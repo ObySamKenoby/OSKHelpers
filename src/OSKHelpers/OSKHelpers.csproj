@@ -1,0 +1,78 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+		<Nullable>disable</Nullable>
+		<Platforms>AnyCPU;x86</Platforms>
+		<Configurations>Debug;Release;G2DataExport_Debug;G2DataExport_Release</Configurations>
+		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<Title>OSK Helpers</Title>
+		<VersionPrefix>1.6.14</VersionPrefix>
+		<UserSecretsId>4af1c825-22b9-438f-9703-901735ed504c</UserSecretsId>
+		<Authors>Fanizza Group</Authors>
+		<Description>Utilità varie non legate a un particolare progetto, incluso Logging e gestione file .ini.</Description>
+		<Copyright>Fanizza Group</Copyright>
+		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
+		<PackageReleaseNotes>Aggiornamento pacchetto System.Text.Json alla versione 10.0.3</PackageReleaseNotes>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(Configuration)'!='Debug'">
+		<Compile Remove="INIFile\Settings.cs" />
+		<Compile Remove="Json\Settings.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Include Settings.cs nel pacchetto NuGet -->
+		<None Include="INIFile\Settings.cs">
+			<Pack>true</Pack>
+			<PackagePath>contentFiles/any/any/.OSKHelpers.content/Settings.cs</PackagePath>
+		</None>
+		<!-- Include SettingsTemplate.ini nel pacchetto NuGet -->
+		<None Include="INIFile\SettingsTemplate.ini">
+			<Pack>true</Pack>
+			<PackagePath>contentFiles/any/any/.OSKHelpers.content/SettingsTemplate.ini</PackagePath>
+		</None>
+		<!-- Include Settings.cs (json) nel pacchetto NuGet -->
+		<None Include="Json\Settings.cs">
+			<Pack>true</Pack>
+			<PackagePath>contentFiles/any/any/.OSKHelpers.content/Json/Settings.cs</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<Version>
+			$(VersionPrefix)-pre1
+		</Version>
+	</PropertyGroup>
+
+	<PropertyGroup Label="Imnpedisce che le classi che utilizzano Reflection (EmbeddedResourcesUtils) vengano rimosse in fase di pubblicazione.">
+		<EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+		<PublishTrimmed>false</PublishTrimmed>
+	</PropertyGroup>
+
+	<PropertyGroup Label="Normalizza il percorso dei file nello stack trace." Condition="'$(Configuration)'=='Release'">
+		<PathMap>$([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))=$(AssemblyName):\</PathMap>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+		<PackageReference Include="System.Text.Json" Version="10.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Net\NetMessages.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>NetMessages.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Net\NetMessages.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>NetMessages.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+
+</Project>

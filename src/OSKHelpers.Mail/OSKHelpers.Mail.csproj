@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Title>OSK Helpers - Mail utils</Title>
+    <VersionPrefix>1.1.6</VersionPrefix>
+    <Description>Libreria di supporto per facilitare l'invio di mail.</Description>
+    <Copyright>Fanizza Group</Copyright>
+    <PackageReleaseNotes>Aggiornati pacchetti NuGet.</PackageReleaseNotes>
+    <PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <Version>$(VersionPrefix)-pre03</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Normalizza il percorso dei file nello stack trace." Condition="'$(Configuration)'=='Release'">
+    <PathMap>$([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))=$(AssemblyName):\</PathMap>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.15.1" />
+    <PackageReference Include="OSKHelpers" Version="1.6.14" />
+    <PackageReference Include="System.Text.Json" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<!-- Include SettingsTemplate.Mail.ini nel pacchetto NuGet-->
+    <None Update="SettingsTemplate.Mail.ini">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/any/.OSKHelpers.content/SettingsTemplate.Mail.ini</PackagePath>
+    </None>
+	<!-- Include MailTemplates/0Index.txt nel pacchetto NuGet-->
+    <None Update="MailTemplates\0Index.txt">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/any/.OSKHelpers.content/MailTemplates/0Index.txt</PackagePath>
+    </None>
+	<!-- Include MailTemplates/Credentials.txt nel pacchetto NuGet-->
+    <None Update="MailTemplates\Credentials.txt">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/any/.OSKHelpers.content/MailTemplates/Credentials.txt</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

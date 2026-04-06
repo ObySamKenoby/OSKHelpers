@@ -1,0 +1,49 @@
+﻿------
+
+File di esempio da aggiungere alla cartella di template per l'invio delle mail.
+Modificare la lista dei template a seconda del bisogno.
+Credentials.txt è un esempio di template utilizzato in produzione per l'invio delle credenziali
+generate automaticamente agli utenti.
+
+------
+
+La cartella contiene i template di default per l'invio delle mail.
+I file devono essere copiati all'interno di MailTemplates.
+
+Tutti i seguenti file devono essere presenti:
+
+Credentials.txt          Invio delle credenziali all'utente
+OrdineReport.txt		 Invio del reporte dell'ordine
+
+
+Tutti i file condividono le seguenti caratteristiche:
+
+- le righe che iniziano con il carattere # sono considerate commenti;
+- il file deve contenere una riga che inizi con @Subject: contenente l'oggetto della mail che sarà inviata. 
+  All'interno dell'oggetto possono essere presenti i TAG specifici per ogni template. 
+  L'oggetto deve essere contenuto all'interno di una singola riga;
+- tutto il resto del file è considerato come corpo della mail. E' possibile utilizzare qualsiasi tag 
+  HTML ed i TAG specifici per il singolo file per formattare la mail stessa;
+- ogni template si avvale di specifici tag identificati come {TAG}
+  E' importante notare che i tag sono case sensitive, quindi TAG è diverso da Tag.
+  I tags utilizzabili per ogni template sono specificati all'interno del template stesso.
+- ogni template può prevedere delle sezioni condizionali che saranno incluse solo in casi particolari,
+  identificate con <<COND>> .... <</COND>>
+  Come per i tags ogni condizione sarà specificata all'itnerno del file di template.
+
+Un file template valido può avere il seguente formato:
+
+----------------
+
+
+# Questo è un commento
+# {USERNAME} è un tag di test...
+@Subject: Mail di test per l'utente {USERNAME}
+
+Buongiorno <strong>{USERNAME}</strong><br/>
+Ti diamo il benvenuto.<br/>
+# La seguente sezione sarà inclusa solo se la configuraizone non prevede una singola azienda
+<<NOSINGLE>>L'applicativo non &egrave; configurato per una singola azienda.<br/><</NOSINGLE>>
+
+
+----------------

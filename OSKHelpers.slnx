@@ -1,0 +1,24 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/docs/" />
+  <Folder Name="/src/">
+    <Project Path="src/OSKHelpers.Mail/OSKHelpers.Mail.csproj" />
+    <Project Path="src/OSKHelpers/OSKHelpers.csproj">
+      <Platform Solution="*|x86" Project="x86" />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OSKHelpers.Mail.Test/OSKHelpers.Mail.Test.csproj">
+      <Build Solution="Release|Any CPU" Project="false" />
+    </Project>
+    <Project Path="tests/OSKHelpers.Tests.Interactive/OSKHelpers.Tests.Interactive.csproj">
+      <Build Solution="Release|Any CPU" Project="false" />
+    </Project>
+    <Project Path="tests/OSKHelpers.Tests/OSKHelpers.Tests.csproj">
+      <Build Solution="Release|Any CPU" Project="false" />
+    </Project>
+  </Folder>
+</Solution>
