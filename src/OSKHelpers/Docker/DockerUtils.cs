@@ -3,20 +3,20 @@
 namespace OSKHelpers.Docker
 {
     /// <summary>
-    /// Utilità per la personalizzazione delle funzionalità in caso di esecuzione all'interno di un container.
+    /// Utilities for customising application behaviour when running inside a container.
     /// </summary>
     public class DockerUtils
     {
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Ha valore true se l'applicativo viene eseguito all'interno di un container.
+        /// True if the application is running inside a container.
         /// </summary>
         public static bool IsDockerized {  get; private set; }
 
         #endregion
 
-        #region Costruttore
+        #region Constructor
 
         static DockerUtils()
         {
@@ -25,7 +25,7 @@ namespace OSKHelpers.Docker
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
 
 

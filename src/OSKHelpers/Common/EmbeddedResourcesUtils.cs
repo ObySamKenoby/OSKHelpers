@@ -6,16 +6,16 @@ using System.Reflection;
 namespace OSKHelpers.Common
 {
     /// <summary>
-    /// Utilità per semplificare l'utilizzo delle Embedded Resources.
+    /// Utilities to simplify the use of embedded resources.
     /// </summary>
     public class EmbeddedResourcesUtils
     {
         /// <summary>
-        /// Estrae il file <paramref name="fileName"/> dalle risorse incorporate e lo salva come <paramref name="outputPath"/>.
+        /// Extracts the embedded resource named <paramref name="fileName"/> and saves it as <paramref name="outputPath"/>.
         /// </summary>
-        /// <param name="fileName">Nome del file da recuperare dalle risorse incorporate.</param>
-        /// <param name="outputPath">Percorso completo (comprensivo del nome) del file da salvare.</param>
-        /// <param name="caseSensitive">Se True la ricerca del nome della risorsa sarà case sensitive.</param>
+        /// <param name="fileName">Name of the file to retrieve from the embedded resources.</param>
+        /// <param name="outputPath">Full output path (including file name).</param>
+        /// <param name="caseSensitive">When true, the resource name search is case-sensitive.</param>
         /// <exception cref="InvalidOperationException" />
         public static void ExtractEmbeddedFile(string fileName, string outputPath, bool caseSensitive = false)
         {
@@ -43,7 +43,7 @@ namespace OSKHelpers.Common
                 {
                     if (stream == null)
                     {
-                        throw new InvalidOperationException($"Risorsa non trovata: {resourceName}");
+                        throw new InvalidOperationException($"Resource not found: {resourceName}");
                     }
 
                     using (var file = File.Create(outputPath))

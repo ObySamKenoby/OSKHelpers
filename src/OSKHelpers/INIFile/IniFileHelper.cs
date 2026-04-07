@@ -9,41 +9,41 @@ using System.Reflection;
 namespace OSKHelpers.INIFile
 {
     /// <summary>
-    /// Helper per l'utilizzo di file ini.
+    /// Helper for working with INI files.
     /// </summary>
     public class IniFileHelper
     {
-        #region Costanti
+        #region Constants
 
         private const string SHOWKEYVALUE   = "!!SHOWKEYVALUE!!";
         private const string FORCEDEBUG     = "!!DEBUG!!";
         private const string FORCEPROTOCOL  = "!!PROTOCOL!!";
 
         /// <summary>
-        /// Nome del file di default (<b>Settings.ini</b>)
+        /// Default file name (<b>Settings.ini</b>).
         /// </summary>
         public const string DEFAULTINIFILE  = "Settings.ini";
         /// <summary>
-        /// Nome del file template di default (<b>SettingsTemplate.ini</b>)
+        /// Default template file name (<b>SettingsTemplate.ini</b>).
         /// </summary>
         public const string INIFILETEMPLATE = "SettingsTemplate.ini";
         /// <summary>
-        /// Messaggio di errore relativo al tentativo di accedere ad un array.
+        /// Error message related to attempting to access an array.
         /// </summary>
-        [Obsolete("Il valore è deprecato, sarà rimosso in una delle prossime versioni.")]
-        public const string ARRAYVALUE      = "Questa chiave si riferisce ad un array, utilizzare la proprietà .Arrays per accedere agli elementi.";
+        [Obsolete("This value is deprecated and will be removed in a future version.")]
+        public const string ARRAYVALUE      = "This key refers to an array; use the .Arrays property to access its elements.";
         /// <summary>
-        /// Percorso completo del file ini di default.
+        /// Full path of the default INI file.
         /// </summary>
         public static readonly string INIFILEFULLPATH = Path.Combine(Paths.AssemblyPath, DEFAULTINIFILE);
         /// <summary>
-        /// Percorso completo del file template di default.
+        /// Full path of the default template file.
         /// </summary>
         public static readonly string INIFILETEMPLATEPATH = Path.Combine(Paths.AssemblyPath, INIFILETEMPLATE);
 
         #endregion
 
-        #region Membri
+        #region Members
 
         private bool _showKeyValue;
         private readonly Dictionary<string, string> _keys;
@@ -53,30 +53,30 @@ namespace OSKHelpers.INIFile
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Contiene il valore per ogni chiave che non è un array.<br />
-        /// In fase di lettura del file tutte le chiavi vengono convertite in maiuscolo.<br />
-        /// La collezione è esposta per comodità di utilizzo ma per la lettura delle chiavi si raccomanda di utilizzare i metodi appositi.
+        /// Contains the value for every key that is not an array.<br />
+        /// During file reading all keys are converted to uppercase.<br />
+        /// The collection is exposed for convenience, but the dedicated methods are recommended for reading keys.
         /// </summary>
         public IReadOnlyDictionary<string, string> Keys => _keys;
 
         /// <summary>
-        /// Contiene gli array.<br />
-        /// In fase di lettura del file tutte le chiavi vengono convertite in maiuscolo.<br />
-        /// La collezione è l'unico metodo per accedere al conenuto degli array.
+        /// Contains the arrays.<br />
+        /// During file reading all keys are converted to uppercase.<br />
+        /// This collection is the only way to access array contents.
         /// </summary>
         public IReadOnlyDictionary<string, IReadOnlyList<string>> Arrays => _arrays.ToDictionary(a => a.Key, a => (IReadOnlyList<string>)a.Value);
 
         /// <summary>
-        /// Indica se la lettura del file Ini è andata a buon fine
+        /// Indicates whether the INI file was read successfully.
         /// </summary>
         public bool IniFileRead { get; private set; }
 
         #endregion
 
-        #region Costruttori
+        #region Constructors
 
         static IniFileHelper()
         {
@@ -84,7 +84,7 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Costruttore standard.
+        /// Default constructor.
         /// </summary>
         public IniFileHelper()
         {
@@ -95,11 +95,11 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Costruttore utilizzato per leggere automaticamente il file di default.<br/>
-        /// Se <paramref name="defaultIniFile"/> è true viene automaticamente letto il file <see cref="DEFAULTINIFILE"/>,<br/>
-        /// altrimenti l'effetto è lo stesso di richiamare il costruttore base.
+        /// Constructor used to automatically read the default file.<br/>
+        /// If <paramref name="defaultIniFile"/> is true, <see cref="DEFAULTINIFILE"/> is read automatically;<br/>
+        /// otherwise the effect is the same as calling the default constructor.
         /// </summary>
-        /// <param name="defaultIniFile">Se true letto il file <see cref="DEFAULTINIFILE"/>.</param>
+        /// <param name="defaultIniFile">If true, reads <see cref="DEFAULTINIFILE"/>.</param>
         public IniFileHelper(bool defaultIniFile) : this()
         {
             if (defaultIniFile)
@@ -108,12 +108,12 @@ namespace OSKHelpers.INIFile
             }
         }
         /// <summary>
-        /// Costruttore utilizzato per leggere il file <paramref name="iniFile"/>, se <paramref name="defaultPath"/> è true il file viene<br/>
-        /// cercato all'interno della directory in cui risiede l'assembly, in caso contrario è<br/> 
-        /// necessario che <paramref name="iniFile"/> contenga il percorso completo del file.
+        /// Constructor used to read the file <paramref name="iniFile"/>. If <paramref name="defaultPath"/> is true, the file is<br/>
+        /// looked up inside the directory containing the assembly; otherwise<br/> 
+        /// <paramref name="iniFile"/> must contain the full path of the file.
         /// </summary>
-        /// <param name="iniFile">Nome del file da leggere.</param>
-        /// <param name="defaultPath">Se true <paramref name="iniFile"/> sarà cercato all'interno della directory in cui risiede l'assembly.</param>
+        /// <param name="iniFile">Name of the file to read.</param>
+        /// <param name="defaultPath">If true, <paramref name="iniFile"/> is searched inside the assembly directory.</param>
         public IniFileHelper(string iniFile, bool defaultPath = true) : this()
         {
             IniFileRead = Load(iniFile, defaultPath);
@@ -121,17 +121,17 @@ namespace OSKHelpers.INIFile
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
          /// <summary>
-        /// Verifica l'esistenza del file ini, nel caso in cui non esista copia il file template
+        /// Checks whether the INI file exists; if it does not, copies the template file.
         /// </summary>
-        /// <param name="iniFile">Nome del file ini, se non specificato utilizza il default Settings.ini</param>
-        /// <param name="templateFile">Nome del fil template, se non specificato utilizza il default SettingsTemplate.ini</param>
-        /// <param name="useDefaultPath">Se true cerca i file ini all'interno della cartella del servizio</param>
-        /// <returns>Una tupla contenente:<br/>
-        /// Exists: indica se il file esiste<br/>
-        /// Message: eventuale messaggio d'errore</returns>
+        /// <param name="iniFile">Name of the INI file; if not specified, defaults to Settings.ini.</param>
+        /// <param name="templateFile">Name of the template file; if not specified, defaults to SettingsTemplate.ini.</param>
+        /// <param name="useDefaultPath">If true, looks for the files inside the service folder.</param>
+        /// <returns>A tuple containing:<br/>
+        /// Exists: indicates whether the file exists.<br/>
+        /// Message: optional error message.</returns>
         public static (bool Exists, string Message) CheckIniFileExists(string iniFile = DEFAULTINIFILE, string templateFile = INIFILETEMPLATE, bool useDefaultPath = true)
         {
             var exists = false;
@@ -176,14 +176,14 @@ namespace OSKHelpers.INIFile
 
 
         /// <summary>
-        /// Legge ed elabora il file passato come parametro, restituisce true se l'operazione è andata a buon fine e sono state trovate chiavi valide.
-        /// Il valore di IniFileRead viene impostato di conseguenza.
+        /// Reads and processes the file passed as parameter; returns true if the operation succeeded and valid keys were found.
+        /// The value of IniFileRead is set accordingly.
         /// </summary>
-        /// <param name="iniFile">File da leggere ed interpretare.</param>
-        /// <param name="defaultPath">Indica se il file si trova nella path di default (quella contenente l'eseguibile del programma).
-        /// Se il file si trova nella directory di default ne deve essere indicato solamente il nome, altrimenti deve essere passato il percorso completo del file.
-        /// Il nome del file deve essere completo di estensione.</param>
-        /// <returns>true se la lettura e l'interpretazione sono andate a buon fine.</returns>
+        /// <param name="iniFile">File to read and parse.</param>
+        /// <param name="defaultPath">Indicates whether the file is located in the default path (the folder containing the program executable).
+        /// If the file is in the default directory, only the name needs to be provided; otherwise the full path must be supplied.
+        /// The file name must include the extension.</param>
+        /// <returns>True if reading and parsing succeeded.</returns>
         public bool Load(string iniFile = DEFAULTINIFILE, bool defaultPath = true)
         {
             SimpleLog.DebugWrite($"{SimpleLog.GetCallerTypeMethodName()}({iniFile}, {defaultPath})");
@@ -193,7 +193,7 @@ namespace OSKHelpers.INIFile
 
             try
             {
-                // Se è stato selezionato l'utilizzo della cartella di default si modifca il nome del file ini di conseguenza aggiungendo il percorso d'esecuzione
+                // If the default path flag is set, prepend the execution path to the INI file name
                 if (defaultPath)
                 {
                     iniFile = Path.Combine(Paths.AssemblyPath, iniFile);
@@ -222,10 +222,10 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Elabora le righe passate come argomento e ne estra le coppie chiave / valore
-        /// valorizza di conseguenza IniFileRead e ne restituisce il valore come risultato.
+        /// Processes the lines passed as argument, extracts key/value pairs,
+        /// sets IniFileRead accordingly and returns its value.
         /// </summary>
-        /// <returns>true se tutte le righe non vuote o di commento contengono coppie chiave/valore valide</returns>
+        /// <returns>True if all non-empty, non-comment lines contain valid key/value pairs.</returns>
         public bool Parse(List<string> iniLines)
         {
             _keys.Clear();
@@ -236,7 +236,7 @@ namespace OSKHelpers.INIFile
             {
                 bool testPragmas = true;
 
-                // Verifichiamo se fossero presenti stringhe di controllo
+                // Check for control pragmas
                 while (testPragmas)
                 {
                     var pragma = iniLines.First().Trim().ToUpper();
@@ -258,7 +258,7 @@ namespace OSKHelpers.INIFile
                     else
                         testPragmas = false;
 
-                    // Se testPragmas è true abbiamo trovato una chiave valida, quinddi rimuoviamo la prima riga
+                    // If testPragmas is true we found a valid pragma, so remove the first line
                     if (testPragmas)
                         iniLines.RemoveAt(0);
                 }
@@ -272,7 +272,7 @@ namespace OSKHelpers.INIFile
                         foreach (var line in lines)
                         {
                             int i = line.IndexOf("=");
-                            // Se il carattere non esiste o è in prima od ultima posizione il valore dell'indice non è valido
+                            // If the character does not exist or is at the first or last position the index is invalid
                             if (i < 1 || i == line.Length - 1)
                             {
                                 valid = false;
@@ -285,16 +285,16 @@ namespace OSKHelpers.INIFile
                                 valid = false;
                                 SimpleLog.Write($"Errore di sintassi nella riga {line}. Se è presente il carattere '=' devono essere presenti un parametro ed un valore.");
                             }
-                            // Si verifica se il valore di key identifica una chiave singola o un array
+                            // Check whether the key value identifies a single key or an array
                             if (key[0] != '*')
                             {
                                 _keys.Add(key, value);
                             }
                             else if (key.Length > 1)
                             {
-                                // Se la chiave è corretta si prende solo la parte seguente il carattere "*"
+                                // If the key is valid, take only the part after '*'
                                 key = key.Substring(1);
-                                // Si aggiunge l'elemento, eventualmente creando l'array
+                                // Add the element, creating the array if needed
                                 if (_arrays.ContainsKey(key))
                                 {
                                     _arrays[key].Add(value);
@@ -347,7 +347,7 @@ namespace OSKHelpers.INIFile
                 List<string> lines = new List<string>();
                 lines.Add("Valore delle impostazioni (chiave -> valore):");
                 var maxKeyNameLength    = _keys.Any() ? _keys.Keys.Max(k => k.Length) : 0;
-                // La lunghezza nel nome degli array viene incrementata di 1 in quanto gli array vengono identificati nel log preponendo un asterisco al nome 
+                // Array name length is incremented by 1 because arrays are identified in the log with a leading asterisk
                 var maxArrayNameLength  = _arrays.Any() ? _arrays.Keys.Max(k => k.Length) + 1 : 0;
                 var l = maxKeyNameLength > maxArrayNameLength ? maxKeyNameLength : maxArrayNameLength;
                 if (_keys.Any())
@@ -360,20 +360,20 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Restituisce le chiavi trovate
+        /// Returns the keys found.
         /// </summary>
         public IEnumerable<string> GetKeys() => _keys.Keys.Select((k, v) => k);
 
         /// <summary>
-        /// Restituisce true se è presente la chiave passata come parametro
+        /// Returns true if the key passed as parameter is present.
         /// </summary>
         public bool HasKey(string key) => _keys.ContainsKey(TrimUpper(key));
 
         /// <summary>
-        /// Restituisce true se tutte le chiavi passate come parametro cono presenti
+        /// Returns true if all the keys passed as parameter are present.
         /// </summary>
-        /// <param name="keys">Chiavi di cui erificare la presenza</param>
-        /// <returns>True se tutte le chiavi sono presenti all'interno del file INI</returns>
+        /// <param name="keys">Keys whose presence is to be verified.</param>
+        /// <returns>True if all keys are present in the INI file.</returns>
         public bool HasKeys(IEnumerable<string> keys)
         {
             bool res = true;
@@ -397,10 +397,10 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Aggiunge la coppia chiave/valore alle chiavi, permettendo così di aggiungere nuove chiavi.
-        /// Nel caso in cui la chiave sia esistente ne aggiorna il valore
+        /// Adds the key/value pair to the keys collection, allowing new keys to be added.
+        /// If the key already exists, its value is updated.
         /// </summary>
-        /// <returns>True se l'aggiunta o l'aggiornamento della chiave sono andati a buon fine</returns>
+        /// <returns>True if the key was added or updated successfully.</returns>
         public bool AddKey(string key, string value)
         {
             bool res = true;
@@ -427,27 +427,27 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Aggiunge la coppia chiave/valore alle chiavi, permettendo così di aggiungere nuove chiavi.
-        /// Nel caso in cui la chiave sia esistente ne aggiorna il valore
+        /// Adds the key/value pair to the keys collection, allowing new keys to be added.
+        /// If the key already exists, its value is updated.
         /// </summary>
-        /// <returns>True se l'aggiunta o l'aggiornamento della chiave sono andati a buon fine</returns>
+        /// <returns>True if the key was added or updated successfully.</returns>
         public bool AddKey(string key, int value)
         {
             return AddKey(key, value.ToString());
         }
 
         /// <summary>
-        /// Aggiunge la coppia chiave/valore alle chiavi, permettendo così di aggiungere nuove chiavi.
-        /// Nel caso in cui la chiave sia esistente ne aggiorna il valore
+        /// Adds the key/value pair to the keys collection, allowing new keys to be added.
+        /// If the key already exists, its value is updated.
         /// </summary>
-        /// <returns>True se l'aggiunta o l'aggiornamento della chiave sono andati a buon fine</returns>
+        /// <returns>True if the key was added or updated successfully.</returns>
         public bool AddKey(string key, bool value)
         {
             return AddKey(key, value.ToString().ToUpper());
         }
 
         /// <summary>
-        /// Restituisce il valore associato a key come stringa, se key non esiste restituisce il valore di default (stringa vuota)
+        /// Returns the value associated with key as a string; if the key does not exist, returns the default value (empty string).
         /// </summary>
         public string GetString(string key, string defaultValue = "")
         {
@@ -460,7 +460,7 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Restituisce il valore della chiave key come intero, se key non esiste o se il valore non è un intero restituisce il vaore di default (zero)
+        /// Returns the value of key as an integer; if the key does not exist or the value is not a valid integer, returns the default value (zero).
         /// </summary>
         public int GetInt(string key, int defaultValue = 0)
         {
@@ -481,7 +481,7 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Restituisce il valore della chiave key come booleano, se key non esiste o se il valore non è valido (true, false, 1, 0) restituisce il valore di default (false).
+        /// Returns the value of key as a boolean; if the key does not exist or the value is not valid (true, false, 1, 0), returns the default value (false).
         /// </summary>
         public bool GetBool(string key, bool defaultValue = false)
         {
@@ -498,8 +498,8 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Restituisce il valore della chiave key come oggetto <see cref="DayOfWeek"/>, se key non esiste o se il valore non è valido restituisce una nuova istanza di<br/>
-        /// <see cref="DaysOfWeekParameter"/> inizializzata con costruttore standard.
+        /// Returns the value of key as a <see cref="DayOfWeek"/> object; if the key does not exist or the value is not valid, returns a new<br/>
+        /// <see cref="DaysOfWeekParameter"/> instance initialised with the default constructor.
         /// </summary>
         public DaysOfWeekParameter GetDaysOfWeek(string key)
         {
@@ -523,7 +523,7 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Imposta il valore della chiave key.
+        /// Sets the value of key.
         /// </summary>
         public void Set(string key, string value)
         {
@@ -534,7 +534,7 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Imposta il valore della chiave key.
+        /// Sets the value of key.
         /// </summary>
         public void Set(string key, int value)
         {
@@ -545,7 +545,7 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Imposta il valore della chiave key.
+        /// Sets the value of key.
         /// </summary>
         public void Set(string key, bool value)
         {
@@ -556,7 +556,7 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Imposta il valore della chiave key.
+        /// Sets the value of key.
         /// </summary>
         public void Set(string key, DaysOfWeekParameter value)
         {
@@ -567,20 +567,20 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Restituisce True se l'array con il nnome passato come parametro esiste tra quelli caricati.
+        /// Returns True if the array with the given name exists among those loaded.
         /// </summary>
-        /// <param name="arrayName">Nome dell'array</param>
-        /// <returns>True se l'array è tra quelli caricati dal file di impostazioni.</returns>
+        /// <param name="arrayName">Name of the array.</param>
+        /// <returns>True if the array is among those loaded from the settings file.</returns>
         public bool HasArray(string arrayName)
         {
             return _arrays.ContainsKey(TrimUpper(arrayName));
         }
 
         /// <summary>
-        /// Restituisce l'array con il nome passato come parametro, se esistente, altrimenti un array vuoto.
+        /// Returns the array with the given name if it exists; otherwise an empty list.
         /// </summary>
-        /// <param name="arrayName">Nome dell'array desiderato.</param>
-        /// <returns>Gli elementi dell'array richiesto, se esistenti.</returns>
+        /// <param name="arrayName">Name of the requested array.</param>
+        /// <returns>The elements of the requested array, if they exist.</returns>
         public IReadOnlyList<string> Array(string arrayName)
         {
             List<string> array = new List<string>();
@@ -596,7 +596,7 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Aggiunge un Array con il nome passato come parametro alla collezione, se già esistente non fa alcunché.
+        /// Adds an array with the given name to the collection; if it already exists, does nothing.
         /// </summary>
         public void AddArray(string arrayName)
         {
@@ -610,9 +610,9 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Aggiunge un Array con il nome passato come parametro alla collezione
-        /// Se l'array è già esistente aggiunge i valori passati come parametro se non già presenti. 
-        /// Il Tipo T deve implementare correttamente il metodo ToString().
+        /// Adds an array with the given name to the collection.
+        /// If the array already exists, the values passed as parameter are added if not already present.
+        /// Type T must correctly implement the ToString() method.
         /// </summary>
         public void AddArray<T>(string arrayName, List<T> elements)
         {
@@ -629,10 +629,10 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Aggiunge un elemento all'array arrayName, creandolo se non esistente
+        /// Adds an element to the array arrayName, creating it if it does not exist.
         /// </summary>
-        /// <param name="arrayName">Nome dell'array</param>
-        /// <param name="element">Elemento da aggiungere</param>
+        /// <param name="arrayName">Name of the array.</param>
+        /// <param name="element">Element to add.</param>
         public void AddArrayElement(string arrayName, string element)
         {
             if (!string.IsNullOrWhiteSpace(arrayName))
@@ -646,10 +646,10 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Cancella tutti gli elementi dell'array arrayName, restituendo True se l'operazione è andata a buon fine.<br/>
-        /// Se l'array non esiste viene restituito False.
+        /// Clears all elements of the array arrayName, returning True if the operation succeeded.<br/>
+        /// Returns False if the array does not exist.
         /// </summary>
-        /// <param name="arrayName">Nome dell'array</param>
+        /// <param name="arrayName">Name of the array.</param>
         public bool ClearArray(string arrayName)
         {
             bool cleared = false;
@@ -667,7 +667,7 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Rimuove l'array arrayName.
+        /// Removes the array arrayName.
         /// </summary>
         public void RemoveArray(string arrayName)
         {
@@ -681,11 +681,11 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Salva il file ini riprendendolo dal template
+        /// Saves the INI file by rebuilding it from the template.
         /// </summary>
-        /// <param name="iniFile">Nome el file ini</param>
-        /// <param name="defaultPath">Indica se il file è nella posizione di default</param>
-        /// <returns>True se tutto è andato a buon fine</returns>
+        /// <param name="iniFile">Name of the INI file.</param>
+        /// <param name="defaultPath">Indicates whether the file is in the default location.</param>
+        /// <returns>True if the operation succeeded.</returns>
         public bool Save(string iniFile = DEFAULTINIFILE, bool defaultPath = true)
         {
             bool saved = false;
@@ -709,17 +709,17 @@ namespace OSKHelpers.INIFile
 
                     var outLines = new List<string>();
 
-                    // Si aggiornano le righe contenenti le chiavi
+                    // Update lines containing keys
                     for (var j = 0; j < lines.Count; j++)
                     {
                         if (lines[j].Length == 0 || lines[j][0] == '#')
                         {
-                            // Se la riga è vuota od è un commento la si copia
+                            // If the line is empty or a comment, copy it as-is
                             outLines.Add(lines[j]);
                         }
                         else if (lines[j][0] == '*')
                         {
-                            // Se la riga contiene il riferimento ad un array lo si inserisce
+                            // If the line contains an array reference, insert it
                             var arrayName = TrimUpper(lines[j].Substring(1));
                             if (_arrays.ContainsKey(arrayName))
                             {
@@ -730,7 +730,7 @@ namespace OSKHelpers.INIFile
                         else
                         {
                             int i = lines[j].IndexOf("=");
-                            // Se il carattere non esiste o è in prima posizione il valore dell'indice non è valido
+                            // If the character does not exist or is at the first position the index is invalid
                             if (i >= 1)
                             {
                                 var key = TrimUpper(lines[j].Substring(0, i));
@@ -742,7 +742,7 @@ namespace OSKHelpers.INIFile
                             }
                         }
                     }
-                    // Si aggiungono in fondo al file eventuali chiavi aggiuntive
+                    // Append any additional keys at the end of the file
                     foreach (var keyValue in _keys.Where(k => !usedKeys.Contains(k.Key)))
                     {
                         outLines.Add($"{keyValue.Key} = {keyValue.Value}");

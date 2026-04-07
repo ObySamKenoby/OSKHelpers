@@ -14,99 +14,99 @@ using System.Text.Json;
 namespace OSKHelpers.Mail
 {
     /// <summary>
-    /// Classe di supporto per semplificare l'invio di mail.
+    /// Helper class for simplifying email sending.
     /// </summary>
     public class MailWorker
     {
-        #region Proprietà relative al parsing dei file
+        #region File parsing properties
 
         /// <summary>
-        /// Parsing del file: in prima posizione il simbolo # identifica un commento.
+        /// File parsing: a '#' in the first position identifies a comment.
         /// </summary>
         public const char COMMENTSYMBOL = '#';
         /// <summary>
-        /// Parsing del file: in prima posizione identifica l'oggetto del messaggio.
+        /// File parsing: in the first position identifies the message subject.
         /// </summary>
         public const string SUBJECTTAG = "@Subject:";
 
         /// <summary>
-        /// PArsing del file: massime iterazioni disponibili per la sostituzione di Tag e verifica delle condizioni prima del timeout
+        /// File parsing: maximum available iterations for tag substitution and condition evaluation before timeout.
         /// </summary>
         public const int MAXITERATIONS = 1000;
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Indirizzo del server SMTP.
+        /// SMTP server address.
         /// </summary>
         public static string SmtpServer { get; set; }
         /// <summary>
-        /// Porta di comunicazione server SMTP.
+        /// SMTP server communication port.
         /// </summary>
         public static int SmtpPort { get; set; }
         /// <summary>
-        /// Il server SMTP richiede connessione SSL.
+        /// The SMTP server requires an SSL connection.
         /// </summary>
         public static bool SmtpSSL { get; set; }
         /// <summary>
-        /// Nome utente per autenticazione SMTP.
+        /// Username for SMTP authentication.
         /// </summary>
         public static string SmtpUsername { get; set; }
         /// <summary>
-        /// Password per autenticazione SMTP.
+        /// Password for SMTP authentication.
         /// </summary>
         public static string SmtpPassword { get; set; }
 
         /// <summary>
-        /// Se True l'autenticazione SMTP è abilitata.
+        /// True if SMTP authentication is enabled.
         /// </summary>
         public static bool SmtpAuthEnabled => !string.IsNullOrWhiteSpace(SmtpUsername) && !string.IsNullOrWhiteSpace(SmtpPassword);
         /// <summary>
-        /// Se True l'autenticazione SMTP contiene errori di configurazione (username o password assenti)
+        /// True if the SMTP authentication configuration contains errors (missing username or password).
         /// </summary>
         public static bool SmtpAuthConfigError => string.IsNullOrWhiteSpace(SmtpUsername) ^ string.IsNullOrWhiteSpace(SmtpPassword);
 
         /// <summary>
-        /// Se presente permette l'invio di mail senza specificare il mittente, in tal caso sarà utilizzato come mittente di default.
+        /// If set, allows sending mail without specifying a sender; in that case it will be used as the default sender.
         /// <see cref="SendAsync(IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}})"/>
         /// 
         /// </summary>
         public static string SmtpFrom { get; set; }
 
         /// <summary>
-        /// Indirizzo server IMAP.
+        /// IMAP server address.
         /// </summary>
         public static string ImapServer { get; set; }
         /// <summary>
-        /// Porta di comunicazione server IMAP.
+        /// IMAP server communication port.
         /// </summary>
         public static int ImapPort { get; set; }
         /// <summary>
-        /// Il server IMAP richiede connessione SSL.
+        /// The IMAP server requires an SSL connection.
         /// </summary>
         public static bool ImapSSL { get; set; }
         /// <summary>
-        /// Nome utente per l'autenticazione IMAP.
+        /// Username for IMAP authentication.
         /// </summary>
         public static string ImapUsername { get; set; }
         /// <summary>
-        /// Password per l'autenticazione IMAP.
+        /// Password for IMAP authentication.
         /// </summary>
         public static string ImapPassword { get; set; }
 
         /// <summary>
-        /// Se True l'autenticazione IMAP contiene errori di configurazione (username o password assenti)
+        /// True if the IMAP authentication configuration contains errors (missing username or password).
         /// </summary>
         public static bool ImapAuthConfigError => string.IsNullOrWhiteSpace(ImapUsername) || string.IsNullOrWhiteSpace(ImapPassword);
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <summary>
-        /// Imposta il livello di log.
+        /// Sets the log level.
         /// </summary>
         /// <param name="logLevel"></param>
         public static void SetLogLevel(LogLevel logLevel)
@@ -115,7 +115,7 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Imposta i parametri di default per la connessione SMTP
+        /// Sets the default parameters for the SMTP connection.
         /// </summary>
         public static bool SetupSmtp(IniFileHelper iniFile)
         {
@@ -134,7 +134,7 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Imposta i parametri di default per la connessione IMAP
+        /// Sets the default parameters for the IMAP connection.
         /// </summary>
         public static bool SetupImap(IniFileHelper iniFile)
         {
@@ -152,15 +152,15 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Imposta i parametri di default per la connessione SMTP
+        /// Sets the default parameters for the SMTP connection.
         /// </summary>
-        /// <param name="server">Indirizzo del server.</param>
-        /// <param name="port">Porta del server.</param>
-        /// <param name="ssl">Se true viene abilitata l'autenticazione SSL (vengono tentate le varie tipologie, 
-        /// funziona ad esempio con l'smtps aruba su porta 465).</param>
-        /// <param name="username">Nome utente per l'autenticazione al server. Se questo e la password sono nulli l'autenticazione viene disattivata.</param>
-        /// <param name="password">Password per l'autenticazione al server. Se questo es il nome utente sono nulli l'autenticazione viene disattivata.</param>
-        /// <param name="from">Opzionale, se non specificato abilita l'invio senza specificare il mittente.</param>
+        /// <param name="server">Server address.</param>
+        /// <param name="port">Server port.</param>
+        /// <param name="ssl">If true, SSL authentication is enabled (all available types are tried;
+        /// works for example with Aruba smtps on port 465).</param>
+        /// <param name="username">Username for server authentication. If this and the password are null, authentication is disabled.</param>
+        /// <param name="password">Password for server authentication. If this and the username are null, authentication is disabled.</param>
+        /// <param name="from">Optional; if not specified, allows sending without specifying a sender.</param>
         public static void SetupSmtp(string server, int port, bool ssl, string username, string password, string from = null)
         {
             SmtpServer      = server;
@@ -172,7 +172,7 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Imposta i parametri di default per la connessione IMAP
+        /// Sets the default parameters for the IMAP connection.
         /// </summary>
         /// <inheritdoc cref="SetupSmtp(string, int, bool, string, string, string)"/>
         public static void SetupImap(string server, int port, bool ssl, string username, string password)
@@ -185,11 +185,11 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Visualizza o effettua il log dei parametri SMTP memorizzati.<br/>
-        /// La password, se presente, è oscurata.
+        /// Displays or logs the stored SMTP parameters.<br/>
+        /// The password, if present, is masked.
         /// </summary>
-        /// <param name="console">Visualizza le impostazioni nella console.</param>
-        /// <param name="log">Effettua il log delle impostazioni.</param>
+        /// <param name="console">Displays the settings in the console.</param>
+        /// <param name="log">Logs the settings.</param>
         public static void DumpStmpParameters(bool console = true, bool log = false)
         {
             if (console)
@@ -213,11 +213,11 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Visualizza o effettua il log dei parametri IMAP memorizzati.<br/>
-        /// La password, se presente, è oscurata.
+        /// Displays or logs the stored IMAP parameters.<br/>
+        /// The password, if present, is masked.
         /// </summary>
-        /// <param name="console">Visualizza le impostazioni nella console.</param>
-        /// <param name="log">Effettua il log delle impostazioni.</param>
+        /// <param name="console">Displays the settings in the console.</param>
+        /// <param name="log">Logs the settings.</param>
         public static void DumpImapParameters(bool console = true, bool log = false)
         {
             if (console)
@@ -238,11 +238,11 @@ namespace OSKHelpers.Mail
             }
         }
         /// <summary>
-        /// Visualizza o effettua il log dei parametri SMTP e IMAP memorizzati.<br/>
-        /// La password, se presente, è oscurata.
+        /// Displays or logs the stored SMTP and IMAP parameters.<br/>
+        /// The password, if present, is masked.
         /// </summary>
-        /// <param name="console">Visualizza le impostazioni nella console.</param>
-        /// <param name="log">Effettua il log delle impostazioni.</param>
+        /// <param name="console">Displays the settings in the console.</param>
+        /// <param name="log">Logs the settings.</param>
         public static void DumpParameters(bool console = true, bool log = false)
         {
             DumpStmpParameters(console,log);
@@ -250,10 +250,10 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Verifica che i dati del server SMTP siano presenti.<br/>
-        /// Non esegue una verifica di correttezza dei dati o un controllo di connettività.<br/>
-        /// Perché la coppia username / password sia valida devono essere entrambi presenti (autenticazione abilitata) o assenti (autenticazione non abilitata).<br/>
-        /// Se logResult è true (default) scrive nel log il risultato della verifica.
+        /// Verifies that the SMTP server data is present.<br/>
+        /// Does not validate the data or check connectivity.<br/>
+        /// For the username/password pair to be valid both must be present (authentication enabled) or absent (authentication disabled).<br/>
+        /// If logResult is true (default), writes the verification result to the log.
         /// </summary>
         /// <returns></returns>
         public static bool CheckSmtpParameters(bool logResult = true)
@@ -280,10 +280,10 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Verifica che i dati del server IMAP siano presenti.<br/>
-        /// Non esegue una verifica di correttezza dei dati o un controllo di connettività.<br/>
-        /// Perché la coppia username / password sia valida devono essere entrambi presenti (autenticazione abilitata) o assenti (autenticazione non abilitata).<br/>
-        /// Se logResult è true (default) scrive nel log il risultato della verifica.
+        /// Verifies that the IMAP server data is present.<br/>
+        /// Does not validate the data or check connectivity.<br/>
+        /// For the username/password pair to be valid both must be present (authentication enabled) or absent (authentication disabled).<br/>
+        /// If logResult is true (default), writes the verification result to the log.
         /// </summary>
         /// <returns></returns>
         public static bool CheckImapParameters(bool logResult = true)
@@ -304,7 +304,7 @@ namespace OSKHelpers.Mail
             return check;
         }
 
-        #region Metodi per invio sincorono
+        #region Synchronous send methods
 
         /// <inheritdoc cref="SendReplyToAsync(string, string, string, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}})"/>
         public static bool SendReplyTo(string from, string to, string replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
@@ -360,7 +360,7 @@ namespace OSKHelpers.Mail
 
         #endregion
 
-        #region Metodi per invio asincrono
+        #region Asynchronous send methods
 
         /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
         public static async Task<bool> SendReplyToAsync(string from, string to, string replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
@@ -439,27 +439,27 @@ namespace OSKHelpers.Mail
         #endregion
 
         /// <summary>
-        /// Invia una mail utilizzando il server e le credenziali passate come parametro
+        /// Sends an email using the server and credentials passed as parameters.
         /// </summary>
-        /// <param name="server">Server SMTP</param>
-        /// <param name="port">Porta da utilizzare</param>
-        /// <param name="ssl">Se True utilizza una connessione SSL</param>
-        /// <param name="username">Nome utente per il server SMTP</param>
-        /// <param name="password">Password per il server SMTP</param>
-        /// <param name="from">Indirizzo mittente</param>
-        /// <param name="to">Indirizzi dei destinatari</param>
-        /// <param name="subject">Oggetto della mail</param>
-        /// <param name="body">Contenuto (HTML)</param>
-        /// <param name="streamAttachments">Elenco di tuple contenenti il nome del file e lo stream da inviare come allegato.<br />
-        /// <param name="replyTo"/>Indirizzi cui la risposta alla mail deve pervenire.</param>
-        /// Il formato è ((Filename, Content) File, Encoding), dove:<br />
-        /// <b>File.Filename</b> contiene il nome del file da assegnare all'allegato<br />
-        /// <b>File.Content</b> è uno stream abilitato alla lettura con il contenuto del file<br />
-        /// <b>Encoding</b> è il tipo di encoding del file (è conveniente usare uno dei valori di MediaTypeNames.Text)
-        /// <returns>True se l'invio è andato a buon fine.</returns>
+        /// <param name="server">SMTP server.</param>
+        /// <param name="port">Port to use.</param>
+        /// <param name="ssl">If True, uses an SSL connection.</param>
+        /// <param name="username">Username for the SMTP server.</param>
+        /// <param name="password">Password for the SMTP server.</param>
+        /// <param name="from">Sender address.</param>
+        /// <param name="to">Recipient addresses.</param>
+        /// <param name="subject">Email subject.</param>
+        /// <param name="body">Content (HTML).</param>
+        /// <param name="streamAttachments">List of tuples containing the file name and the stream to send as an attachment.<br />
+        /// <param name="replyTo"/>Addresses to which the reply to the email should be sent.</param>
+        /// The format is ((Filename, Content) File, Encoding), where:<br />
+        /// <b>File.Filename</b> contains the name to assign to the attachment.<br />
+        /// <b>File.Content</b> is a readable stream with the file content.<br />
+        /// <b>Encoding</b> is the file encoding type (using a value from MediaTypeNames.Text is recommended).
+        /// <returns>True if the send succeeded.</returns>
         public static async Task<bool> SendAsync(string server, int port, bool ssl, string username, string password, string from, IEnumerable<string> to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null, IEnumerable<string> replyTo = null)
         {
-            // Utilizzato per effettuare un log del corpo della mail di dimensioni ridotte
+            // Used to log a truncated version of the mail body
             var debugBody = body.Substring(0, body.Length > 50 ? 50 : body.Length);
             SimpleLog.Write(LogLevel.Debug, $"{SimpleLog.GetCallerTypeMethodName()}(From: '{from}', To: ['{string.Join("', '", to)}']{(replyTo?.Any() ?? false ? $", Reply-To: ['{string.Join("', '", replyTo)}']" : string.Empty)}, Subject: '{subject}', Body: '{debugBody}')");
             
@@ -480,7 +480,7 @@ namespace OSKHelpers.Mail
                     email.Subject       = subject;
                     var mailBody        = new BodyBuilder();
                     mailBody.HtmlBody   = body;
-                    // Aggiunge gli attachment passati come stream
+                    // Add attachments passed as streams
                     if (streamAttachments?.Any() ?? false)
                     {
                         foreach (var attachment in streamAttachments.Where(a => a.File.Content != null && a.File.Content.Length > 0))
@@ -527,22 +527,22 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Effettua il parsing della stringa passata in content sostituendo i Tags e mostrando (o nascondendo) le sezioni a seconda delle relative condizioni.<br/>
-        /// Attenzione: i tag vengono elaborati dopo le condizioni.
+        /// Parses the string passed in content, substituting tags and showing (or hiding) sections according to their conditions.<br/>
+        /// Note: tags are processed after conditions.
         /// </summary>
-        /// <param name="content">stringa da elaborare.</param>
+        /// <param name="content">String to process.</param>
         /// <param name="tags">
-        /// Lista dei tag da cercare all'interno di content e per cui sostituire Name con Value.<br/>
-        /// In content i tag devono essere scritti come <b>{TAG}</b>, all'interno della lista Name deve essere privo delle parentesi, quindi <b>TAG</b>.<br/>
-        /// I nomi dei tag sono case sensitive.
+        /// List of tags to find within content and for which Name should be replaced with Value.<br/>
+        /// In content, tags must be written as <b>{TAG}</b>; within the list, Name must be without braces, i.e. <b>TAG</b>.<br/>
+        /// Tag names are case sensitive.
         /// </param>
         /// <param name="conditions">
-        /// Lista di condizioni che permettono di mostrare o nascondere parti del testo.<br/>
-        /// In content le condizioni devono essere identificate come <b>&lt;&lt;COND&gt;&gt;..&lt;&lt;/COND&gt;&gt;</b> all'interno della lista Name deve essere privo dei simboli, quindi <b>COND</b>.<br/>
-        /// I nomi delle condizioni sono case sensitive.
+        /// List of conditions that allow sections of text to be shown or hidden.<br/>
+        /// In content, conditions must be identified as <b>&lt;&lt;COND&gt;&gt;..&lt;&lt;/COND&gt;&gt;</b>; within the list Name must be without symbols, i.e. <b>COND</b>.<br/>
+        /// Condition names are case sensitive.
         /// </param>
-        /// <param name="tagName">Eventuale tag da rimuovere (utilizzato nel caso in cui il metodi sia stato richiamato per recuperare il valore di un tag).</param>
-        /// <returns>La stringa elaborata.</returns>
+        /// <param name="tagName">Optional tag to remove (used when the method has been called to retrieve the value of a tag).</param>
+        /// <returns>The processed string.</returns>
         public static string ParseString(string content, List<(string Name, string Value)> tags = null, List<(string Name, Func<bool> Check)> conditions = null, string tagName = null)
         {
             var res = string.Empty;
@@ -603,13 +603,13 @@ namespace OSKHelpers.Mail
 
                                     if (textLen > 0 && !condition.Check)
                                     {
-                                        // Nel caso in cui la lunghezza del contenuto sia maggiore di zero ed
-                                        // il check fallisca si rimuove tutto il testo tra i tag...
+                                        // If the content length is greater than zero and
+                                        // the check fails, remove all text between the tags...
                                         output = output.Substring(0, openStart) + output.Substring(closingEnd);
                                     }
                                     else if (openStart >= 0 && openEnd >= 0 && closingStart > openEnd)
                                     {
-                                        // ... altrimenti si rimuovono i soli tag
+                                        // ... otherwise remove only the tags
                                         output = $"{output.Substring(0, openStart)}{output.Substring(openEnd, closingStart - openEnd)}{output.Substring(closingEnd)}";
                                     }
                                     iterations++;
@@ -624,7 +624,7 @@ namespace OSKHelpers.Mail
                             output = output.Replace($"{{{tag.Name}}}", tag.Value);
                         }
                     }
-                    // Rimuove, se presente, il tag.
+                    // Remove the tag if present.
                     if (!string.IsNullOrWhiteSpace(tagName))
                     {
                         if (output.Contains(tagName))
@@ -652,37 +652,37 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Elabora il file passato come serie di righe (lette attraverso File.ReadAllLines) estraendone oggettoe corpo della mail.<br/>
-        /// Se l'oggetto od il corpo della mail risultano vuoti Parsed sarà valorizzato a False.
+        /// Processes the file passed as a series of lines (read via File.ReadAllLines), extracting the email subject and body.<br/>
+        /// If the subject or body turn out to be empty, Parsed will be set to False.
         /// </summary>
-        /// <param name="lines">Righe da elaborare.</param>
+        /// <param name="lines">Lines to process.</param>
         /// <param name="tags">
-        /// Lista dei tag da cercare all'interno di content e per cui sostituire Name con Value.<br/>
-        /// In content i tag devono essere scritti come <b>{TAG}</b>, all'interno della lista Name deve essere privo delle parentesi, quindi <b>TAG</b>.<br/>
-        /// I nomi dei tag sono case sensitive.
+        /// List of tags to find within content and for which Name should be replaced with Value.<br/>
+        /// In content, tags must be written as <b>{TAG}</b>; within the list Name must be without braces, i.e. <b>TAG</b>.<br/>
+        /// Tag names are case sensitive.
         /// </param>
         /// <param name="conditions">
-        /// Lista di condizioni che permettono di mostrare o nascondere parti del testo.<br/>
-        /// In content le condizioni devono essere identificate come <b>&lt;&lt;COND&gt;&gt;..&lt;&lt;/COND&gt;&gt;</b> all'interno della lista Name deve essere privo dei simboli, quindi <b>COND</b>.<br/>
-        /// I nomi delle condizioni sono case sensitive.
+        /// List of conditions that allow sections of text to be shown or hidden.<br/>
+        /// In content, conditions must be identified as <b>&lt;&lt;COND&gt;&gt;..&lt;&lt;/COND&gt;&gt;</b>; within the list Name must be without symbols, i.e. <b>COND</b>.<br/>
+        /// Condition names are case sensitive.
         /// </param>
         /// <param name="customTags">
-        /// Tag Custom di cui recuperare il valore dall'interno del template.<br/>
-        /// I tag custom obbediscono alle stesse regole del soggetto, devono iniziare con '@', terminare con ':', essere posti all'inizio della riga e sono case sensitive.<br/>
-        /// Ii carattere iniziale e finale saranno automaticamente aggiunti dopo aver effettuato il trim della voce, quindi per richiedere l'interpretazione dei <br/>
-        /// tag { '@AltSubject:', '@Value2' } sarà necessario passare la lista di valori { 'AltSubject' , 'Value2' }, passare '   Value2 ' sarà ugualmente considerato valido<br/>
-        /// e sarà ricercato all'interno del template come '@Value2:' ma sarà restituito con la chiave '   Value2 '
-        /// Il contenuto dei tag personalizzati può contenere qualsiasi tag valido per il tipo di template.<br/>
-        /// Le righe contenenti i tag saranno rimosse.
+        /// Custom tags whose value should be retrieved from inside the template.<br/>
+        /// Custom tags follow the same rules as the subject: they must start with '@', end with ':', appear at the beginning of the line, and are case sensitive.<br/>
+        /// The leading '@' and trailing ':' are added automatically after trimming the entry; to request parsing of<br/>
+        /// tags { '@AltSubject:', '@Value2' } pass the list { 'AltSubject', 'Value2' }; passing '   Value2 ' is equally valid<br/>
+        /// and will be searched in the template as '@Value2:' but returned with the key '   Value2 '.<br/>
+        /// The content of custom tags may contain any valid tag for the template type.<br/>
+        /// Lines containing the tags will be removed.
         /// </param>
         /// <returns>
-        /// Una tupla con:<br />
-        /// <b>Parsed</b>: le righe sono state correttamente elaborate;<br/>
-        /// <b>Subject</b>: oggetto della mail;<br/>
-        /// <b>Body</b>: corpo della mail;<br/>
-        /// <b>TagFiles</b>: Dizionario contenente in <b>Key</b> il nome del tag richiesto (così come passato in <paramref name="customTags"/>) e in <b>Value</b> il valore rilevato.<br/>
-        /// Se non sono richiesti tag custom sarà restituito null, in caso di errore durtante l'esecuzione del metodo sarà restituito un dizionario contenente stringhe vuote come valori.<br/>
-        /// Eventuali stringhe vuote passate in <paramref name="customTags"/> saranno ignorate e non saranno presenti come chiavi, qualsiasi altra stringa sarà restituita così come passata.
+        /// A tuple with:<br />
+        /// <b>Parsed</b>: the lines were processed correctly;<br/>
+        /// <b>Subject</b>: email subject;<br/>
+        /// <b>Body</b>: email body;<br/>
+        /// <b>TagValues</b>: dictionary with <b>Key</b> = requested tag name (as passed in <paramref name="customTags"/>) and <b>Value</b> = detected value.<br/>
+        /// If no custom tags are requested, null is returned; on error a dictionary containing empty string values is returned.<br/>
+        /// Empty strings passed in <paramref name="customTags"/> are ignored and will not appear as keys; any other string is returned as passed.
         /// </returns>
         public static (bool Parsed, string Subject, string Body, Dictionary<string, string> TagValues) ParseFile(List<string> lines, List<(string Name, string Value)> tags = null, List<(string Name, Func<bool> Check)> conditions = null, List<string> customTags = null)
         {
@@ -724,16 +724,16 @@ namespace OSKHelpers.Mail
                 if (lines != null && lines.Any())
                 {
                     var trimmedLines = lines.Select(l => l?.Trim()).ToList();
-                    // Rimuove le righe di commento
+                    // Remove comment lines
                     foreach (var line in trimmedLines.Where(l => string.IsNullOrWhiteSpace(l) || l[0] == COMMENTSYMBOL).ToList())
                     {
                         trimmedLines.Remove(line);
                     }
 
-                    // Recupera l'oggetto della mail.
+                    // Retrieve the email subject.
                     subject = GetTagValue(SUBJECTTAG, trimmedLines, tags, conditions);
-                    
-                    // Recupera il valore per i tag custom passati come parametro.
+
+                    // Retrieve the value for the custom tags passed as parameter.
                     if (tagValues != null && tagValues.Count > 0)
                     {
                         foreach (var tag in tagValues)
@@ -742,10 +742,10 @@ namespace OSKHelpers.Mail
                         }
                     }
 
-                    // Solo se esistono ulteriori righe si effettua il parse del testo, altrimenti il metodo fallisce
+                    // Parse the body only if there are remaining lines; otherwise the method fails.
                     if (lines.Any())
                     {
-                        // Considerando tutte le righe rimanenti come un'unica stringa effettua il parse del body
+                        // Treat all remaining lines as a single string and parse the body.
                         body = ParseString(string.Join(" ", trimmedLines), tags, conditions);
                     }
 
@@ -770,24 +770,24 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Ricerca se disponibile una riga all'interno di <paramref name="lines"/> che inizi con <paramref name="tag"/> e ne restituisce il valore.<br/>
-        /// Se fossero presenti più righe sarà restituito il valore della prima.<br/>
-        /// Se non fossero presenti righe sarà restituita una stringa vuota.<br/>
-        /// Tutte le righe corrispondenti a <paramref name="tag"/> saranno rimosse dal template.
+        /// Searches for a line within <paramref name="lines"/> that starts with <paramref name="tag"/> and returns its value.<br/>
+        /// If multiple matching lines are found, the value of the first is returned.<br/>
+        /// If no lines are found, an empty string is returned.<br/>
+        /// All lines matching <paramref name="tag"/> are removed from the template.
         /// </summary>
-        /// <param name="tag">Tag da ricercare all'interno di <paramref name="lines"/>.</param>
-        /// <returns>Il valore di <paramref name="tag"/> trovato secondo le indicazioni di cui sopra.</returns>
+        /// <param name="tag">Tag to search for within <paramref name="lines"/>.</param>
+        /// <returns>The value of <paramref name="tag"/> found as described above.</returns>
         /// <inheritdoc cref="ParseFile(List{string}, List{ValueTuple{string, string}}, List{ValueTuple{string, Func{bool}}}, List{string})"/>
         private static string GetTagValue(string tag, List<string> lines, List<(string Name, string Value)> tags, List<(string Name, bool Check)> conditions)
         {
-            // Valore che sarà restituito.
+            // Value to be returned.
             string value = string.Empty;
 
-            // Linea identificata come contenente il soggetto.
+            // Line identified as containing the subject.
             string line = null;
 
-            // Cerca l'eventuale riga relativa all'oggetto e ne effettua il parse.
-            // Il ciclo viene utilizzato per far sì che se ci fossero più righe di soggetto venga presa la prima valida
+            // Search for the line containing the subject and parse it.
+            // The loop ensures that if multiple subject lines exist, the first valid one is used.
             do
             {
                 line = lines.Where(l => l.Trim().Contains(tag)).FirstOrDefault();

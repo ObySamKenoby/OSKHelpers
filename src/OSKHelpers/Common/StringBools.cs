@@ -5,7 +5,7 @@ using System.Linq;
 namespace OSKHelpers.Common
 {
     /// <summary>
-    /// Rappresenta un array di booleani sotto forma di stringa dove ogni valore True è rappresentato con un 1 e ogni False con uno 0
+    /// Represents an array of booleans as a string where each true value is represented as '1' and each false as '0'.
     /// </summary>
     public class StringBools
     {
@@ -20,13 +20,13 @@ namespace OSKHelpers.Common
 
         #endregion
 
-        #region Membri
+        #region Members
 
         private List<bool> _bools;
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         /// <summary>
         /// True if there is at least one True among values

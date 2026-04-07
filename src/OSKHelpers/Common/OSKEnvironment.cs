@@ -7,22 +7,22 @@ namespace OSKHelpers.Common
     public class OSKEnvironment
     {
         /// <summary>
-        /// True se l'ambiente di esecuzione è windows.
+        /// True if the runtime environment is Windows.
         /// </summary>
         public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         /// <summary>
-        /// True se l'ambiente di esecuzione è MacOS.
+        /// True if the runtime environment is macOS.
         /// </summary>
         public static bool IsMacOS => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
         /// <summary>
-        /// True se l'ambiente di esecuzione è Linux.
+        /// True if the runtime environment is Linux.
         /// </summary>
         public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
         /// <summary>
-        /// True se l'ambiente di esecuzione è interattivo (console).
+        /// True if the runtime environment is interactive (console).
         /// </summary>
         public static bool IsInteractive => Environment.UserInteractive &&
             (IsWindows || !(Console.IsInputRedirected && Console.IsOutputRedirected && Console.IsErrorRedirected));

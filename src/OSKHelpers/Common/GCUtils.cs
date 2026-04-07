@@ -6,37 +6,36 @@ namespace OSKHelpers.Common
 {
     
     /// <summary>
-    /// Utilità relative alla configurazione e l'utilizzo del Garbage Collector.
+    /// Utilities related to the configuration and use of the Garbage Collector.
     /// </summary>
     public class GCUtils
     {
-        #region Metodi
+        #region Methods
 
     #if NET8_0_OR_GREATER
 
         /// <summary>
-        /// Imposta il valore massimo heap del Garbage Collector.<br/>
-        /// https://learn.microsoft.com/it-it/dotnet/api/system.gc.refreshmemorylimit?view=net-8.0#system-gc-refreshmemorylimit
+        /// Sets the maximum GC heap size.<br/>
+        /// https://learn.microsoft.com/en-us/dotnet/api/system.gc.refreshmemorylimit?view=net-8.0
         /// </summary>
-        /// <param name="maxHeapSize">Dimensione massima dellheap espressa in MB.</param>
+        /// <param name="maxHeapSize">Maximum heap size in MB.</param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static void SetHeapHardLimit(int maxHeapSize)
         {
             if (maxHeapSize <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(maxHeapSize), $"Il valore di {nameof(maxHeapSize)} deve essere maggiore di zero.");
+                throw new ArgumentOutOfRangeException(nameof(maxHeapSize), $"The value of {nameof(maxHeapSize)} must be greater than zero.");
             }
             AppContext.SetData("GCHeapHardLimit", (ulong)500 << 20);
             GC.RefreshMemoryLimit();
         }
 
         /// <summary>
-        /// Forza l'esecuzione della pulizia da parte del Garbage collector.<br/>
-        /// Se <paramref name="complete"/> è false si limita a richiamare <see cref="GC.Collect()"/>,<br/>
-        /// altrimenti esegue una pulizia completa.<br/>
-        /// In linea di massima è preferibile non intervenire sul funzionaamnento del Garbage Collector,<br/>
-        /// se si rendesse necessario prestare la massima attenzione prima di utilizzare un valore<br/>
-        /// true per <paramref name="complete"/>.
+        /// Forces the Garbage Collector to run.<br/>
+        /// When <paramref name="complete"/> is false, simply calls <see cref="GC.Collect()"/>;<br/>
+        /// otherwise performs an aggressive full collection.<br/>
+        /// In general it is preferable not to interfere with GC behaviour; if you must,
+        /// pay careful attention before passing true for <paramref name="complete"/>.
         /// </summary>
         /// <param name="complete"></param>
         public static void Force(bool complete = false)
@@ -55,8 +54,8 @@ namespace OSKHelpers.Common
 #else
 
         /// <summary>
-        /// Forza l'esecuzione della pulizia da parte del Garbage Collector.<br/>
-        /// E' a tutti gli effetti un alias per <see cref="GC.Collect()"/>.
+        /// Forces the Garbage Collector to run.<br/>
+        /// This is effectively an alias for <see cref="GC.Collect()"/>.
         /// </summary>
         public static void Force()
         {

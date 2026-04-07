@@ -1,46 +1,68 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Title>OSK Helpers - Mail utils</Title>
-    <VersionPrefix>1.1.6</VersionPrefix>
-    <Description>Libreria di supporto per facilitare l'invio di mail.</Description>
-    <Copyright>Fanizza Group</Copyright>
-    <PackageReleaseNotes>Aggiornati pacchetti NuGet.</PackageReleaseNotes>
-    <PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Title>OSK Helpers - Mail utils</Title>
+		<VersionPrefix>1.1.7</VersionPrefix>
+		<Description>Support library to ease sending mail.</Description>
+		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <Version>$(VersionPrefix)-pre03</Version>
-  </PropertyGroup>
+	<PropertyGroup>
+		<PackageId>OSKHelpers.Mail</PackageId>
+		<Company>OSK Soft</Company>
+		<PackageIcon>logo_128px.jpg</PackageIcon>
+		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+		<PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
+		<PackageReleaseNotes>First public available package version.</PackageReleaseNotes>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
 
-  <PropertyGroup Label="Normalizza il percorso dei file nello stack trace." Condition="'$(Configuration)'=='Release'">
-    <PathMap>$([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))=$(AssemblyName):\</PathMap>
-  </PropertyGroup>
-	
-  <ItemGroup>
-    <PackageReference Include="MailKit" Version="4.15.1" />
-    <PackageReference Include="OSKHelpers" Version="1.6.14" />
-    <PackageReference Include="System.Text.Json" Version="10.0.3" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<Version>$(VersionPrefix)-pre01</Version>
+	</PropertyGroup>
 
-  <ItemGroup>
-	<!-- Include SettingsTemplate.Mail.ini nel pacchetto NuGet-->
-    <None Update="SettingsTemplate.Mail.ini">
-      <Pack>true</Pack>
-      <PackagePath>contentFiles/any/any/.OSKHelpers.content/SettingsTemplate.Mail.ini</PackagePath>
-    </None>
-	<!-- Include MailTemplates/0Index.txt nel pacchetto NuGet-->
-    <None Update="MailTemplates\0Index.txt">
-      <Pack>true</Pack>
-      <PackagePath>contentFiles/any/any/.OSKHelpers.content/MailTemplates/0Index.txt</PackagePath>
-    </None>
-	<!-- Include MailTemplates/Credentials.txt nel pacchetto NuGet-->
-    <None Update="MailTemplates\Credentials.txt">
-      <Pack>true</Pack>
-      <PackagePath>contentFiles/any/any/.OSKHelpers.content/MailTemplates/Credentials.txt</PackagePath>
-    </None>
-  </ItemGroup>
+	<PropertyGroup Label="Normalize stack trace path." Condition="'$(Configuration)'=='Release'">
+		<PathMap>$([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))=$(AssemblyName):\</PathMap>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MailKit" Version="4.10.0" />
+		<PackageReference Include="OSKHelpers" Version="1.6.14" />
+		<PackageReference Include="System.Text.Json" Version="10.0.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\docs\images\logo_128px.jpg">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<!-- Include SettingsTemplate.Mail.ini into NuGet package-->
+		<None Update="License.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="SettingsTemplate.Mail.ini">
+			<Pack>true</Pack>
+			<PackagePath>contentFiles/any/any/.OSKHelpers.content/SettingsTemplate.Mail.ini</PackagePath>
+		</None>
+		<!-- Include MailTemplates/0Index.txt into NuGet package-->
+		<None Update="MailTemplates\0Index.txt">
+			<Pack>true</Pack>
+			<PackagePath>contentFiles/any/any/.OSKHelpers.content/MailTemplates/0Index.txt</PackagePath>
+		</None>
+		<!-- Include MailTemplates/Credentials.txt into NuGet package-->
+		<None Update="MailTemplates\Credentials.txt">
+			<Pack>true</Pack>
+			<PackagePath>contentFiles/any/any/.OSKHelpers.content/MailTemplates/Credentials.txt</PackagePath>
+		</None>
+		<!-- Include ReadMe.md into NuGet package-->
+		<None Update="ReadMe.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>

@@ -7,26 +7,26 @@ using System.Threading.Tasks;
 namespace OSKHelpers.Common
 {
     /// <summary>
-    /// Classe di utilità derivata da Random.<br/>
-    /// Contiene un generatore statico di numeri casuali (Shared)
+    /// Utility class derived from <see cref="Random"/>.<br/>
+    /// Contains a static random-number generator (Shared).
     /// </summary>
     public class OSKRandom : Random
     {
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Fornisce un seed basato sui ticks attuali
+        /// Provides a seed based on the current tick count.
         /// </summary>
         public static int Seed => Math.Abs((int)DateTime.Now.Ticks);
 
         /// <summary>
-        /// Generatore random statico
+        /// Static random generator instance.
         /// </summary>
         public static new OSKRandom Shared;
 
         #endregion
 
-        #region Costruttori
+        #region Constructors
 
         static OSKRandom() 
         { 
@@ -34,12 +34,12 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Costruttore base
+        /// Default constructor.
         /// </summary>
         public OSKRandom() : base(Seed) { }
 
         /// <summary>
-        /// Costruttore con seed personalizzato
+        /// Constructor with a custom seed.
         /// </summary>
         /// <param name="seed"></param>
         public OSKRandom(int seed) : base(seed) { }

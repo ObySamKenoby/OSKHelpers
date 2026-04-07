@@ -6,32 +6,32 @@ namespace OSKHelpers.Types.IsChanged
 {
     public static class IIsChangedExtensionMethods
     {
-        #region Metodi
+        #region Methods
 
         /// <summary>
-        /// Imposta il vaore del membro passato come parametro restituendo True se è andato a buon fine.
+        /// Sets the value of the member passed as parameter, returning True if the update succeeded.
         /// </summary>
-        /// <typeparam name="T">Tipologia della proprietà.</typeparam>
-        /// <param name="field">Membro (passato come riferimento).</param>
-        /// <param name="newValue">Nuovo valore da attribuire al membro.</param>
+        /// <typeparam name="T">Type of the property.</typeparam>
+        /// <param name="field">Member (passed by reference).</param>
+        /// <param name="newValue">New value to assign to the member.</param>
         /// <param name="onValueChanging">
-        /// Funzione che sarà richiamata prima della modifica del valore nel caso in cui questo sia diverso dal precedente,<br/>
-        /// se sarà resituito un valore False la modifica sarà annullata.
+        /// Function called before the value is changed, only when the new value differs from the current one;<br/>
+        /// if it returns False the change is cancelled.
         /// <code>
         /// bool OnValueChanging(T newValue)
         /// </code>
-        /// <b>newValue</b>: nuovo valore della proprietà;<br/>
-        /// <b>Restituisce</b>: False se l'aggiornamento del valore non deve essere portato a termine.
+        /// <b>newValue</b>: new value of the property;<br/>
+        /// <b>Returns</b>: False if the value update must not be completed.
         /// </param>
         /// <param name="onValueChanged">
-        /// Azione che sarà eseguita dopo l'aggiornamento del valore e dopo che IsChanged è stato impostato a True.
+        /// Action executed after the value has been updated and after IsChanged has been set to True.
         /// <code>
         /// void OnValueChanged(T oldValue, T newValue)
         /// </code>
-        /// <b>oldValue</b>: vecchio valore della proprietà;<br/>
-        /// <b>newValue</b>: nuovo valore della proprietà.
+        /// <b>oldValue</b>: previous value of the property;<br/>
+        /// <b>newValue</b>: new value of the property.
         /// </param>
-        /// <returns>True se il valore della proprietà è stato aggiornato.</returns>
+        /// <returns>True if the property value was updated.</returns>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Func<T, bool> onValueChanging = null, Action<T, T> onValueChanged = null)
         {
             bool changed = false;
@@ -56,18 +56,18 @@ namespace OSKHelpers.Types.IsChanged
         }
 
         /// <param name="onValueChanged">
-        /// Azione che sarà eseguita dopo l'aggiornamento del valore e dopo che IsChanged è stato impostato a True.
+        /// Action executed after the value has been updated and after IsChanged has been set to True.
         /// </param>
         /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Func{T, bool}, Action{T, T})"/>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Func<T, bool> onValueChanging, Action onValueChanged)
             => obj.SetProperty(ref field, newValue, onValueChanging, new Action<T, T>((v1, v2) => { onValueChanged(); }));
 
         /// <param name="onValueChanged">
-        /// Azione che sarà eseguita dopo l'aggiornamento del valore e dopo che IsChanged è stato impostato a True.
+        /// Action executed after the value has been updated and after IsChanged has been set to True.
         /// <code>
         /// void OnValueChanged(T newValue)
         /// </code>
-        /// <b>newValue</b>: nuovo valore della proprietà.
+        /// <b>newValue</b>: new value of the property.
         /// </param>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Func<T, bool> onValueChanging, Action<T> onValueChanged)
             => obj.SetProperty(ref field, newValue, onValueChanging, new Action<T, T>((oldVal, newVal) => { onValueChanged(newValue); }));
@@ -84,10 +84,10 @@ namespace OSKHelpers.Types.IsChanged
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Action<T> onValueChanged)
             => obj.SetProperty(ref field, newValue, null, new Action<T, T>((oldVal, newVal) => { onValueChanged(newValue); }));
 
-        // Metodi per utilizzi particolari
+        // Methods for special use cases
 
         /// <summary>
-        /// Imposta il valore del campo passato come parametro di riferimento convertendo la stringa <seealso cref="PropertyStringUtils.SetProperty(ref decimal, string)"/>
+        /// Sets the value of the field passed by reference by converting the string <seealso cref="PropertyStringUtils.SetProperty(ref decimal, string)"/>
         /// </summary>
         /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Func{T, bool}, Action{T, T})"/>
         public static bool SetProperty(this IIsChanged obj, ref decimal field, string newValue)
@@ -103,7 +103,7 @@ namespace OSKHelpers.Types.IsChanged
         }
 
         /// <summary>
-        /// Imposta il valore del campo passato come parametro di riferimento convertendo la stringa <seealso cref="PropertyStringUtils.SetProperty(ref decimal, string)"/>
+        /// Sets the value of the field passed by reference by converting the string <seealso cref="PropertyStringUtils.SetProperty(ref decimal, string)"/>
         /// </summary>
         /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Func{T, bool}, Action{T, T})"/>
         public static bool SetProperty(this IIsChanged obj, ref decimal? field, string newValue)
@@ -121,7 +121,7 @@ namespace OSKHelpers.Types.IsChanged
 
 
         /// <summary>
-        /// Imposta il valore di IsChanged.
+        /// Sets the value of IsChanged.
         /// </summary>
         public static void SetIsChanged(this IIsChanged obj, bool isChanged = true)
         {
@@ -129,8 +129,8 @@ namespace OSKHelpers.Types.IsChanged
         }
 
         /// <summary>
-        /// Resetta lo stato di Ischanged.<br/>
-        /// Può essere effettuato un override nelle classi derivate per scenari più complessi (collezioni o altro).
+        /// Resets the IsChanged state.<br/>
+        /// Can be overridden in derived classes for more complex scenarios (collections or other).
         /// </summary>
         public static void ResetIsChanged(this IIsChanged obj)
         {

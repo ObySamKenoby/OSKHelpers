@@ -12,11 +12,11 @@ using System.Text.Json;
 namespace OSKHelpers.Logging
 {
     /// <summary>
-    /// Semplice classe da utilizzare per generare i log dell'applicativo.
+    /// Simple class used to generate application logs.
     /// </summary>
     public class SimpleLogger
     {
-        #region Membri
+        #region Members
 
         private DateTime? _lastDate;
 
@@ -34,31 +34,30 @@ namespace OSKHelpers.Logging
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Cartella log di default
+        /// Default log folder.
         /// </summary>
         public static string DefaultLogPath { get => _defaultLogPath; }
 
         /// <summary>
-        /// Utilizzato per mostrare i messaggi a video se l'ambiente di esecuzione lo permette,
-        /// non influenza il comportamento di <see cref="DebugConsoleLog(string)"/> e <see cref="ProtocolConsoleLog(string)"/>.<br/>
+        /// Used to display messages
+        /// Does not affect the behaviour of <see cref="DebugConsoleLog(string)"/> and <see cref="ProtocolConsoleLog(string)"/>.<br/>
         /// Default: false.
         /// </summary>
         public bool EnableConsoleLog { get; set; }
 
         /// <summary>
-        /// Utilizzato per disabilitare le chiamate in fase di debug, non tocca quel che 
-        /// è il normale funzionamento del livello LogLevel.Debug
+        /// Used to disable debug calls; does not affect the normal behaviour of the LogLevel.Debug level.
         /// </summary>
         public bool DisableDebugLog { get; set; }
 
         /// <summary>
-        /// Livello minimo di log per i messaggi che saranno registrati.<br/>
-        /// Valore di default: Loglevel.Error
+        /// Minimum log level
+        /// Default value: LogLevel.Error.
         /// </summary>
-        public LogLevel LogLevel 
+        public LogLevel LogLevel
         { 
             get => _logLevel; 
             set
@@ -73,9 +72,9 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Percorso del file di log.<br/>
-        /// La presenza della cartella viene verificato al momento della scrittura di un messaggio, se il percorso non viene trovato se ne tenta la creazione.<br />
-        /// Di default viene utilizzata la cartella "Log" all'interno del percorso dell'applicativo.
+        /// Path of the log file.<br/>
+        /// The folder is checked at write time; if it does not exist, a creation attempt is made.<br/>
+        /// By default the "Log" folder inside the application path is used.
         /// </summary>
         public string LogPath
         {
@@ -83,14 +82,14 @@ namespace OSKHelpers.Logging
             set
             {
                 _logPath = value;
-                // _lastDate viene posto a null per forzare la rigenerazione del nome file
+                // _lastDate is set to null to force file name regeneration
                 _lastDate = null;
             }
         }
 
         /// <summary>
-        /// Prefisso da aggiungere al nome del file log.<br/>
-        /// Valore di default: Null.
+        /// Prefix to add to the log file name.<br/>
+        /// Default value: null.
         /// </summary>
         public string Prefix
         {
@@ -98,16 +97,16 @@ namespace OSKHelpers.Logging
             set
             {
                 _prefix = value;
-                // _lastDate viene posto a null per forzare la rigenerazione del nome file
+                // _lastDate is set to null to force file name regeneration
                 _lastDate = null;
             }
         }
 
         /// <summary>
-        /// Forza il nome del log al solo prefisso.<br/>
-        /// Utilizzato per poter avere un nome log univoco che racchiuda più giorni.<br/>
-        /// Implementato la prima volta per l'utilizzo nella classe KDucer di ProFanStd.<br/>
-        /// NB: la proprietà non ha un equivalente all'interno di SimpleLog.
+        /// Forces the log name to be the prefix only.<br/>
+        /// Used to have a unique log name that spans multiple days.
+        /// First implemented for the KDucer class in ProFanStd.<br/>
+        /// Note: this property has no equivalent in <see cref="SimpleLog"/>.
         /// </summary>
         public bool UsePrefixAsLogFile
         {
@@ -115,14 +114,14 @@ namespace OSKHelpers.Logging
             set
             {
                 _usePrefixAsLogFile = value;
-                // _lastDate viene posto a null per forzare la rigenerazione del nome file
+                // _lastDate is set to null to force file name regeneration
                 _lastDate = null;
             }
         }
 
         /// <summary>
-        /// Nome del file di log.<br/>
-        /// Il nome è composto secondo il pattern PREFIXLogYYYYMMDD.txt, è possibile differenziare i vari log all'interno della stessa cartella modificando Prefix
+        /// Log file name.<br/>
+        /// The name follows the pattern
         /// </summary>
         public string LogFile
         {
@@ -139,9 +138,9 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Forza il livello di log a Debug.<br/> 
-        /// Utile per attivare il debug già in fase di inizializzazione del programma (quando ancora non è stato caricato il file delle impostazioni),<br/>
-        /// viene ignorato nel caso in cui sia True anche ForceProtocol.
+        /// Forces the log level to Debug.<br/>
+        /// Useful for enabling debug logging during program initialisation (before the settings file is loaded).<br/>
+        /// Ignored when ForceProtocol is also true.
         /// </summary>
         public bool ForceDebug
         {
@@ -157,9 +156,9 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Forza il livello di log a Debug.<br/> 
-        /// Utile per attivare il debug già in fase di inizializzazione del programma (quando ancora non è stato caricato il file delle impostazioni),<br/>
-        /// se True il valore di ForceDebug viene ignorato.
+        /// Forces the log level to Protocol.<br/>
+        /// Useful for enabling protocol logging during program initialisation (before the settings file is loaded).<br/>
+        /// When true, ForceDebug is ignored.
         /// </summary>
         public bool ForceProtocol
         {
@@ -175,18 +174,18 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// True se il livello di log è uguale o superiore a Debug
+        /// True if the log level is Debug or higher.
         /// </summary>
         public bool LogLevelDebug => LogLevel >= LogLevel.Debug;
 
         /// <summary>
-        /// True se il livello di log è uguale o superiore a Protocol
+        /// True if the log level is Protocol or higher.
         /// </summary>
         public bool LogLevelProtocol => LogLevel >= LogLevel.Protocol;
 
         #endregion
 
-        #region Costruttore
+        #region Constructor
 
         static SimpleLogger()
         {
@@ -194,7 +193,7 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Costruttore standard.
+        /// Default constructor.
         /// </summary>
         public SimpleLogger()
         {
@@ -216,24 +215,24 @@ namespace OSKHelpers.Logging
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <summary>
-        /// Restituisce True se il livello di log passato come parametro permette la scrittura del log.
+        /// Returns true if the specified log level allows writing to the log.
         /// </summary>
-        /// <param name="logLevel">Livello di log da verificare.</param>
-        /// <returns>True se il livello di log passato come parametro permette la scrittura del log.</returns>
+        /// <param name="logLevel">Log level to check.</param>
+        /// <returns>True if the specified log level allows writing to the log.</returns>
         public bool ToLog(LogLevel logLevel)
         {
             return logLevel <= LogLevel;
         }
 
         /// <summary>
-        /// Scrive la linea passata come parametro nel file di log e, di default, la visualizza a video quando in fase di debug
+        /// Writes the specified line to the log file and, by default, prints it to the console when debugging.
         /// </summary>
-        /// <param name="line">Linea da scrivere nel log</param>
-        /// <param name="logLevel">Utilizzato per formattare correttamente il prefisso nel caso in cui il livello di log sia DEBUG o PROTOCOL,<br/>
-        /// non impedisce in alcun caso la scrittura della riga. Se omesso viene utilizzato il prefisso standard (data/ora)</param>
+        /// <param name="line">Line to write to the log.</param>
+        /// <param name="logLevel">Used to correctly format the prefix when the log level is DEBUG or PROTOCOL.<br/>
+        /// Does not prevent the line from being written. When omitted, the standard prefix (date/time) is used.</param>
         public void Write(string line, LogLevel logLevel = LogLevel.None)
         {
             if (!string.IsNullOrWhiteSpace(line) && ToLog(logLevel))
@@ -255,8 +254,8 @@ namespace OSKHelpers.Logging
                     {
                         try
                         {
-                            // Se si verificano errori in fase di scrittura viene creato un log all'interno della cartella dell'applicazione, se possibile.
-                            line = $"Errore in fase di scrittura del log.\r\n  Nome del file di log: {LogFile}\r\n  Errore: {FormattedException(ex, true)}\r\n  Messaggio originale: {line}";
+                            // If an error occurs during writing, a fallback log is created in the application folder, if possible.
+                            line = $"Error writing log.\r\n  Log file name: {LogFile}\r\n  Error: {FormattedException(ex, true)}\r\n  Original message: {line}";
                             File.AppendAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ERRORSLOG.txt"), $"{prefix} {line}\r\n");
                         }
                         catch { }
@@ -266,12 +265,12 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Effettua il log della linea con eventiale serializzazione di un oggetto se il livello di log è compatibile
+        /// Logs the line with optional object serialisation when the log level is compatible.
         /// </summary>
-        /// <param name="logLevel">Livello di log minimo</param>
-        /// <param name="line">Testo del log</param>
-        /// <param name="obj">Eventuale oggetto da serializzare</param>
-        /// <param name="inline">Se True la serializzazione dell'oggetto viene salvata di seguito al testo, altrimenti viene salvata in una nuova riga.</param>
+        /// <param name="logLevel">Minimum log level.</param>
+        /// <param name="line">Log text.</param>
+        /// <param name="obj">Optional object to serialise.</param>
+        /// <param name="inline">If true the serialised object is appended to the text; otherwise it is written on a new line.</param>
         public void Write(LogLevel logLevel, string line, object obj = null, bool inline = false)
         {
             if (ToLog(LogLevel))
@@ -290,31 +289,31 @@ namespace OSKHelpers.Logging
                 }
                 catch (Exception ex)
                 {
-                    Write($"Errore in {nameof(SimpleLogger)}.{nameof(Write)}(LogLevel.{logLevel},'{line}', obj, {inline}): {SimpleLog.FormattedException(ex, true)}");
+                    Write($"Error in {nameof(SimpleLogger)}.{nameof(Write)}(LogLevel.{logLevel},'{line}', obj, {inline}): {SimpleLog.FormattedException(ex, true)}");
                 }
             }
         }
 
         /// <summary>
-        /// Effettua il log della serializzazione dell'oggetto passato come parametro.
+        /// Logs the serialisation of the given object.
         /// </summary>
         public void Write(LogLevel logLevel, object obj) 
             => Write(logLevel, string.Empty, obj, true);
 
         /// <summary>
-        /// Scrive una riga.<br/>
-        /// Metodo creato per poter essere utilizzato, ad esempio, per il logging di EF.<br/>
-        /// Scrive la linea passata come parametro nel file di log e, di default, la visualizza a video quando in fase di debug
+        /// Writes a line.<br/>
+        /// Created to allow use as a logging delegate, e.g. for EF Core logging.<br/>
+        /// Writes the specified line to the log file and, by default, prints it to the console when debugging.
         /// </summary>
-        /// <param name="line"></param>
+        /// <param name="line">Line to write.</param>
         public void WriteLine(string line) => Write(line);
 
         /// <summary>
-       /// Effettua il log della linea con eventiale serializzazione di un oggetto se il livello di log è almeno Error
+        /// Logs the line with optional object serialisation when the log level is at least Error.
         /// </summary>
-        /// <param name="line">Testo del log</param>
-        /// <param name="obj">Eventuale oggetto da serializzare</param>
-        /// <param name="inline">Se True la serializzazione dell'oggetto viene salvata di seguito al testo, altrimenti viene salvata in una nuova riga.</param>
+        /// <param name="line">Log text.</param>
+        /// <param name="obj">Optional object to serialise.</param>
+        /// <param name="inline">If true the serialised object is appended to the text; otherwise it is written on a new line.</param>
         public void ErrorWrite(string line, object obj = null, bool inline = false)
             => Write(LogLevel.Error, line, obj, inline);
 
@@ -323,12 +322,12 @@ namespace OSKHelpers.Logging
             => ErrorWrite(string.Empty, obj, true);
 
         /// <summary>
-        /// Effettua il log della linea con eventiale serializzazione di un oggetto se il livello di log è almeno Debug
+        /// Logs the line with optional object serialisation when the log level is at least Debug.
         /// </summary>
-        /// <param name="line">Testo del log</param>
-        /// <param name="obj">Eventuale oggetto da serializzare</param>
-        /// <param name="inline">Se True la serializzazione dell'oggetto viene salvata di seguito al testo, altrimenti viene salvata in una nuova riga.</param>
-        public void DebugWrite(string line, object obj = null, bool inline = false) 
+        /// <param name="line">Log text.</param>
+        /// <param name="obj">Optional object to serialise.</param>
+        /// <param name="inline">If true the serialised object is appended to the text; otherwise it is written on a new line.</param>
+        public void DebugWrite(string line, object obj = null, bool inline = false)
             => Write(LogLevel.Debug, line, obj, inline);
 
         ///<inheritdoc cref="DebugWrite(string, object, bool)"/>
@@ -336,18 +335,18 @@ namespace OSKHelpers.Logging
             => DebugWrite(string.Empty, obj, true);
 
         /// <summary>
-        /// Effettua il log della linea con eventiale serializzazione di un oggetto se il livello di log è almeno Protocol
+        /// Logs the line with optional object serialisation when the log level is at least Protocol.
         /// </summary>
-        /// <param name="line">Testo del log</param>
-        /// <param name="obj">Eventuale oggetto da serializzare</param>
-        /// <param name="inline">Se True la serializzazione dell'oggetto viene salvata di seguito al testo, altrimenti viene salvata in una nuova riga.</param>
-        public void ProtocolWrite(string line, object obj = null, bool inline = false) 
+        /// <param name="line">Log text.</param>
+        /// <param name="obj">Optional object to serialise.</param>
+        /// <param name="inline">If true the serialised object is appended to the text; otherwise it is written on a new line.</param>
+        public void ProtocolWrite(string line, object obj = null, bool inline = false)
             => Write(LogLevel.Protocol, line, obj, inline);
 
         /// <summary>
-        /// Effettua il log della serializzazione dell'oggetto passato come parametro.
+        /// Logs the serialisation of the given object at Protocol level.
         /// </summary>
-        public void ProtocolWrite(object obj) 
+        public void ProtocolWrite(object obj)
             => ProtocolWrite(string.Empty, obj, true);
 
         ///<inheritdoc cref="LogLines(LogLevel, IEnumerable{string})"/>
@@ -355,10 +354,10 @@ namespace OSKHelpers.Logging
             => LogLines(LogLevel.None, lines);
 
         /// <summary>
-        /// Scrive sul log le stringhe passate come parametro se il livello di log è compatibile.
+        /// Writes the given strings to the log when the log level is compatible.
         /// </summary>
-        /// <param name="logLevel">Livello di log minimo</param>
-        /// <param name="lines">Linee di cui effettuare il log</param>
+        /// <param name="logLevel">Minimum log level.</param>
+        /// <param name="lines">Lines to log.</param>
         public void LogLines(LogLevel logLevel, IEnumerable<string> lines)
         {
             try
@@ -379,7 +378,7 @@ namespace OSKHelpers.Logging
             }
             catch (Exception ex)
             {
-                Write($"Errore in {nameof(SimpleLogger)}.{nameof(LogArray)}: {FormattedException(ex)}");
+                Write($"Error in {nameof(SimpleLogger)}.{nameof(LogArray)}: {FormattedException(ex)}");
             }
         }
 
@@ -388,14 +387,14 @@ namespace OSKHelpers.Logging
             => LogArray(logLevel, message, logLevel, arrayName, array, serialize);
 
         /// <summary>
-        /// Effettua il log dell'array opzionalmente registrando il contenuto di tutti gli elementi se il livello di log è compatibile con detailLogLevel.
+        /// Logs the array, optionally recording the content of all elements when the log level is compatible with detailLogLevel.
         /// </summary>
-        /// <param name="logLevel">Livello di log minimo</param>
-        /// <param name="message">Testo del log</param>
-        /// <param name="detailLogLevel">Livello di log minimo per registrare il contenuto dell'array.</param>
-        /// <param name="arrayName">Nome dell'array</param>
-        /// <param name="array">Array di cui effettuare il log</param>
-        /// <param name="serialize">Richiede la serializzazione di ogni elemento</param>
+        /// <param name="logLevel">Minimum log level.</param>
+        /// <param name="message">Log text.</param>
+        /// <param name="detailLogLevel">Minimum log level required to log each element's content.</param>
+        /// <param name="arrayName">Name of the array.</param>
+        /// <param name="array">Array to log.</param>
+        /// <param name="serialize">When true, each element is JSON-serialised.</param>
         public void LogArray(LogLevel logLevel, string message, LogLevel detailLogLevel, string arrayName, IEnumerable<object> array, bool serialize = false)
         {
             if (ToLog(logLevel) && array != null && (array?.Any() ?? false))
@@ -433,16 +432,16 @@ namespace OSKHelpers.Logging
                 }
                 catch (Exception ex)
                 {
-                    Write($"Errore in {nameof(SimpleLogger)}.{nameof(LogArray)}: {FormattedException(ex)}");
+                    Write($"Error in {nameof(SimpleLogger)}.{nameof(LogArray)}: {FormattedException(ex)}");
                 }
             }
         }
 
         /// <summary>
-        /// Restituisce una stringa standard per la visualizzazione ed il logging delle eccezioni e dell inner exception
+        /// Returns a standard string for displaying and logging exceptions and their inner exceptions.
         /// </summary>
-        /// <param name="ex">Eccezione di cui effettuare il log</param>
-        /// <param name="includeStackTrace">Indica se forzare l'inclusione del trace dello stack (con livello log Debug o superiore lo stack viene sempre incluso)</param>
+        /// <param name="ex">Exception to log.</param>
+        /// <param name="includeStackTrace">Whether to force inclusion of the stack trace (always included when log level is Debug or higher).</param>
         public string FormattedException(Exception ex, bool includeStackTrace = false)
         {
             includeStackTrace = includeStackTrace || LogLevelDebug;
@@ -457,12 +456,12 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Effettua il log dell'eccezione passata come parametro con un messaggio tipo "Errore in Classe.Metodo: Eccezione".<br/>
-        /// Se viene passata un'eccezione nulla viene comunque registrato il messaggio d'errore.<br/>
-        /// Il log viene effettuato per un livello di logging LogLevel.Error o superiore
+        /// Logs the given exception with a message of the form "Error in ClassName.MethodName: Exception".<br/>
+        /// If a null exception is passed, the error message is still recorded.<br/>
+        /// Logging is performed for LogLevel.Error or higher.
         /// </summary>
-        /// <param name="ex">Eccezione di cui effettuare il log</param>
-        /// <param name="includeStackTrace">Indica se forzare l'inclusione del trace dello stack (con livello log Debug o superiore lo stack viene sempre incluso)</param>
+        /// <param name="ex">Exception to log.</param>
+        /// <param name="includeStackTrace">Whether to force inclusion of the stack trace (always included when log level is Debug or higher).</param>
         public void LogError(Exception ex, bool includeStackTrace = false, [CallerMemberName] string callerMethodName = "")
         {
             var callerTypeName = new StackFrame(1).GetMethod().DeclaringType.Name;
@@ -470,45 +469,45 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Effettua il log dell'eccezione passata come parametro con un messaggio tipo "Errore in Classe.Metodo: Eccezione".<br/>
-        /// Se viene passata un'eccezione nulla viene comunque registrato il messaggio d'errore.<br/>
-        /// Il log viene effettuato per un livello di logging LogLevel.Error o superiore
+        /// Logs the given exception with a message of the form "Error in ClassName.MethodName: Exception".<br/>
+        /// If a null exception is passed, the error message is still recorded.<br/>
+        /// Logging is performed for LogLevel.Error or higher.
         /// </summary>
-        /// <param name="ex">Eccezione di cui effettuare il log</param>
-        /// <param name="callerTypeName">Nome del tipo chiamante</param>
-        /// <param name="callerMethodName">Nome del metodo chiamante</param>
-        /// <param name="includeStackTrace">Indica se forzare l'inclusione del trace dello stack (con livello log Debug o superiore lo stack viene sempre incluso)</param>
+        /// <param name="ex">Exception to log.</param>
+        /// <param name="callerTypeName">Name of the calling type.</param>
+        /// <param name="callerMethodName">Name of the calling method.</param>
+        /// <param name="includeStackTrace">Whether to force inclusion of the stack trace (always included when log level is Debug or higher).</param>
         public void LogError(Exception ex, string callerTypeName, string callerMethodName , bool includeStackTrace = false)
         {
-            Write(LogLevel.Error, $"Errore in {callerTypeName}.{callerMethodName}: {FormattedException(ex, includeStackTrace)}");
+            Write(LogLevel.Error, $"Error in {callerTypeName}.{callerMethodName}: {FormattedException(ex, includeStackTrace)}");
         }
 
         /// <summary>
-        /// Restituisce il nome del tipo chiamante
+        /// Returns the name of the calling type.
         /// </summary>
         public string GetCallerTypeName() => new StackFrame(1).GetMethod().DeclaringType.Name;
 
         /// <summary>
-        /// Restituisce il nome del metodo chiamante
+        /// Returns the name of the calling method.
         /// </summary>
         public string GetCallerMethodName([CallerMemberName] string callerMethodName = "") => callerMethodName;
 
         /// <summary>
-        /// Restituisce il nome del tipo e metodo chiamanti nella forma ClassName.MethodName
+        /// Returns the calling type and method name in the form ClassName.MethodName.
         /// </summary>
         public string GetCallerTypeMethodName([CallerMemberName] string callerMethodName = "") => $"{new StackFrame(1).GetMethod().DeclaringType.Name}.{callerMethodName}";
 
-        /// <summary>
-        /// Effettua il log della classe e metodo chiamanti se il livello di log è adeguato.
+
+        /// Logs the calling class and method name when the log level is adequate.
         /// </summary>
         public void LogCallerTypeMethodName(LogLevel logLevel = LogLevel.Debug, [CallerMemberName] string callerMethodName = "") => Write(logLevel, $"{new StackFrame(1).GetMethod().DeclaringType.Name}.{callerMethodName}");
 
         /// <summary>
-        /// Visualizza a video <paramref name="text"/> se <paramref name="logLevel"/> lo permette.
+        /// Displays <paramref name="text"/>
         /// </summary>
         public void ConsoleLog(string text, LogLevel logLevel = LogLevel.None)
         {
-            // La verifica su LogLevelDebug è fatta per evitare che i messaggi a video vengano scritti due volte.
+            // The LogLevelDebug check is there to prevent messages from being printed to the console twice.
             if (EnableConsoleLog && ToLog(logLevel) && (!LogLevelDebug || DisableDebugLog))
             {
                 Console.WriteLine(text);
@@ -516,9 +515,9 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Visualizza a video la linea passata come parametro se <see cref="LogLevel"/> è almeno Debug, altrimenti non fa niente.<br/>
-        /// La visualizzazione avviene anche in produzione se <see cref="DisableDebugLog"/> è false.<br/>
-        /// Può essere disabilitato impostando <see cref="DisableDebugLog"/> a true (default quando in produzione)
+        /// Prints the given line to the console when <see cref="LogLevel"/> is at least Debug; does nothing otherwise.<br/>
+        /// Output is produced even in production when <see cref="DisableDebugLog"/> is false.<br/>
+        /// Can be suppressed by setting <see cref="DisableDebugLog"/> to true (default in production).
         /// </summary>
         public void DebugConsoleLog(string text)
         {
@@ -529,9 +528,9 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Visualizza a video la linea passata come parametro se <see cref="LogLevel"/> è almeno Protocol, altrimenti non fa niente.<br/>
-        /// La visualizzazione avviene anche in produzione se <see cref="DisableDebugLog"/> è false.<br/>
-        /// Può essere disabilitato impostando <see cref="DisableDebugLog"/> a true (default quando in produzione)
+        /// Prints the given line to the console when <see cref="LogLevel"/> is at least Protocol; does nothing otherwise.<br/>
+        /// Output is produced even in production when <see cref="DisableDebugLog"/> is false.<br/>
+        /// Can be suppressed by setting <see cref="DisableDebugLog"/> to true (default in production).
         /// </summary>
         public void ProtocolConsoleLog(string text)
         {
@@ -542,26 +541,26 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Scrive il testo a video e sul file di log a seconda dei diversi valori limite assegnati.
+        /// Writes text to the console and/or to the log file according to the two independent level thresholds.
         /// </summary>
-        /// <param name="line">Testo da mostrare o registrare nel filedi log.</param>
-        /// <param name="consoleLogLevel">Livello log per mostrare il messaggio a video.</param>
-        /// <param name="fileLogLevel">Livello log per registrare il messaggio nel log.</param>
-        /// <param name="obj">Oggetto da serializzare.</param>
-        /// <param name="inline">La serializzazione dell'oggetto avverrà di seguito a text</param>
+        /// <param name="line">Text to display or record in the log file.</param>
+        /// <param name="consoleLogLevel">Log level required to display the message on screen.</param>
+        /// <param name="fileLogLevel">Log level required to record the message in the log file.</param>
+        /// <param name="obj">Object to serialise.</param>
+        /// <param name="inline">The object serialisation is appended to the text on the same line.</param>
         /// <param name="disableConsoleLog">
-        /// Ignora la visualizzazione a video. Se null sarà utilizzato il valore di <br/>
-        /// <see cref="DisableDebugLog"/> indipendentemente dal reale valore di consoleLogLevel.
+        /// Suppresses console output. When null, the value of <see cref="DisableDebugLog"/> is used,
+        /// regardless of the actual value of consoleLogLevel.
         /// </param>
         public void ConditionalLog(string line, LogLevel consoleLogLevel, LogLevel fileLogLevel, object obj = null, bool inline = false, bool? disableConsoleLog = null)
         {
             try
             {
-                // Visualizzazione in console
+                // Console output
                 if (Environment.UserInteractive && ToLog(consoleLogLevel))
                 {
                     var consoleLog = !(disableConsoleLog ?? DisableDebugLog);
-                    // Se DisableDebugLog è false ed il consoleLogLevel è almeno debug si disabilita il log a video per evitare visualizzazioni doppie. 
+                    // If DisableDebugLog is false and consoleLogLevel is at least Debug, suppress console output to avoid duplicate lines.
                     consoleLog &= !(fileLogLevel <= LogLevel.Debug && !DisableDebugLog);
 
                     if (consoleLog)
@@ -586,18 +585,18 @@ namespace OSKHelpers.Logging
         }
 
         ///<summary>
-        /// Scrive il testo a video quando il livello di log è Debug e su file quando è Protocol.
+        /// Writes text to the console when the log level is Debug, and to the file when it is Protocol.
         /// </summary>
         /// <inheritdoc cref="ConditionalLog(string, LogLevel, LogLevel, object, bool, bool?)"/>
         public void DebugProtocolConditionalLog(string line, object obj = null, bool inline = false, bool? disableConsoleLog = null)
             => ConditionalLog(line, LogLevel.Debug, LogLevel.Protocol, obj, inline, disableConsoleLog);
 
         /// <summary>
-        /// Recupera il livello di log dalla chiave "LogLevel" nell'oggetto IniFileHelper passato come parametro .
-        /// Se la chiave non esiste o ha un valore on valido viene impostato il valore di default (Error).
-        /// In fase di Debug il livello sarà sempre impostato minimo a Debug
+        /// Reads the log level from the "LogLevel" key in the given IniFileHelper object.
+        /// If the key does not exist or has an invalid value, the default (Error) is used.
+        /// In Debug builds, the level is always set to at least Debug.
         /// </summary>
-        /// <param name="iniFile">Oggetto IniFile da cui recuperare LogLevel</param>
+        /// <param name="iniFile">IniFileHelper object from which to read LogLevel.</param>
         public void SetLogLevel(IniFileHelper iniFile)
         {
             var logLevel = LogLevel.Error;
@@ -623,13 +622,13 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Restituisce il prefisso per le stringhe di log:<br/>
-        /// - Data in formato dd/MM/yyyy<br/>
-        /// - Eventuale descrizione per i livelli di log DEBUG o PROTOCOL<br/>
-        /// Il prefisso non include lo spazio finale
+        /// Returns the prefix string for log lines:<br/>
+        /// - Date in dd/MM/yyyy HH:mm:ss format.<br/>
+        /// - Optional label for DEBUG or PROTOCOL log levels.<br/>
+        /// The prefix does not include a trailing space.
         /// </summary>
-        /// <param name="logLevel">LogLevel per generare il prefisso</param>
-        private string GetLogLinePrefix(LogLevel logLevel = LogLevel.None) 
+        /// <param name="logLevel">Log level used to generate the prefix.</param>
+        private string GetLogLinePrefix(LogLevel logLevel = LogLevel.None)
         {
             string prefix = $"{DateTime.Now:dd/MM/yyyy HH:mm:ss}";
             if (logLevel == LogLevel.Debug)

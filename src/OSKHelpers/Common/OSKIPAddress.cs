@@ -27,21 +27,21 @@ namespace OSKHelpers.Common
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <summary>
-        /// Restituisce, se presente, la quartina x.x.x.x all'interno della stringa.<br/>
-        /// Il risultato non viene verificato, sarà responsabilità del chiamante procedere in tal senso.<br/>
-        /// Se si desidera l'oggetto IPAddress risultante dalla verifica utilizzare il metodo TryParseMatch.
+        /// Returns, if present, the x.x.x.x quad contained in the string.<br/>
+        /// The result is not validated; it is the caller's responsibility to do so.<br/>
+        /// To obtain the resulting IPAddress object with validation, use <see cref="TryParseMatch"/>.
         /// </summary>
-        /// <param name="address">Stringa da cui estrarre l'indirizzo</param>
+        /// <param name="address">String from which to extract the address.</param>
         public static Match Match(string address) => Regex.Match(address ?? string.Empty, IPMASK);
 
         /// <summary>
-        /// Recupera, se presente, la quartina x.x.x.x all'interno della stringa e restituisce l'oggetto IPAddress risultante
+        /// Extracts, if present, the x.x.x.x quad from the string and returns the resulting IPAddress object.
         /// </summary>
-        /// <param name="address">Stringa contenente l'indirizzo da verificare.</param>
-        /// <param name="ipAddress">Oggetto IPAddress risultante dalla verifica.</param>
+        /// <param name="address">String containing the address to validate.</param>
+        /// <param name="ipAddress">Resulting IPAddress object.</param>
         /// <returns></returns>
         public static bool TryParseMatch(string address, out IPAddress ipAddress) => TryParse(Match(address).Value, out ipAddress);
 

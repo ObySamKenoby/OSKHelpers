@@ -7,4 +7,8 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OSKHelpers\OSKHelpers.csproj" />
+  </ItemGroup>
+
 </Project>

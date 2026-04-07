@@ -7,22 +7,22 @@ using System.Runtime.CompilerServices;
 namespace OSKHelpers.Logging
 {
     /// <summary>
-    /// Semplice classe da utilizzare per generare i log dell'applicativo.
+    /// Simple static façade over <see cref="SimpleLogger"/> for application-wide, zero-configuration logging.
     /// </summary>
     public class SimpleLog
     {
-        #region Membri
+        #region Members
 
         private static readonly SimpleLogger _logger;
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Istanza privata di <see cref="SimpleLogger"/> utilizzata per esporre i metodi e le proprietà.<br/>
-        /// E' sconsigliato agire direttamente su questa, in ogni caso utilizzarla equivarrà ad utilizzare<br/>
-        /// Le proprietà ed i metodi statici corrispondenti in <see cref="SimpleLog"/>.
+        /// Private <see cref="SimpleLogger"/> instance used to expose methods and properties.<br/>
+        /// It is not recommended to act on it directly; doing so is equivalent to using<br/>
+        /// the corresponding static properties and methods on <see cref="SimpleLog"/>.
         /// </summary>
         public static SimpleLogger Instance => _logger;
 
@@ -61,7 +61,7 @@ namespace OSKHelpers.Logging
 
         #endregion
 
-        #region Costruttore
+        #region Constructor
 
         static SimpleLog()
         {
@@ -75,7 +75,7 @@ namespace OSKHelpers.Logging
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <inheritdoc cref="SimpleLogger.ToLog(LogLevel)"/>
         public static bool ToLog(LogLevel logLevel)

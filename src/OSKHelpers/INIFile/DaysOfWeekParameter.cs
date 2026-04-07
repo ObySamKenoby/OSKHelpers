@@ -7,19 +7,19 @@ namespace OSKHelpers.INIFile
 {
     public class DaysOfWeekParameter
     {
-        #region Membri
+        #region Members
 
         private List<DayOfWeek> _daysOfWeek;
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         public IReadOnlyList<DayOfWeek> DaysOfWeek => _daysOfWeek;
 
         #endregion
 
-        #region Costruttori
+        #region Constructors
 
         public DaysOfWeekParameter() 
         { 
@@ -27,11 +27,11 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Questo costruttore accetta un parametro che permette di passare i giorni della settimana.<br/>
-        /// I giorni devono essere indicati all'interno di un'unica stringa contenente i valori Int dei giorni (0 Domenica - 6 Sabato) separati da spazi.<br/>
-        /// Se il parametro passato è nullo o vuoto o i singoli valori non sono validi eleva la relativa eccezione.
+        /// Initialises a new instance accepting a string that specifies the days of the week.<br/>
+        /// Days must be provided as a single string containing the integer values of the days (0 Sunday - 6 Saturday) separated by spaces.<br/>
+        /// Throws an exception if the parameter is null, empty, or contains invalid values.
         /// </summary>
-        /// <param name="daysOfWeek">Stringa contenente i giorni rappresentati da interi separati da spazi.</param>
+        /// <param name="daysOfWeek">String containing the days represented as space-separated integers.</param>
         /// <exception cref="ArgumentNullException"></exception>
         public DaysOfWeekParameter(string daysOfWeek) : this() 
         { 
@@ -45,7 +45,7 @@ namespace OSKHelpers.INIFile
             {
                 if (!int.TryParse(day, out int d) || !Enum.IsDefined(typeof(DayOfWeek), d))
                 {
-                    throw new ArgumentOutOfRangeException($"{SimpleLog.GetCallerTypeMethodName()}: l'elenco dei giorni contiene un valore non valido: {day}");
+                    throw new ArgumentOutOfRangeException($"{SimpleLog.GetCallerTypeMethodName()}: the days list contains an invalid value: {day}");
                 }
                 Add(d);
             }
@@ -53,13 +53,13 @@ namespace OSKHelpers.INIFile
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         public void Add(int day)
         {
             if (!Enum.IsDefined(typeof(DayOfWeek), day))
             {
-                throw new ArgumentNullException($"{SimpleLog.GetCallerTypeMethodName()}: il valore {day} non è valido.");
+                throw new ArgumentNullException($"{SimpleLog.GetCallerTypeMethodName()}: the value {day} is not valid.");
             }
             Add((DayOfWeek)day);
         }
@@ -76,7 +76,7 @@ namespace OSKHelpers.INIFile
         {
             if (!Enum.IsDefined(typeof(DayOfWeek), day))
             {
-                throw new ArgumentNullException($"{SimpleLog.GetCallerTypeMethodName()}: il valore {day} non è valido.");
+                throw new ArgumentNullException($"{SimpleLog.GetCallerTypeMethodName()}: the value {day} is not valid.");
             }
             Remove((DayOfWeek)day);
         }

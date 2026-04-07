@@ -3,16 +3,16 @@ using System.Net.Http;
 namespace OSKHelpers.Net
 {
     /// <summary>
-    /// Classe che semplifica l'utilizzo di una singola istanza di <see cref="HttpClient"/>.<br/>
-    /// Può essere utilizzata sia per avere automaticamente una singola istanza immediatamente sfruttabile in modo statico<br/>
-    /// (attraverso <see cref="Instance"/> che per accedere ai metodi di utilità generale (recupero dell'handler per accettare<br/>
-    /// connessioni non sicure con <see cref="GetInsecureHttpHandler"/> ed altro).<br/>
-    /// <b>Nota</b>: <see cref="Instance"/> sarà istanziato solamente al momento del primo utilizzo, quindi la sola referenziazione<br/>
-    /// del pacchetto non creerà una istanza di <see cref="HttpClient"/>.
+    /// Class that simplifies the use of a single <see cref="HttpClient"/> instance.<br/>
+    /// Can be used either to obtain an automatically managed static instance ready to use<br/>
+    /// (via <see cref="Instance"/>) or to access general utility methods (e.g. obtaining the handler for insecure<br/>
+    /// connections via <see cref="GetInsecureHttpHandler"/> and more).<br/>
+    /// <b>Note</b>: <see cref="Instance"/> is instantiated only on first use, so merely referencing<br/>
+    /// the package will not create an <see cref="HttpClient"/> instance.
     /// </summary>
     public class OSKHttpClient
     {
-        #region Membri
+        #region Members
 
         private static HttpClient _instance;
 
@@ -22,13 +22,13 @@ namespace OSKHelpers.Net
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Restituisce una istanza statica di HttpHandler.<br/>
-        /// l'istanza non viene creata fino al primo utilizzo della proprietà, quindi la sola referenziazione<br/>
-        /// del pacchetto non creerà una istanza di <see cref="HttpClient"/>.<br/>
-        /// L'eventuale chiamata di <see cref="Dispose"/> pone <see cref="Instance"/> a null.
+        /// Returns a static <see cref="HttpClient"/> instance.<br/>
+        /// The instance is not created until the property is first accessed, so merely referencing<br/>
+        /// the package will not create an <see cref="HttpClient"/> instance.<br/>
+        /// Calling <see cref="Dispose"/> sets <see cref="Instance"/> to null.
         /// </summary>
         public static HttpClient Instance 
         { 
@@ -50,17 +50,17 @@ namespace OSKHelpers.Net
         }
 
         /// <summary>
-        /// Restituisce True se <see cref="Instance"/> è stato inizializzato.<br/>
-        /// Effettuare un confronto tra <see cref="Instance"/> e null restituirà sempre false in quanto richiamare<br/>
-        /// <see cref="Instance "/> porta, se necessario, alla sua inizializzazione.
+        /// Returns True if <see cref="Instance"/> has been initialised.<br/>
+        /// Comparing <see cref="Instance"/> against null will always return false because accessing<br/>
+        /// <see cref="Instance "/> triggers its initialisation if needed.
         /// </summary>
         public static bool InstanceIsNotNull  => _instance != null;
 
         /// <summary>
-        /// Se True <see cref="Instance"/> accetterà l'utilizzo di connessioni non sicure.<br/>
-        /// La modifica del valore di questa proprietà deve avvenire prima dell'utilizzo di <see cref="Instance"/> e non ne comporterà l'istanziazione.<br/>
-        /// <b>Nota</b>: il tentativo di modificare il valore della proprietà successivamente l'utilizzo di <see cref="Instance"/><br/>
-        /// comporterà una eccezione, è necessario provvedere in anticipo a richiamare il metodo <see cref="Dispose"/>.
+        /// When True, <see cref="Instance"/> will accept insecure connections.<br/>
+        /// This property must be set before <see cref="Instance"/> is used and will not trigger its instantiation.<br/>
+        /// <b>Note</b>: attempting to change this property after <see cref="Instance"/> has been used<br/>
+        /// will throw an exception; call <see cref="Dispose"/> beforehand if needed.
         /// </summary>
         /// <exception cref="InvalidOperationException" />
         public static bool AcceptInsecureConnections
@@ -87,11 +87,11 @@ namespace OSKHelpers.Net
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <summary>
-        /// Restituisce l'handler per permettere connessioni non sicure attraverso SSL.<br/>
-        /// <b>Attenzione</b>: l'utilizzo di cnonnessioni non sicure è possibile fonte di problemi di sicurezza.
+        /// Returns the handler that allows insecure connections over SSL.<br/>
+        /// <b>Warning</b>: the use of insecure connections is a potential security risk.
         /// </summary>
         public static HttpClientHandler GetInsecureHttpHandler()
         {
@@ -105,10 +105,10 @@ namespace OSKHelpers.Net
         }
 
         /// <summary>
-        /// Permette di utilizzare una istanza custom di <see cref="HttpClient"/> come Instance.<br/>
-        /// Può essere richiamato esclusivamente quando Instance è null.
+        /// Allows a custom <see cref="HttpClient"/> instance to be used as Instance.<br/>
+        /// Can only be called when Instance is null.
         /// </summary>
-        /// <param name="instance">Istanza da utilizzare come Instance.</param>
+        /// <param name="instance">Instance to use as Instance.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
         public static void SetInstance(HttpClient instance)
@@ -126,8 +126,8 @@ namespace OSKHelpers.Net
         }
 
         /// <summary>
-        /// Effettua il Dispose di <see cref="Instance"/> e lo pone a null.<br/>
-        /// Se <see cref="Instance"/> è già null non effettua alcuna operazione.
+        /// Disposes <see cref="Instance"/> and sets it to null.<br/>
+        /// If <see cref="Instance"/> is already null, no action is taken.
         /// </summary>
         public static void Dispose()
         {
@@ -140,7 +140,7 @@ namespace OSKHelpers.Net
 
 #if DEBUG
 
-        #region Metodi per test
+        #region Test methods
 
         public static HttpClient GetHttpClientPrivateInstance() => _instance;
 

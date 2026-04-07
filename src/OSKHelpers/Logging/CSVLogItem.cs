@@ -7,20 +7,20 @@ using System.Linq;
 namespace OSKHelpers.Logging
 {
     /// <summary>
-    /// Classe base che genera automaticamente gli header e le righe per i file SV utilizzando tutte le proprietà pubbliche dell'oggetto.
+    /// Base class that automatically generates CSV headers and rows from all public properties of the object.
     /// </summary>
     public class CSVLogItem : ICSVLogItem
     {
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Separatore che sarà utilizzato all'interno delle intestazioni e dei dati per dividere i valori.
+        /// Separator used in headers and data to divide values.
         /// </summary>
         public string CSVSeparator = ";";
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <inheritdoc cref="ICSVLogItem.GetCSVData"/>
         public string GetCSVHeader()
@@ -34,11 +34,12 @@ namespace OSKHelpers.Logging
             return GetCSVData(this, CSVSeparator);
         }
 
-        /// Restituisce l'intestazione di default per il file CSV contenente i nomi di tutte le proprietà ordinati alfabeticamente.
+        /// <summary>
+        /// Returns the default CSV header string containing the names of all public properties sorted alphabetically.
         /// </summary>
-        /// <param name="obj">Oggetto per cui creare le intestazioni.</param>
-        /// <param name="separator">Separatore da utilizzare.</param>
-        /// <returns>La stringa contenente le intestazioni.</returns>
+        /// <param name="obj">Object for which to create the headers.</param>
+        /// <param name="separator">Separator to use.</param>
+        /// <returns>The string containing the headers.</returns>
         /// <exception cref="ArgumentNullException"/>
         public static string GetCSVHeader(object obj, string separator)
         {
@@ -56,16 +57,16 @@ namespace OSKHelpers.Logging
         }
 
         /// <summary>
-        /// Restituisce la riga dati di default per il file CSV contenente il valore di tutte le proprietà ordinate alfabeticamente.<br/>
-        /// I dati saranno così formattati:<br/>
-        /// <b>stringhe</b>: racchiuse tra virgolette ("");<br/>
-        /// <b>numeri</b>: senza virgolette, senza separatore delle migliaia, utilizzano il punto come separatore decimale);<br/>
-        /// <b>date (o data/ora)</b>: senza virgolette, con prefisso "D", in formato ISO UTC;<br/>
-        /// <b>altri tipi</b>: saranno trattati come stringhe, racchiusi tra virgolette e rappresentati richiamando il relativo metodo ToString().
+        /// Returns the default CSV data row containing the values of all public properties sorted alphabetically.<br/>
+        /// Data is formatted as follows:<br/>
+        /// <b>strings</b>: enclosed in double quotes ("");<br/>
+        /// <b>numbers</b>: no quotes, no thousands separator, dot as decimal separator;<br/>
+        /// <b>dates (or date/time)</b>: no quotes, prefixed with "D", ISO UTC format;<br/>
+        /// <b>other types</b>: treated as strings, enclosed in double quotes, represented via ToString().
         /// </summary>
-        /// <param name="obj">Oggetto per cui creare la riga dati.</param>
-        /// <param name="separator">Separatore da utilizzare.</param>
-        /// <returns>La stringa contenente le intestazioni.</returns>
+        /// <param name="obj">Object for which to create the data row.</param>
+        /// <param name="separator">Separator to use.</param>
+        /// <returns>The string containing the data row.</returns>
         /// <exception cref="ArgumentNullException"/>
         /// <summary>
         public static string GetCSVData(object obj, string separator)

@@ -6,19 +6,19 @@ using System.Text;
 namespace OSKHelpers.Common
 {
     /// <summary>
-    /// Utilità generiche applicabili a qualsiasi tipo di oggetto.
+    /// Generic utilities applicable to any object type.
     /// </summary>
     public class ObjectUtils
     {
         /// <summary>
-        /// Visualizza a video tutte le proprietà pubbliche, con relativo valore e tipologia, dell'oggetto.<br/>
-        /// Se <paramref name="log"/> è true il contenuto dell'oggetto sarà salvato nel log di default.
+        /// Dumps all public properties of the object (with their values and types) to the console.<br/>
+        /// When <paramref name="log"/> is true, the object contents are also written to the default log.
         /// </summary>
-        /// <typeparam name="T">Tipologia dell'oggetto.</typeparam>
-        /// <param name="obj">Oggetto di cui effettuare il dump.</param>
-        /// <param name="objName">Nome dell'oggetto, se venisse passato null sarà omesso.</param>
-        /// <param name="log">Se true il contenuto dell'oggetto sarà salvato nel log di default.</param>
-        /// <param name="logLevel">Livello di log minimo perché il contenuto dell'oggetto sia analizzato.</param>
+        /// <typeparam name="T">Type of the object.</typeparam>
+        /// <param name="obj">Object to dump.</param>
+        /// <param name="objName">Name of the object; omitted when null.</param>
+        /// <param name="log">When true, the object contents are written to the default log.</param>
+        /// <param name="logLevel">Minimum log level for the object contents to be analysed.</param>
         public static void Dump<T>(T obj, string objName = null, bool log = false, LogLevel logLevel = LogLevel.Error)
         {
             if (SimpleLog.ToLog(logLevel))
@@ -76,10 +76,10 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Restituisce true se l'oggetto passato come parametro è di tipo numerico.
+        /// Returns true if the given object is of a numeric type.
         /// </summary>
-        /// <param name="obj">Oggetto da analizzare.</param>
-        /// <returns>True se l'oggetto è di tipo numerico.</returns>
+        /// <param name="obj">Object to inspect.</param>
+        /// <returns>True if the object is of a numeric type.</returns>
         public static bool IsNumeric(object obj)
         {
             var res = false;

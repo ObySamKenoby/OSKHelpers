@@ -3,7 +3,7 @@
 namespace OSKHelpers.ExtensionMethods
 {
     /// <summary>
-    /// Medodi di estensione per le stringhe.
+    /// Extension methods for strings.
     /// </summary>
     public static class StringExtensionMethods
     {

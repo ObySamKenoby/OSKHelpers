@@ -4,18 +4,18 @@ using System.Threading.Tasks;
 namespace OSKHelpers.Common
 {
     /// <summary>
-    /// Utilità varie legate alla connettività di rete.
+    /// Miscellaneous network connectivity utilities.
     /// </summary>
     public class NetUtils
     {
         /// <summary>
-        /// Verifica che <paramref name="host"/> sia raggiungibile.
+        /// Checks whether <paramref name="host"/> is reachable.
         /// </summary>
-        /// <param name="host">Host per cui verificare la risoluzione DNS.</param>
+        /// <param name="host">Host for which to perform a DNS resolution.</param>
         /// <returns>
-        /// Una tupla composta da:<br/>
-        /// <b>Rachable</b>: True se l'host è stato risolto;<br/>
-        /// <b>Addresses</b>: indirizzi con cui l'host è stato risolto.
+        /// A tuple containing:<br/>
+        /// <b>Reachable</b>: true if the host was resolved;<br/>
+        /// <b>Addresses</b>: the IP addresses the host was resolved to.
         /// </returns>
         public static (bool Reachable, IPAddress[] Addresses) CheckDNS(string host)
         {

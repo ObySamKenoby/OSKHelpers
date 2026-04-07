@@ -5,23 +5,23 @@ using System.IO;
 namespace OSKHelpers.Common
 {
     /// <summary>
-    /// Utilità varie per lapertura e la gestione di file esterni.
+    /// Utilities for opening and managing external files.
     /// </summary>
     public class OSKFile
     {
         /// <summary>
-        /// Apre il file passato come parametro.
+        /// Opens the specified file using the OS shell.
         /// </summary>
-        /// <param name="filename">Nome del file da aprire, può essere relativo od assoluto</param>
+        /// <param name="filename">Name of the file to open; may be relative or absolute.</param>
         public static void Open(string filename)
         {
             if (string.IsNullOrWhiteSpace(filename))
             {
-                throw new ArgumentException("Il nome del file deve essere valido non può essere nullo o vuoto.");
+                throw new ArgumentException("The file name must be valid and cannot be null or empty.");
             }
             if (!File.Exists(filename))
             {
-                throw new FileNotFoundException($"Impossibile trovare il file {filename}.");
+                throw new FileNotFoundException($"Cannot find file {filename}.");
             }
 
             Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });

@@ -7,16 +7,16 @@ namespace OSKHelpers.ExtensionMethods
     public static class IPAddressExtensionMethods
     {
         /// <summary>
-        /// Restituisce, se presente, la quartina x.x.x.x all'interno della stringa.
-        /// Il risultato non viene verificato, sarà responsabilità del chiamante procedere in tal senso.
+        /// Returns, if present, the x.x.x.x quartet within the string.
+        /// The result is not validated; it is the caller's responsibility to do so.
         /// </summary>
-        /// <param name="address">Stringa da cui estrarre l'indirizzo</param>
+        /// <param name="address">String from which to extract the address.</param>
         public static Match Match(this IPAddress ipAddress, string address) => OSKIPAddress.Match(address);
 
         /// <summary>
-        /// Recupera, se presente, la quartina x.x.x.x all'interno della stringa e restituisce l'oggetto IPAddress risultante
+        /// Retrieves, if present, the x.x.x.x quartet within the string and returns the resulting IPAddress object.
         /// </summary>
-        /// <param name="address">Stringa contenente l'indirizzo da verificare.</param>
+        /// <param name="address">String containing the address to validate.</param>
         /// <param name="ipAddress">Oggetto IPAddress risultante dalla verifica.</param>
         /// <returns></returns>
         public static bool TryParseMatch(string address, out IPAddress ipAddress) => OSKIPAddress.TryParse(OSKIPAddress.Match(address).Value, out ipAddress);

@@ -1,22 +1,22 @@
 ﻿namespace OSKHelpers.Common
 {
 	/// <summary>
-	/// Classe di utilità per unità chiave / valore fortemente tipizzate.<br/>
-	/// L'utilizzo ideale non è quello di sfruttarle come dizionari (c'è la classe apposita) ma per liste che vadano a popolare
-	/// combobox o quant'altro
+	/// Strongly typed key/value pair utility class.<br/>
+	/// Its intended use is not as a dictionary replacement but for lists that populate
+	/// combo-boxes or similar UI elements.
 	/// </summary>
-	/// <typeparam name="KeyType">Tipo della chiave</typeparam>
-	/// <typeparam name="ValueType">Tipo del valore</typeparam>
+	/// <typeparam name="KeyType">Type of the key.</typeparam>
+	/// <typeparam name="ValueType">Type of the value.</typeparam>
 	public class KeyValue<KeyType, ValueType>
 	{
-		#region Proprietà
+		#region Properties
 
 		public KeyType Key { get; set; }
 		public ValueType Value { get; set; }
 
 		#endregion
 
-		#region Costruttori
+		#region Constructors
 
 		public KeyValue() { }
 

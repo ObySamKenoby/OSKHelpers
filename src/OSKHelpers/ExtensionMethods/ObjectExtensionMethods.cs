@@ -4,7 +4,7 @@ using OSKHelpers.Logging;
 namespace OSKHelpers.ExtensionMethods
 {
     /// <summary>
-    /// Metodi d'estensione comuni per tutti gli oggetti
+    /// Common extension methods for all objects.
     /// </summary>
     public static class ObjectExtensionMethods
     {

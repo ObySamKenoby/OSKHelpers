@@ -5,11 +5,11 @@ using System.Reflection;
 namespace OSKHelpers.Logging
 {
     /// <summary>
-    /// Permette di salvare il contenuto di un tipo T di oggetto all'interno di un file CSV.
+    /// Saves the content of objects of type T to a CSV log file.
     /// </summary>
     public class CSVLogger<T> where T : ICSVLogItem, new()
     {
-        #region Membri
+        #region Members
 
         private DateTime? _lastDate;
 
@@ -23,12 +23,12 @@ namespace OSKHelpers.Logging
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Percorso del file di log.<br/>
-        /// La presenza della cartella viene verificato al momento della scrittura di un messaggio, se il percorso non viene trovato se ne tenta la creazione.<br />
-        /// Di default viene utilizzata la cartella "Log" all'interno del percorso dell'applicativo.
+        /// Path of the log file.<br/>
+        /// The folder is checked at write time; if it does not exist, a creation attempt is made.<br/>
+        /// By default the "Log" folder inside the application path is used.
         /// </summary>
         public string LogPath
         {
@@ -36,14 +36,14 @@ namespace OSKHelpers.Logging
             set
             {
                 _logPath = value;
-                // _lastDate viene posto a null per forzare la rigenerazione del nome file
+                // _lastDate is set to null to force file name regeneration
                 _lastDate = null;
             }
         }
 
         /// <summary>
-        /// Prefisso da aggiungere al nome del file log.<br/>
-        /// Valore di default: Null.
+        /// Prefix to add to the log file name.<br/>
+        /// Default value: null.
         /// </summary>
         public string Prefix
         {
@@ -51,16 +51,15 @@ namespace OSKHelpers.Logging
             set
             {
                 _prefix = value;
-                // _lastDate viene posto a null per forzare la rigenerazione del nome file
+                // _lastDate is set to null to force file name regeneration
                 _lastDate = null;
             }
         }
 
         /// <summary>
-        /// Forza il nome del log al solo prefisso.<br/>
-        /// Utilizzato epr ptoer avere un nome log univoco che racchiuda più giorni.<br/>
-        /// Implementato la priam volta per l'utilizzo nella classe KDucer di ProFanStd.<br/>
-        /// NB: la proprietà non ha u equivalente all'interno di SimpleLog.
+        /// Forces the log name to be the prefix only.<br/>
+        /// Used to have a unique log name that spans multiple days.<br/>
+        /// Note: this property has no equivalent in <see cref="SimpleLog"/>.
         /// </summary>
         public bool UsePrefixAsLogFile
         {
@@ -68,14 +67,14 @@ namespace OSKHelpers.Logging
             set
             {
                 _usePrefixAsLogFile = value;
-                // _lastDate viene posto a null per forzare la rigenerazione del nome file
+                // _lastDate is set to null to force file name regeneration
                 _lastDate = null;
             }
         }
 
         /// <summary>
-        /// Nome del file di log.<br/>
-        /// Il nome è composto secondo il pattern PREFIXLogYYYYMMDD.txt, è possibile differenziare i vari log all'interno della stessa cartella modificando Prefix
+        /// Log file name.<br/>
+        /// The name follows the pattern PREFIXLogYYYYMMDD.csv; different logs in the same folder can be distinguished by changing Prefix.
         /// </summary>
         public string LogFile
         {
@@ -93,7 +92,7 @@ namespace OSKHelpers.Logging
 
         #endregion
 
-        #region Costruttori
+        #region Constructors
 
         static CSVLogger()
         {
@@ -110,14 +109,12 @@ namespace OSKHelpers.Logging
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <summary>
-        /// Scrive la linea passata come parametro nel file di log e, di default, la visualizza a video quando in fase di debug
+        /// Writes the given object to the CSV log file.
         /// </summary>
-        /// <param name="obj">Oggetto da cui ricavare la rga di Log (deve e</param>
-        /// <param name="logLevel">Utilizzato per formattare correttamente il prefisso nel caso in cui il livello di log sia DEBUG o PROTOCOL,<br/>
-        /// non impedisce in alcun caso la scrittura della riga. Se omesso viene utilizzato il prefisso standard (data/ora)</param>
+        /// <param name="obj">Object to log.</param>
         public void Log(T obj)
         {
             if (obj != null)
@@ -142,8 +139,8 @@ namespace OSKHelpers.Logging
                     {
                         try
                         {
-                            // Se si verificano errori in fase di scrittura viene creato un log all'interno della cartella dell'applicazione, se possibile.
-                            var line = $"Errore in fase di scrittura del log.\r\n  Nome del file di log: {LogFile}\r\n  Errore: {SimpleLog.FormattedException(ex, true)}\r\n";
+                            // If an error occurs during writing, a fallback log is created in the application folder, if possible.
+                            var line = $"Error writing log.\r\n  Log file name: {LogFile}\r\n  Error: {SimpleLog.FormattedException(ex, true)}\r\n";
                             File.AppendAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ERRORSLOG.txt"), $"{line}\r\n");
                         }
                         catch { }

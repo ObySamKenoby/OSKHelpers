@@ -8,11 +8,11 @@ namespace OSKHelpers.Common
         /// <inheritdoc cref="IsWellFormedAddress(string, bool, bool)"/>
         public static bool IsWellFormedAddress(string address) => GetUri(address).IsValid;
         /// <summary>
-        /// Verifica se la stringa passata come parametro costituisce un Uri valido
+        /// Checks whether the given string is a valid absolute URI.
         /// </summary>
-        /// <param name="address">Indirizzo da verificare.</param>
-        /// <param name="onlyHttp">L'indirizzo deve essere di tipo http://</param>
-        /// <param name="onlyHttps">L'indirizzo deve essere di tipo https://</param>
+        /// <param name="address">Address to validate.</param>
+        /// <param name="onlyHttp">The address must use the http:// scheme.</param>
+        /// <param name="onlyHttps">The address must use the https:// scheme.</param>
         public static bool IsWellFormedAddress(string address, bool onlyHttps, bool onlyHttp = false)
         {
             var uri = GetUri(address);
@@ -26,7 +26,7 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Tenta la conversione della stringa passata come parametro in un Uri restituendo il risultato della conversione, l'Uri generato e lo schema.
+        /// Attempts to convert the given string to a Uri, returning the conversion result, the generated Uri, and the scheme.
         /// </summary>
         private static (bool IsValid, Uri Uri, string Scheme) GetUri(string address)
         {

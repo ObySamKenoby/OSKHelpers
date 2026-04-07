@@ -4,17 +4,17 @@ using System.Text.Json.Serialization;
 namespace OSKHelpers.Json
 {
     /// <summary>
-    /// Utilità aggiuntive per la gestione dei file  JSON.
+    /// Additional utilities for handling JSON files.
     /// </summary>
     public class JsonUtils
     {
-        #region Membri
+        #region Members
 
         private static readonly JsonSerializerOptions _defaultOptions;
 
         #endregion
 
-        #region Costruttore
+        #region Constructor
 
         static JsonUtils()
         {
@@ -27,15 +27,15 @@ namespace OSKHelpers.Json
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <summary>
-        /// Serializza un oggetto usando il suo tipo runtime effettivo.
+        /// Serialises an object using its actual runtime type.
         /// </summary>
-        /// <param name="obj">Oggetto da serializzare.</param>
+        /// <param name="obj">Object to serialise.</param>
         /// <param name="options">
-        /// Opzioni di serializzazione, se nullo utilizza le opzioni di default<br/>
-        /// (include tutte le proprietà, formatta la stringa serializzata).
+        /// Serialisation options; if null the default options are used<br/>
+        /// (includes all properties, formats the serialised string).
         /// </param>
         public static string Serialize(object obj, JsonSerializerOptions options = null)
         {

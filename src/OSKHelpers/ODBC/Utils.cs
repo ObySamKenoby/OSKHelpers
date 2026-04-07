@@ -12,7 +12,7 @@ namespace OSKHelpers.ODBC
         {
             var sources = new List<string>();
 
-            // L'utilizzo del registro è consentito esclusivamente in ambiente Windows
+            // Registry access is only allowed on Windows
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 try

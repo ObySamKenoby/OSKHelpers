@@ -6,40 +6,40 @@ using System.Threading.Tasks;
 namespace OSKHelpers.Net
 {
     /// <summary>
-    /// Classe di supporto che contiene metodi per il download (sincrono o asincrono) di un file da web.
+    /// Helper class providing methods for downloading (synchronously or asynchronously) a file from the web.
     /// </summary>
     public class WebDownloader
     {
-        #region Membri
+        #region Members
 
         private static HttpClient _httpClient;
         private static readonly object _lock = new object();
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
 
 
         /// <summary>
-        /// Esegue il download di un file da <paramref name="url"/> e lo salva in <paramref name="outputFile"/>.<br/>
-        /// <b>Attenzione</b>: incapsulare il metodo in un blocco try / catch in modo da intercettare le possibili eccezioni,<br/>
-        /// quelle di comunicazione non saranno filtrate in modo da permettere  un debug più agevole.
+        /// Downloads a file from <paramref name="url"/> and saves it to <paramref name="outputFile"/>.<br/>
+        /// <b>Warning</b>: wrap the method in a try / catch block to handle possible exceptions;<br/>
+        /// communication exceptions are not filtered to allow easier debugging.
         /// </summary>
         /// <param name="httpClient">
-        /// Istanza di <see cref="HttpClient"/> da utilizzare per effettuare le richieste.<br/>
-        /// Non può essere nulla e deve essere istanziata una singola volta all'interno del ciclo di vita dell'applicazione.<br/>
-        /// Se desiderato è possibile utilizzare <see cref="OSKHttpClient.Instance"/> per semplificare la gestione del client.<br/>
-        /// Consultare la documentazione Microsoft ai seguenti indirizzi:<br/>
+        /// <see cref="HttpClient"/> instance to use for the requests.<br/>
+        /// Must not be null and should be instantiated only once during the application lifetime.<br/>
+        /// <see cref="OSKHttpClient.Instance"/> can be used to simplify client management.<br/>
+        /// Refer to the Microsoft documentation at the following links:<br/>
         /// <see href="https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient?view=netstandard-2.0"/><br/>
         /// <see href="https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-net-http-httpclient"/>
         /// </param>
-        /// <param name="url">url da cui effettuare il download.</param>
+        /// <param name="url">URL from which to download the file.</param>
         /// <param name="outputFile">
-        /// Percorso completo del file di output.<br/>
-        /// Se si vuole salvare il file nella cartella di esecuzione far precedere il nome da ".\" (es ".\testFile.txt")
+        /// Full path of the output file.<br/>
+        /// To save the file in the execution folder, prefix the name with ".\" (e.g. ".\testFile.txt").
         /// </param>
-        /// <returns>True se il download è andato a buon fine.</returns>
+        /// <returns>True if the download succeeded.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="DirectoryNotFoundException"></exception>
         public static async Task<bool> DownloadAsync(HttpClient httpClient, string url, string outputFile)
@@ -76,7 +76,7 @@ namespace OSKHelpers.Net
         }
 
         /// <inheritdoc cref="DownloadAsync(HttpClient, string, string)"/>
-        /// <remarks><b>Attenzione</b>: richiamare questo metodo provocherà la creazione di <see cref="OSKHttpClient.Instance"/> con le attuali impostazioni.</remarks>
+        /// <remarks><b>Warning</b>: calling this method will trigger the creation of <see cref="OSKHttpClient.Instance"/> with the current settings.</remarks>
         public static async Task<bool> DownloadAsync(string url, string outputFile)
             => await DownloadAsync(OSKHttpClient.Instance, url, outputFile);
 
@@ -87,7 +87,7 @@ namespace OSKHelpers.Net
         }
 
         /// <inheritdoc cref="Download(HttpClient, string, string)"/>
-        /// <remarks><b>Attenzione</b>: richiamare questo metodo provocherà la creazione di <see cref="OSKHttpClient.Instance"/> con le attuali impostazioni.</remarks>
+        /// <remarks><b>Warning</b>: calling this method will trigger the creation of <see cref="OSKHttpClient.Instance"/> with the current settings.</remarks>
         public static bool Download(string url, string outputFile)
             => Download(OSKHttpClient.Instance, url, outputFile);
 

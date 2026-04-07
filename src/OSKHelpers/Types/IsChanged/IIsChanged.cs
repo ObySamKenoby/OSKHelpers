@@ -5,22 +5,22 @@ using System.Text;
 namespace OSKHelpers.Types.IsChanged
 {
     /// <summary>
-    /// Interfaccia base per l'implemntazione di classi che vogliano sfruttare il campo IsChanged.<br/>
-    /// Tali classi per funzionare correttamente devono implementare questa interfaccia e referenziare il<br/>
-    /// namespace <see cref="OSKHelpers.Types.IsChanged"/> in modo da poter accedere ai metodi d'estensione.
+    /// Base interface for implementing classes that want to use the IsChanged field.<br/>
+    /// Such classes must implement this interface and reference the<br/>
+    /// <see cref="OSKHelpers.Types.IsChanged"/> namespace to access the extension methods.
     /// </summary>
     public interface IIsChanged
     {
-        #region Proprietà
+        #region Properties
 
         bool IsChanged { get; set; }
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <summary>
-        /// Implementazioni necessarie per resettare lo stato sdi IsChanged (reset dello stato di elementi di collezioni, reset di particolari oggetti eccetera).
+        /// Implementations required to reset the IsChanged state (resetting collection element states, specific objects, etc.).
         /// </summary>
         void ResetIsChangedExecute();
 

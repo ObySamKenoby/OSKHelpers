@@ -8,9 +8,9 @@ namespace OSKHelpers.Common
     public class ThreadUtils
     {
         /// <summary>
-        /// Esegue il Task passato come parametro all'interno di un Thread separato incapsulandolo all'interno di un blocco try...catch.
+        /// Executes the given task on a separate thread, wrapped in a try/catch block.
         /// </summary>
-        /// <param name="task">Task da eseguire.</param>
+        /// <param name="task">Task to execute.</param>
         public static void ExecuteTaskAsync(Task task)
         {
             if (task == null)

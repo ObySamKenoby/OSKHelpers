@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
@@ -7,14 +7,11 @@
 		<Configurations>Debug;Release;G2DataExport_Debug;G2DataExport_Release</Configurations>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>OSK Helpers</Title>
-		<VersionPrefix>1.6.14</VersionPrefix>
+		<VersionPrefix>1.6.15</VersionPrefix>
 		<UserSecretsId>4af1c825-22b9-438f-9703-901735ed504c</UserSecretsId>
-		<Authors>Fanizza Group</Authors>
-		<Description>Utilità varie non legate a un particolare progetto, incluso Logging e gestione file .ini.</Description>
-		<Copyright>Fanizza Group</Copyright>
-		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
-		<PackageReleaseNotes>Aggiornamento pacchetto System.Text.Json alla versione 10.0.3</PackageReleaseNotes>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Authors>Samuele Gaggioli</Authors>
+		<Description>General purpose utilities, including Logging and settings (.ini / json) files.</Description>
+		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(Configuration)'!='Debug'">
@@ -23,22 +20,46 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- Include Settings.cs nel pacchetto NuGet -->
+		<None Include="..\..\docs\images\logo_128px.jpg">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<!-- Include Settings.cs into NuGet package-->
 		<None Include="INIFile\Settings.cs">
 			<Pack>true</Pack>
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/Settings.cs</PackagePath>
 		</None>
-		<!-- Include SettingsTemplate.ini nel pacchetto NuGet -->
+		<!-- Include SettingsTemplate.ini into NuGet package-->
 		<None Include="INIFile\SettingsTemplate.ini">
 			<Pack>true</Pack>
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/SettingsTemplate.ini</PackagePath>
 		</None>
-		<!-- Include Settings.cs (json) nel pacchetto NuGet -->
+		<!-- Include Settings.cs (json) into NuGet package-->
 		<None Include="Json\Settings.cs">
 			<Pack>true</Pack>
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/Json/Settings.cs</PackagePath>
 		</None>
+		<None Update="License.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="ReadMe.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
+
+	<PropertyGroup>
+		<PackageId>OSKHelpers</PackageId>
+		<Company>OSK Soft</Company>
+		<PackageIcon>logo_128px.jpg</PackageIcon>
+		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+		<PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
+		<PackageReleaseNotes>First public available package version.</PackageReleaseNotes>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<Version>
@@ -46,18 +67,18 @@
 		</Version>
 	</PropertyGroup>
 
-	<PropertyGroup Label="Imnpedisce che le classi che utilizzano Reflection (EmbeddedResourcesUtils) vengano rimosse in fase di pubblicazione.">
+	<PropertyGroup Label="Prevents reflection using classes (EmbeddedResourcesUtils) from being removed during package publishing.">
 		<EnableTrimAnalyzer>false</EnableTrimAnalyzer>
 		<PublishTrimmed>false</PublishTrimmed>
 	</PropertyGroup>
 
-	<PropertyGroup Label="Normalizza il percorso dei file nello stack trace." Condition="'$(Configuration)'=='Release'">
+	<PropertyGroup Label="Normalize stack trace path." Condition="'$(Configuration)'=='Release'">
 		<PathMap>$([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))=$(AssemblyName):\</PathMap>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-		<PackageReference Include="System.Text.Json" Version="10.0.3" />
+		<PackageReference Include="System.Text.Json" Version="8.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>

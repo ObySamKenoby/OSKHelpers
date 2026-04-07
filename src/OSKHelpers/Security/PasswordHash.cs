@@ -4,17 +4,17 @@ using System;
 namespace OSKHelpers.Security
 { 
     /// <summary>
-    /// Classe utilizzata per generare password sicure da poter salvare all'interno di un database.<br/>
-    /// Origine: http://csharptest.net/470/another-example-of-how-to-store-a-salted-password-hash/<br/>
-    /// <b>Nota:</b> il metodo non effettua verifiche sulla bontà dei parametri passati, incapsularne l'utilizzo in un blocco try...catch.<br/>
-    /// Per utilizzarla:
+    /// Class used to generate secure passwords suitable for storage in a database.<br/>
+    /// Source: http://csharptest.net/470/another-example-of-how-to-store-a-salted-password-hash/<br/>
+    /// <b>Note:</b> the method does not validate the supplied parameters; wrap its usage in a try...catch block.<br/>
+    /// Usage:
     /// <code>
-    /// // Creazione di un hash da salvare:
+    /// // Create a hash to save:
     /// PasswordHash hash = new PasswordHash("password");
     /// byte[] hashBytes = hash.ToArray();
     ///
-    /// // Verifica di una password salvata
-    /// byte[] hashBytes = // lettura della password salvata.
+    /// // Verify a saved password
+    /// byte[] hashBytes = // read the saved password.
     /// PasswordHash hash = new PasswordHash(hashBytes);
     /// if (!hash.Verify("newly entered password"))
     ///    throw new System.UnauthorizedAccessException();
@@ -23,7 +23,7 @@ namespace OSKHelpers.Security
     /// </summary>
     public sealed class PasswordHash
     {
-        #region Membri
+        #region Members
 
         private const int SALTSIZE = 16;
         private const int HASHSIZE = 20;
@@ -33,7 +33,7 @@ namespace OSKHelpers.Security
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         public byte[] Salt => (byte[])_salt.Clone();
 
@@ -41,7 +41,7 @@ namespace OSKHelpers.Security
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         public PasswordHash(string password)
         {

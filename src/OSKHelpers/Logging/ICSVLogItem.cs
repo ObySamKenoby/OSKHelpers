@@ -1,17 +1,17 @@
 ﻿namespace OSKHelpers.Logging
 {
     /// <summary>
-    /// Interfaccia per gli oggetti che devono produrre un log in formato CSV.
+    /// Interface for objects that must produce a CSV-formatted log.
     /// </summary>
     public interface ICSVLogItem
     {
         /// <summary>
-        /// Header del file CSV.
+        /// Header row of the CSV file.
         /// </summary>
         string GetCSVHeader();
 
         /// <summary>
-        /// Contenuto della riga per il file CSV.
+        /// Data row for the CSV file.
         /// </summary>
         string GetCSVData();
     }

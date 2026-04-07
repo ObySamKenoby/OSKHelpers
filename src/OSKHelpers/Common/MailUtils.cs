@@ -4,18 +4,18 @@ using System.Text.RegularExpressions;
 namespace OSKHelpers.Common
 {
     /// <summary>
-    /// Utilità per la validazione delle mauil
+    /// Utilities for e-mail address validation.
     /// </summary>
     public class MailUtils
     {
-        #region Membri
+        #region Members
 
         private static Regex _validateRegex;
         private static Regex _containsRegex;
 
         #endregion
 
-        #region Costruttore
+        #region Constructor
 
         static MailUtils()
         {
@@ -24,7 +24,7 @@ namespace OSKHelpers.Common
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         private static void CreateRegex()
         {
@@ -36,15 +36,15 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Restituisce True se il testo è un indirizzo mail valido.
+        /// Returns true if the text is a valid e-mail address.
         /// </summary>
         public static bool IsValidEmail(string text) => !string.IsNullOrWhiteSpace(text) && _validateRegex.IsMatch(text);
         /// <summary>
-        /// Restituisce True se il testo contiene uno o più indirizzi mail validi.
+        /// Returns true if the text contains one or more valid e-mail addresses.
         /// </summary>
         public static bool ContainsValidEmails(string text) => !string.IsNullOrWhiteSpace(text) && _containsRegex.Match(text).Success;
         /// <summary>
-        /// Restituisce True se il testo contiene esattamente un indirizzo mail valido.
+        /// Returns true if the text contains exactly one valid e-mail address.
         /// </summary>
         public static bool ContainsSingleEmail(string text) => !string.IsNullOrWhiteSpace(text) && _containsRegex.Matches(text).Count == 1 && text.Count(c => c == '@') == 1;
 
