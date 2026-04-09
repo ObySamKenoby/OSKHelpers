@@ -777,7 +777,17 @@ namespace OSKHelpers.Mail
         /// </summary>
         /// <param name="tag">Tag to search for within <paramref name="lines"/>.</param>
         /// <returns>The value of <paramref name="tag"/> found as described above.</returns>
-        /// <inheritdoc cref="ParseFile(List{string}, List{ValueTuple{string, string}}, List{ValueTuple{string, Func{bool}}}, List{string})"/>
+        /// <param name="lines">Lines to process.</param>
+        /// <param name="tags">
+        /// List of tags to find within content and for which Name should be replaced with Value.<br/>
+        /// In content, tags must be written as <b>{TAG}</b>; within the list Name must be without braces, i.e. <b>TAG</b>.<br/>
+        /// Tag names are case sensitive.
+        /// </param>
+        /// <param name="conditions">
+        /// List of conditions that allow sections of text to be shown or hidden.<br/>
+        /// In content, conditions must be identified as <b>&lt;&lt;COND&gt;&gt;..&lt;&lt;/COND&gt;&gt;</b>; within the list Name must be without symbols, i.e. <b>COND</b>.<br/>
+        /// Condition names are case sensitive.
+        /// </param>
         private static string GetTagValue(string tag, List<string> lines, List<(string Name, string Value)> tags, List<(string Name, bool Check)> conditions)
         {
             // Value to be returned.

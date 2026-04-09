@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 
 namespace OSKHelpers.Security
-{ 
-/// <summary>
-/// Class containing methods to keep a password obfuscated in memory.
-/// </summary>
-
+{
+    /// <summary>
+    /// Class containing methods to keep a password obfuscated in memory.
+    /// </summary>
     public class PasswordObfuscator
     {
         #region Constants

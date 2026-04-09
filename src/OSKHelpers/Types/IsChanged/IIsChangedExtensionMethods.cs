@@ -4,6 +4,10 @@ using System.Text;
 
 namespace OSKHelpers.Types.IsChanged
 {
+    /// <summary>
+    /// Extension methods for <see cref="IIsChanged"/> that simplify property assignment
+    /// and change-flag management on model objects.
+    /// </summary>
     public static class IIsChangedExtensionMethods
     {
         #region Methods
@@ -12,6 +16,7 @@ namespace OSKHelpers.Types.IsChanged
         /// Sets the value of the member passed as parameter, returning True if the update succeeded.
         /// </summary>
         /// <typeparam name="T">Type of the property.</typeparam>
+        /// <param name="obj">Reference to `this` object.</param>
         /// <param name="field">Member (passed by reference).</param>
         /// <param name="newValue">New value to assign to the member.</param>
         /// <param name="onValueChanging">
@@ -44,10 +49,7 @@ namespace OSKHelpers.Types.IsChanged
                     field           = newValue;
                     changed         = true;
                     obj.SetIsChanged();
-                    if (onValueChanged != null)
-                    {
-                        onValueChanged(oldValue, newValue);
-                    }
+                    onValueChanged?.Invoke(oldValue, newValue);
                 }
 
             }
@@ -55,20 +57,11 @@ namespace OSKHelpers.Types.IsChanged
             return changed;
         }
 
-        /// <param name="onValueChanged">
-        /// Action executed after the value has been updated and after IsChanged has been set to True.
-        /// </param>
-        /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Func{T, bool}, Action{T, T})"/>
+        /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Action)"/>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Func<T, bool> onValueChanging, Action onValueChanged)
             => obj.SetProperty(ref field, newValue, onValueChanging, new Action<T, T>((v1, v2) => { onValueChanged(); }));
 
-        /// <param name="onValueChanged">
-        /// Action executed after the value has been updated and after IsChanged has been set to True.
-        /// <code>
-        /// void OnValueChanged(T newValue)
-        /// </code>
-        /// <b>newValue</b>: new value of the property.
-        /// </param>
+        /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Action)"/>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Func<T, bool> onValueChanging, Action<T> onValueChanged)
             => obj.SetProperty(ref field, newValue, onValueChanging, new Action<T, T>((oldVal, newVal) => { onValueChanged(newValue); }));
 

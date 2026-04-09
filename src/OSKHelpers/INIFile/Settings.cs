@@ -5,34 +5,46 @@ using System;
 namespace OSKHelpers.Templates.INIFile
 {
     /// <summary>
-    /// Classe contenente le impostazioni per l'applicativo.
+    /// Class containing the application settings.
     /// </summary>
     public class Settings
     {
-        #region Costanti
+        #region Constants
 
+        /// <summary>
+        /// Product name
+        /// </summary>
         public const string PRODUCTNAME = "Applicazione";
+        /// <summary>
+        /// Product version
+        /// </summary>
         public const string PRODUCTVERSION = "0.0.1";
+        /// <summary>
+        /// Product name
+        /// </summary>
         public const string PRODUCTDATE = "01/01/1900";
+        /// <summary>
+        /// Full product name / version
+        /// </summary>
         public const string PRODUCTFULLNAME = PRODUCTNAME + " Ver. " + PRODUCTVERSION + " del" + PRODUCTDATE;
 
         #endregion
 
-        #region Membri
+        #region Members
 
 
         #endregion
 
-        #region Proprietà
+        #region Properties
 
         /// <summary>
-        /// Se True la configurazione è stata correttamente caricata ed è valida.
+        /// True if the configuration was loaded correctly and is valid.
         /// </summary>
         public static bool IsValid { get; private set; }
 
         #endregion
 
-        #region Costruttore
+        #region Constructor
 
         static Settings()
         {
@@ -62,7 +74,7 @@ namespace OSKHelpers.Templates.INIFile
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         private static bool CheckIsValid()
         {

@@ -1,10 +1,4 @@
-﻿using OSKHelpers.Mail;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace OSKHelpers.Tests.Mail
+﻿namespace OSKHelpers.Mail.Test
 {
     [TestClass]
     public class MailWorkerTests

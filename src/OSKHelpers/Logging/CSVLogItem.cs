@@ -68,7 +68,6 @@ namespace OSKHelpers.Logging
         /// <param name="separator">Separator to use.</param>
         /// <returns>The string containing the data row.</returns>
         /// <exception cref="ArgumentNullException"/>
-        /// <summary>
         public static string GetCSVData(object obj, string separator)
         {
             if (obj == null)

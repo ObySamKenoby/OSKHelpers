@@ -3,6 +3,9 @@ using System;
 
 namespace OSKHelpers.Common
 {
+    /// <summary>
+    /// Utilities for validating and inspecting URIs.
+    /// </summary>
     public class WebUtils
     {
         /// <inheritdoc cref="IsWellFormedAddress(string, bool, bool)"/>

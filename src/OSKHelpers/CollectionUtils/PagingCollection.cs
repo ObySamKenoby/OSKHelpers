@@ -6,34 +6,54 @@ using System.Threading.Tasks;
 
 namespace OSKHelpers.CollectionUtils
 {
+	/// <summary>
+	/// Generic wrapper that holds a <see cref="List{T}"/> together with all pagination state,
+	/// making it easy to expose paged data directly from a view-model or API response.
+	/// </summary>
 	public class PagingCollection<T>
 	{
-        #region Costanti
+		#region Constants
 
-        public const int MINPAGESIZE		= Paging.MINPAGESIZE;
-        public const int DEFAULTPAGESIZE	= Paging.DEFAULTPAGESIZE;
-        public const int MINGROUPSIZE		= Paging.MINGROUPSIZE;
-        public const int MAXGROUPSIZE		= Paging.MAXGROUPSIZE;
-        public const int DEFAULTGROUPSIZE	= Paging.DEFAULTGROUPSIZE;
-        public const int MINBORDERSIZE		= Paging.MINBORDERSIZE;
-        public const int MAXBORDERSIZE		= Paging.MAXBORDERSIZE;
-        public const int DEFAULTBORDERSIZE	= Paging.DEFAULTBORDERSIZE;
+		/// <summary>Minimum page size.</summary>
+		public const int MINPAGESIZE		= Paging.MINPAGESIZE;
+		/// <summary>Default page size.</summary>
+		public const int DEFAULTPAGESIZE	= Paging.DEFAULTPAGESIZE;
+		/// <summary>Minimum group size.</summary>
+		public const int MINGROUPSIZE		= Paging.MINGROUPSIZE;
+		/// <summary>Maximum group size.</summary>
+		public const int MAXGROUPSIZE		= Paging.MAXGROUPSIZE;
+		/// <summary>Default group size.</summary>
+		public const int DEFAULTGROUPSIZE	= Paging.DEFAULTGROUPSIZE;
+		/// <summary>Minimum border size.</summary>
+		public const int MINBORDERSIZE		= Paging.MINBORDERSIZE;
+		/// <summary>Maximum border size.</summary>
+		public const int MAXBORDERSIZE		= Paging.MAXBORDERSIZE;
+		/// <summary>Default border size.</summary>
+		public const int DEFAULTBORDERSIZE	= Paging.DEFAULTBORDERSIZE;
 
-        #endregion
+		#endregion
 
-        #region Membri
+		#region Members
 
-        private List<T> _elements;
+		/// <summary>Internal list of elements.</summary>
+		private List<T> _elements;
 
+		/// <summary>Current page number.</summary>
 		private int _page;
+		/// <summary>Page size.</summary>
 		private int _pageSize;
+		/// <summary>Group size.</summary>
 		private int _groupSize;
+		/// <summary>Border size.</summary>
 		private int _borderSize;
 
 		#endregion
 
-		#region Proprietà
+		#region Properties
 
+		/// <summary>
+		/// Gets or sets the current page number.
+		/// </summary>
 		public int Page
 		{
 			get => _page > 0 ? _page : 1;
@@ -47,8 +67,14 @@ namespace OSKHelpers.CollectionUtils
 			}
 		}
 
+		/// <summary>
+		/// Gets the total number of elements.
+		/// </summary>
 		public int ElementsCount => _elements?.Count ?? 0;
 
+		/// <summary>
+		/// Gets or sets the page size.
+		/// </summary>
 		public int PageSize
 		{
 			get => _pageSize;
@@ -59,6 +85,9 @@ namespace OSKHelpers.CollectionUtils
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the group size.
+		/// </summary>
 		public int GroupSize 
 		{ 
 			get => _groupSize; 
@@ -83,6 +112,9 @@ namespace OSKHelpers.CollectionUtils
 			}
 		}
 
+		/// <summary>
+		/// Gets or sets the border size.
+		/// </summary>
 		public int BorderSize 
 		{ 
 			get => _borderSize;
@@ -103,14 +135,17 @@ namespace OSKHelpers.CollectionUtils
 			}
 		}
 
+		/// <summary>
+		/// Gets the total number of pages.
+		/// </summary>
 		public int Pages { get; private set; }
 
 		#endregion
 
-		#region Costruttori
+		#region Constructors
 
 		/// <summary>
-		/// Inizializza l'istanza di PagingResult
+		/// Initializes a new instance of <see cref="PagingCollection{T}"/> with default values.
 		/// </summary>
 		public PagingCollection()
 		{
@@ -122,13 +157,13 @@ namespace OSKHelpers.CollectionUtils
 		}
 
 		/// <summary>
-		/// Inizializza l'istanza di PagingResults con i valori passati come parametro
+		/// Initializes a new instance of <see cref="PagingCollection{T}"/> with the specified values.
 		/// </summary>
-		/// <param name="elements">Elementi di cui fare la paginazione</param>
-		/// <param name="pageSize">Elementi per pagina</param>
-		/// <param name="page">Pagina desiderata</param>
-		/// <param name="groupNumbers">Quantità di numeri costituenti il gruppo centrale (quello della pagina desiderata)</param>
-		/// <param name="startEndNumbers">Quantità di numeri costituenti i gruppi iniziale e finale (quelli contenenti la prima e l'ultima pagina) </param>
+		/// <param name="elements">Elements to paginate.</param>
+		/// <param name="pageSize">Number of elements per page.</param>
+		/// <param name="page">Desired page number.</param>
+		/// <param name="groupNumbers">Number of page numbers in the central group (around the current page).</param>
+		/// <param name="startEndNumbers">Number of page numbers in the initial and final border groups.</param>
 		public PagingCollection(IEnumerable<T> elements, int pageSize = DEFAULTPAGESIZE, int page = 1, int groupNumbers = DEFAULTGROUPSIZE, int startEndNumbers = DEFAULTBORDERSIZE) : this()
 		{
 			SetElements(elements);
@@ -140,8 +175,12 @@ namespace OSKHelpers.CollectionUtils
 
 		#endregion
 
-		#region Metodi
+		#region Methods
 
+		/// <summary>
+		/// Replaces the current element collection with the provided enumerable.
+		/// </summary>
+		/// <param name="elements">New elements to paginate.</param>
 		public void SetElements(IEnumerable<T> elements)
 		{
 			_elements.Clear();
@@ -152,6 +191,10 @@ namespace OSKHelpers.CollectionUtils
 			CalculatePages();
 		}
 
+		/// <summary>
+		/// Returns the list of elements belonging to the current page.
+		/// </summary>
+		/// <returns>Elements for the current page.</returns>
 		public List<T> GetPageElements()
 		{
 			var elements = new List<T>();
@@ -174,15 +217,16 @@ namespace OSKHelpers.CollectionUtils
 		}
 
 		/// <summary>
-		/// Restituisce l'array contenente la lista delle pagine da visualizzare con i relativi punti di sospensione
+		/// Returns the array containing the list of pages to display with the related suspension points.
 		/// </summary>
+		/// <returns>List of page numbers and control characters.</returns>
 		public List<int> GetPagesArray()
 		{
 			var numbers = new List<int>();
-			var surroundingNums = (int)Math.Floor((decimal)GroupSize / 2); // Numeri intorno alla pagina selezionata
+			var surroundingNums = (int)Math.Floor((decimal)GroupSize / 2); // Numbers around the selected page
 			if (Pages <= (BorderSize * 2) + GroupSize)
 			{
-				// Se il numero di pagine è inferiore a quello dei numeri iniziali e finali più quelli del gruppo selezionato si crea una unica lista ininterrotta
+				// If the number of pages is less than the sum of initial/final numbers plus the group size, create a single uninterrupted list
 				for (var p = 1; p <= Pages; p++)
 				{
 					numbers.Add(p);
@@ -190,12 +234,12 @@ namespace OSKHelpers.CollectionUtils
 			}
 			else
 			{
-				// Si calcolano la posizione inizale e finale dei numeri da visualizzare per il gruppo della pagina selezionata
+				// Calculate the start and end positions of the numbers to display for the selected page group
 				var groupStart = Page - surroundingNums;
 				var groupEnd = Page + surroundingNums;
-				// Si calcola il primo numero di pagina del gruppo finale
+				// Calculate the first page number of the final group
 				var lastStart = Pages - BorderSize + 1;
-				// Si aggiungono i numeri in testata
+				// Add the header numbers
 				for (var p = 1; p <= BorderSize; p++)
 				{
 					numbers.Add(p);
@@ -232,7 +276,7 @@ namespace OSKHelpers.CollectionUtils
 		}
 
 		/// <summary>
-		/// Calcola il numero di pagine in cui suddividere gli elementi
+		/// Calculates the number of pages needed to display all elements.
 		/// </summary>
 		private void CalculatePages()
 		{

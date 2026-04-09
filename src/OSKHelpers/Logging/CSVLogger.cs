@@ -99,6 +99,9 @@ namespace OSKHelpers.Logging
             _defaultLogPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Logs");
         }
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public CSVLogger()
         {
             _usePrefixAsLogFile = false;

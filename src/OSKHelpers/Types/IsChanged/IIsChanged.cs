@@ -13,6 +13,9 @@ namespace OSKHelpers.Types.IsChanged
     {
         #region Properties
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the object has unsaved changes.
+        /// </summary>
         bool IsChanged { get; set; }
 
         #endregion

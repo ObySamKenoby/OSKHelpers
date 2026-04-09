@@ -9,11 +9,11 @@ using System.Timers;
 namespace OSKHelpers.Common
 {
     /// <summary>
-    /// Utilità varie relative ai percorsi standard da utilizzare all'interno degli applicativi.
+    /// Provides standard filesystem paths and related utilities for use within applications.
     /// </summary>
     public class Paths
     {
-        #region Costanti
+        #region Constants
 
         private const string LOWERCASELETTERS   = "abcdefghijklmnopqrstuvwxyz";
         private const string UPPERCASELETTERS   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -25,7 +25,7 @@ namespace OSKHelpers.Common
 
         #endregion
 
-        #region Membri
+        #region Members
 
         /// <summary>
         /// True if the application is running inside a Docker container (checks for the ./dockerenv file).

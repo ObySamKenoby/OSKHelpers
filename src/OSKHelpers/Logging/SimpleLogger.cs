@@ -462,6 +462,7 @@ namespace OSKHelpers.Logging
         /// </summary>
         /// <param name="ex">Exception to log.</param>
         /// <param name="includeStackTrace">Whether to force inclusion of the stack trace (always included when log level is Debug or higher).</param>
+        ///<param name="callerMethodName">Name of the caller method (by deafult automatically discovered).</param>
         public void LogError(Exception ex, bool includeStackTrace = false, [CallerMemberName] string callerMethodName = "")
         {
             var callerTypeName = new StackFrame(1).GetMethod().DeclaringType.Name;
@@ -498,6 +499,7 @@ namespace OSKHelpers.Logging
         public string GetCallerTypeMethodName([CallerMemberName] string callerMethodName = "") => $"{new StackFrame(1).GetMethod().DeclaringType.Name}.{callerMethodName}";
 
 
+        /// <summary>
         /// Logs the calling class and method name when the log level is adequate.
         /// </summary>
         public void LogCallerTypeMethodName(LogLevel logLevel = LogLevel.Debug, [CallerMemberName] string callerMethodName = "") => Write(logLevel, $"{new StackFrame(1).GetMethod().DeclaringType.Name}.{callerMethodName}");
