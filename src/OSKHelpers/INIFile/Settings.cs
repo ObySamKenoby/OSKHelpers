@@ -11,9 +11,21 @@ namespace OSKHelpers.Templates.INIFile
     {
         #region Constants
 
+        /// <summary>
+        /// Product name
+        /// </summary>
         public const string PRODUCTNAME = "Applicazione";
+        /// <summary>
+        /// Product version
+        /// </summary>
         public const string PRODUCTVERSION = "0.0.1";
+        /// <summary>
+        /// Product name
+        /// </summary>
         public const string PRODUCTDATE = "01/01/1900";
+        /// <summary>
+        /// Full product name / version
+        /// </summary>
         public const string PRODUCTFULLNAME = PRODUCTNAME + " Ver. " + PRODUCTVERSION + " del" + PRODUCTDATE;
 
         #endregion

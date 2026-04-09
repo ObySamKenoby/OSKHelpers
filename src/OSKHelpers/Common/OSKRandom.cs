@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OSKHelpers.Common
 {
@@ -22,15 +18,18 @@ namespace OSKHelpers.Common
         /// <summary>
         /// Static random generator instance.
         /// </summary>
-        public static new OSKRandom Shared;
-
+#if NETSTANDARD2_0
+        public static OSKRandom Shared { get; private set; }
+#endif
         #endregion
 
         #region Constructors
 
         static OSKRandom() 
-        { 
-            Shared = new OSKRandom(); 
+        {
+#if NETSTANDARD2_0
+            Shared = new OSKRandom();
+#endif
         }
 
         /// <summary>

@@ -41,7 +41,7 @@ namespace OSKHelpers.Json
         #region Properties
 
         /// <summary>
-        /// Default options (shared by all classes deriving from <see cref="JsonConfig"/>) for serialisation and deserialisation.<br/>
+        /// Default options (shared by all classes deriving from <see cref="JsonSettings{T}"/>) for serialisation and deserialisation.<br/>
         /// Can be replaced to suit personal preferences.<br/>
         /// <b>Warning</b>: changing these options will affect all instances of classes derived from <see cref="JsonSettings{T}"/>.<br/>
         /// Default values are:<br/>

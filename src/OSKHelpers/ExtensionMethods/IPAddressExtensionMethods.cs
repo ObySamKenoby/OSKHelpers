@@ -13,6 +13,7 @@ namespace OSKHelpers.ExtensionMethods
         /// Returns, if present, the x.x.x.x quartet within the string.
         /// The result is not validated; it is the caller's responsibility to do so.
         /// </summary>
+        /// <param name="ipAddress">Reference to object.</param>
         /// <param name="address">String from which to extract the address.</param>
         public static Match Match(this IPAddress ipAddress, string address) => OSKIPAddress.Match(address);
 

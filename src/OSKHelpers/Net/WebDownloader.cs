@@ -10,16 +10,7 @@ namespace OSKHelpers.Net
     /// </summary>
     public class WebDownloader
     {
-        #region Members
-
-        private static HttpClient _httpClient;
-        private static readonly object _lock = new object();
-
-        #endregion
-
         #region Methods
-
-
 
         /// <summary>
         /// Downloads a file from <paramref name="url"/> and saves it to <paramref name="outputFile"/>.<br/>
