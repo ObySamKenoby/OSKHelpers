@@ -4,6 +4,9 @@ using System.Runtime.InteropServices;
 
 namespace OSKHelpers.Common
 {
+    /// <summary>
+    /// Provides static flags describing the current runtime environment.
+    /// </summary>
     public class OSKEnvironment
     {
         /// <summary>

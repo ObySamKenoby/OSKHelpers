@@ -7,7 +7,7 @@
 		<Configurations>Debug;Release;G2DataExport_Debug;G2DataExport_Release</Configurations>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>OSK Helpers</Title>
-		<VersionPrefix>1.6.15</VersionPrefix>
+		<VersionPrefix>1.7.0</VersionPrefix>
 		<UserSecretsId>4af1c825-22b9-438f-9703-901735ed504c</UserSecretsId>
 		<Authors>Samuele Gaggioli</Authors>
 		<Description>General purpose utilities, including Logging and settings (.ini / json) files.</Description>
@@ -39,12 +39,14 @@
 			<Pack>true</Pack>
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/Json/Settings.cs</PackagePath>
 		</None>
-		<None Update="License.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="ReadMe.md">
+		<None Include="License.txt">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="ReadMe.md">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
@@ -54,7 +56,7 @@
 		<Company>OSK Soft</Company>
 		<PackageIcon>logo_128px.jpg</PackageIcon>
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
-		<PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+		<PackageLicenseFile>License.txt</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
 		<PackageReleaseNotes>First public available package version.</PackageReleaseNotes>

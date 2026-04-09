@@ -3,8 +3,8 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<Title>OSK Helpers - Mail utils</Title>
-		<VersionPrefix>1.1.7</VersionPrefix>
-		<Description>Support library to ease sending mail.</Description>
+		<VersionPrefix>1.2.0</VersionPrefix>
+		<Description>Support library to simplify sending mail.</Description>
 		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
 	</PropertyGroup>
 
@@ -13,7 +13,7 @@
 		<Company>OSK Soft</Company>
 		<PackageIcon>logo_128px.jpg</PackageIcon>
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
-		<PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+		<PackageLicenseFile>License.txt</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
 		<PackageReleaseNotes>First public available package version.</PackageReleaseNotes>
@@ -30,7 +30,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="MailKit" Version="4.10.0" />
-		<PackageReference Include="OSKHelpers" Version="1.6.14" />
 		<PackageReference Include="System.Text.Json" Version="10.0.5" />
 	</ItemGroup>
 
@@ -39,10 +38,16 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
-		<!-- Include SettingsTemplate.Mail.ini into NuGet package-->
-		<None Update="License.txt">
+		<None Include="..\OSKHelpers\License.txt">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
+		<None Include="License.txt">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<!-- Include SettingsTemplate.Mail.ini into NuGet package-->
 		<None Update="SettingsTemplate.Mail.ini">
 			<Pack>true</Pack>
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/SettingsTemplate.Mail.ini</PackagePath>
@@ -58,7 +63,7 @@
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/MailTemplates/Credentials.txt</PackagePath>
 		</None>
 		<!-- Include ReadMe.md into NuGet package-->
-		<None Update="ReadMe.md">
+		<None Include="ReadMe.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

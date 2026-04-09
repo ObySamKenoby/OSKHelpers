@@ -4,6 +4,10 @@ using System.Text;
 
 namespace OSKHelpers.Types.IsChanged
 {
+    /// <summary>
+    /// Extension methods for <see cref="IIsChanged"/> that simplify property assignment
+    /// and change-flag management on model objects.
+    /// </summary>
     public static class IIsChangedExtensionMethods
     {
         #region Methods

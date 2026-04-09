@@ -9,19 +9,28 @@ namespace OSKHelpers.Common
     /// </summary>
     public class StringBools
     {
-        #region Costanti
+        #region Constants
 
+        /// <summary>Integer representation of true.</summary>
         public const int    TrueInt     = 1;
+        /// <summary>Integer representation of false.</summary>
         public const int    FalseInt    = 0;
+        /// <summary>String representation of true.</summary>
         public const string TrueString  = "1";
+        /// <summary>String representation of false.</summary>
         public const string FalseString = "0";
+        /// <summary>Char representation of true.</summary>
         public const char   TrueChar    = '1';
+        /// <summary>Char representation of false.</summary>
         public const char   FalseChar   = '0';
 
         #endregion
 
         #region Members
 
+        /// <summary>
+        /// Internal list of boolean values.
+        /// </summary>
         private List<bool> _bools;
 
         #endregion
@@ -50,13 +59,20 @@ namespace OSKHelpers.Common
 
         #endregion
 
-        #region Costruttori
+        #region Constructors
 
+        /// <summary>
+        /// Initializes a new empty instance of <see cref="StringBools"/>.
+        /// </summary>
         public StringBools()
         {
             _bools = new List<bool>();
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="StringBools"/> from an enumerable of booleans.
+        /// </summary>
+        /// <param name="bools">Boolean values to initialise the collection with.</param>
         public StringBools(IEnumerable<bool> bools) : this()
         {
             if (bools != null)
@@ -65,6 +81,10 @@ namespace OSKHelpers.Common
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="StringBools"/> from a string of '1'/'0' characters.
+        /// </summary>
+        /// <param name="bools">String whose characters represent boolean values ('1' = true, '0' = false).</param>
         public StringBools(string bools) : this()
         {
             if (!string.IsNullOrEmpty(bools))
@@ -73,11 +93,20 @@ namespace OSKHelpers.Common
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="StringBools"/> from a string of '1'/'0' characters with a fixed length.
+        /// </summary>
+        /// <param name="bools">String whose characters represent boolean values.</param>
+        /// <param name="length">Fixed length of the collection.</param>
         public StringBools(string bools, int length) : this()
         {
             UpdateFromString(bools, length);
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="StringBools"/> with all values set to false.
+        /// </summary>
+        /// <param name="length">Number of boolean values in the collection.</param>
         public StringBools(int length) : this()
         {
             SetLength(length);
@@ -85,14 +114,14 @@ namespace OSKHelpers.Common
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <summary>
-        /// Imposta la lunghezza dell'array.<br/>
-        /// Se length fosse minore o uguale a 0 la lunghezza dell'array  sarà impostata a 0.<br/>
-        /// Attenzione: tutto il contenuto dell'array sarà cancellato.
+        /// Sets the length of the array.<br/>
+        /// If <paramref name="length"/> is less than or equal to 0, the array length is set to 0.<br/>
+        /// Warning: all existing content is cleared.
         /// </summary>
-        /// <param name="length">Lunghezza desiderata</param>
+        /// <param name="length">Desired length.</param>
         public void SetLength(int length)
         {
             _bools.Clear();
@@ -104,10 +133,10 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Imposta il valore nella posizione pos. Se la posizione non è valida non accade niente.
+        /// Sets the value at position <paramref name="pos"/>. Does nothing if the position is invalid.
         /// </summary>
-        /// <param name="pos">Posizione</param>
-        /// <param name="value">Valore da impostare</param>
+        /// <param name="pos">Position.</param>
+        /// <param name="value">Value to set.</param>
         public void SetValue(int pos,  bool value)
         {
             if (pos >= 0 && pos < _bools.Count) 
@@ -118,10 +147,10 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Imposta il valore nella posizione pos. Se la posizione non è valida non accade niente.
+        /// Sets the value at position <paramref name="pos"/>. Does nothing if the position is invalid.
         /// </summary>
-        /// <param name="pos">Posizione</param>
-        /// <param name="value">Valore da impostare (1 True, qualsiasi altro valore False)</param>
+        /// <param name="pos">Position.</param>
+        /// <param name="value">Value to set (1 = true, any other value = false).</param>
         public void SetValue(int pos, int value)
         {
             if (pos >= 0 && pos < _bools.Count)
@@ -132,10 +161,10 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Imposta il valore nella posizione pos. Se la posizione non è valida non accade niente.
+        /// Sets the value at position <paramref name="pos"/>. Does nothing if the position is invalid.
         /// </summary>
-        /// <param name="pos">Posizione</param>
-        /// <param name="value">Valore da impostare (1 True, qualsiasi altro valore False)</param>
+        /// <param name="pos">Position.</param>
+        /// <param name="value">Value to set ("1" = true, any other value = false).</param>
         public void SetValue(int pos, string value)
         {
             if (pos >= 0 && pos < _bools.Count)
@@ -146,10 +175,10 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Imposta il valore nella posizione pos. Se la posizione non è valida non accade niente.
+        /// Sets the value at position <paramref name="pos"/>. Does nothing if the position is invalid.
         /// </summary>
-        /// <param name="pos">Posizione</param>
-        /// <param name="value">Valore da impostare (1 True, qualsiasi altro valore False)</param>
+        /// <param name="pos">Position.</param>
+        /// <param name="value">Value to set ('1' = true, any other value = false).</param>
         public void SetValue(int pos, char value)
         {
             if (pos >= 0 && pos < _bools.Count)
@@ -160,36 +189,36 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Restituisce il valore alla posizione pos. Se la posizione non è valida restituisce false.
+        /// Returns the value at position <paramref name="pos"/>. Returns false if the position is invalid.
         /// </summary>
-        /// <param name="pos">Posizione di cui si desidera recuperare il valore</param>
+        /// <param name="pos">Position whose value is to be retrieved.</param>
         public bool Get(int pos)
         {
             return pos >= 0 && pos < _bools.Count ? _bools[pos] : false;
         }
 
         /// <summary>
-        /// Restituisce come intero il valore alla posizione pos. Se la posizione non è valida restituisce 0.
+        /// Returns the integer representation of the value at position <paramref name="pos"/>. Returns 0 if the position is invalid.
         /// </summary>
-        /// <param name="pos">Posizione di cui si desidera recuperare il valore</param>
+        /// <param name="pos">Position whose value is to be retrieved.</param>
         public int GetInt(int pos)
         {
             return pos >= 0 && pos < _bools.Count && _bools[pos] ? 1 : 0;
         }
 
         /// <summary>
-        /// Restituisce come stringa il valore alla posizione pos. Se la posizione non è valida restituisce "0".
+        /// Returns the string representation of the value at position <paramref name="pos"/>. Returns "0" if the position is invalid.
         /// </summary>
-        /// <param name="pos">Posizione di cui si desidera recuperare il valore</param>
+        /// <param name="pos">Position whose value is to be retrieved.</param>
         public string GetString(int pos)
         {
             return pos >= 0 && pos < _bools.Count && _bools[pos] ? "1" : "0";
         }
 
         /// <summary>
-        /// Restituisce come char il valore alla posizione pos. Se la posizione non è valida restituisce '0'.
+        /// Returns the char representation of the value at position <paramref name="pos"/>. Returns '0' if the position is invalid.
         /// </summary>
-        /// <param name="pos">Posizione di cui si desidera recuperare il valore</param>
+        /// <param name="pos">Position whose value is to be retrieved.</param>
         public char GetChar(int pos)
         {
             return pos >= 0 && pos < _bools.Count && _bools[pos] ? '1' : '0';
@@ -202,7 +231,7 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Resetta tutti gli elementi al valore passato come parametro (default false)
+        /// Resets all elements to the value passed as parameter (default false).
         /// </summary>
         public void Reset(bool value = false)
         {
@@ -214,10 +243,10 @@ namespace OSKHelpers.Common
         }
 
         /// <summary>
-        /// Aggiorna i valori dalla stringa passata in <paramref name="bools"/> e setta <see cref="Length"/> a <paramref name="length"/>.
+        /// Updates the values from the string passed in <paramref name="bools"/> and sets <see cref="Length"/> to <paramref name="length"/>.
         /// </summary>
-        /// <param name="bools">Stringa da cui sarnno recuperati i valori ('1' uguale a True).</param>
-        /// <param name="length">Valore da assegnare a <see cref="Length"/>.c</param>
+        /// <param name="bools">String from which values will be retrieved ('1' equals true).</param>
+        /// <param name="length">Value to assign to <see cref="Length"/>.</param>
         public void UpdateFromString(string bools, int length)
         {
             SetLength(length);

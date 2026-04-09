@@ -3,6 +3,8 @@
 **OSKHelpers** is a collection of general-purpose, independent utility classes targeting **.NET Standard 2.0** and **.NET 8**.  
 Each namespace addresses a specific concern and has no mandatory coupling with the others, so you can use only what you need.
 
+
+
 ---
 
 ## Namespaces & Classes
@@ -12,7 +14,7 @@ Utilities for paginating collections.
 
 | Class / Enum | Description |
 |---|---|
-| `Paging` | Calculates pagination metadata (pages, groups, borders) for a given element count and page size. Exposes configurable constants for minimum/default values. |
+| `Paging` | Calculates pagination metadata (pages, groups, borders) for a given element count and page size. |
 | `PagingCollection<T>` | Generic wrapper that holds a `List<T>` together with all pagination state, making it easy to expose paged data directly from a view-model or API response. |
 | `PagingControlChars` | Enum whose negative values represent special navigation actions (First, Previous, Next, Last, FastRewind, FastForward, SuspensionPoints) for building pager UI controls. |
 
@@ -39,6 +41,15 @@ A broad set of stand-alone utility classes covering everyday programming tasks.
 | `StringUtils` | Rich string manipulation: ASCII normalisation, regex-based character-class validation, random string generation, and more. |
 | `ThreadUtils` | Runs a `Task` on a dedicated `Thread` wrapped in a try/catch that logs any unhandled exception via `SimpleLog`. |
 | `WebUtils` | Validates whether a string is a well-formed absolute URI, with optional scheme restrictions (HTTP-only, HTTPS-only, or either). |
+
+---
+
+### `OSKHelpers.Diagnostics`
+Utilities to be used for diagnostics.
+
+| Class | Description |
+|---|---|
+| `MemoryDiagnostics` | Class containing utility methods for memory usage diagnostics during program execution. |
 
 ---
 

@@ -5,6 +5,9 @@ using System.Text;
 
 namespace OSKHelpers.Security
 {
+    /// <summary>
+    /// Static helper to compute cryptographic hashes of a string.
+    /// </summary>
     public static class Hash
     {
         /// <summary>

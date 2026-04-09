@@ -66,32 +66,31 @@ namespace OSKHelpers.Common
 
 
         /// <summary>
-        /// Restituisce un timer da poter utilizzare per forzare l'intervento del Garbage Collector al raggiungimento<br/>
-        /// di una certa dimensione dell'heap.<br/>
-        /// Il timer avrà già preimpostata la funzione di pulizia e <see cref="Timer.AutoReset"/> a true, sarà responsabilità<br/>
-        /// della classe chiamante occuparsi dell'avvio e dell'arresto.
+        /// Returns a timer that can be used to force the Garbage Collector when the heap reaches a given size.<br/>
+        /// The timer already has the cleanup function preset and <see cref="Timer.AutoReset"/> set to true; it is the
+        /// responsibility of the calling class to start and stop it.
         /// </summary>
         /// <param name="interval">
-        /// Intervallo in millisecondi per effettuar e la verifica.<br/>
-        /// Il valore minimo è 1000 (un secondo), tuttavia è necessario tenere in considerazione il peso relativo alla verifica<br/>
-        /// dell'heap e all'esecuzione della pulizia da parte del Garbage Collector onde evitar eun decadimento delle prestazioni.
+        /// Interval in milliseconds for the check.<br/>
+        /// The minimum value is 1000 (one second); however the overhead of checking the heap and running the GC
+        /// must be factored in to avoid a performance penalty.
         /// </param>
-        /// <param name="triggerSize">Dimensioni (espresse in MB) che comporteranno il richiamo a <see cref="GC.Collect()"/>, il valore minimo è 1.</param>
-        /// <returns>Il timer da utilizzare per la verifica del Garbage Collector.</returns>
+        /// <param name="triggerSize">Heap size in MB at which <see cref="GC.Collect()"/> will be called; minimum value is 1.</param>
+        /// <returns>The timer to use for the Garbage Collector check.</returns>
         /// <exception cref="ArgumentOutOfRangeException"/>
         public static Timer GetCheckTimer(double interval, int triggerSize)
         {
             if (interval < 1000)
             {
-                throw new ArgumentOutOfRangeException(nameof(interval), interval, "Il minimo valore consentito è 1000 (un secondo).");
+                throw new ArgumentOutOfRangeException(nameof(interval), interval, "The minimum allowed value is 1000 (one second).");
             }
             if (triggerSize < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(triggerSize), triggerSize, "Il minimo valore consentito è 1.");
+                throw new ArgumentOutOfRangeException(nameof(triggerSize), triggerSize, "The minimum allowed value is 1.");
             }
 
             var gcTimer = new Timer();
-            long size = triggerSize << 10; // triggerSize viene convertito in bytes.
+            long size = triggerSize << 10; // triggerSize is converted to bytes.
 
             gcTimer.Interval = interval;
             gcTimer.AutoReset = true;

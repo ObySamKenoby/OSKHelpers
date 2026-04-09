@@ -498,6 +498,7 @@ namespace OSKHelpers.Logging
         public string GetCallerTypeMethodName([CallerMemberName] string callerMethodName = "") => $"{new StackFrame(1).GetMethod().DeclaringType.Name}.{callerMethodName}";
 
 
+        /// <summary>
         /// Logs the calling class and method name when the log level is adequate.
         /// </summary>
         public void LogCallerTypeMethodName(LogLevel logLevel = LogLevel.Debug, [CallerMemberName] string callerMethodName = "") => Write(logLevel, $"{new StackFrame(1).GetMethod().DeclaringType.Name}.{callerMethodName}");

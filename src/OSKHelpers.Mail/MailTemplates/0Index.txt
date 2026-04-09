@@ -1,49 +1,49 @@
 ﻿------
 
-File di esempio da aggiungere alla cartella di template per l'invio delle mail.
-Modificare la lista dei template a seconda del bisogno.
-Credentials.txt è un esempio di template utilizzato in produzione per l'invio delle credenziali
-generate automaticamente agli utenti.
+Sample file to add to the template folder for sending emails.
+Modify the list of templates as needed.
+Credentials.txt is an example of a template used in production for sending credentials
+automatically generated for users.
 
 ------
 
-La cartella contiene i template di default per l'invio delle mail.
-I file devono essere copiati all'interno di MailTemplates.
+The folder contains the default templates for sending emails.
+Files must be copied inside MailTemplates.
 
-Tutti i seguenti file devono essere presenti:
+All the following files must be present:
 
-Credentials.txt          Invio delle credenziali all'utente
-OrdineReport.txt		 Invio del reporte dell'ordine
+Credentials.txt          Template for sending credentials to the user
+OrdersReport.txt         Template for sending the order report
+....
 
+All files share the following characteristics:
 
-Tutti i file condividono le seguenti caratteristiche:
+- lines starting with the # character are considered comments;
+- the file must contain a line starting with @Subject: containing the subject of the email to be sent.
+  The subject may contain TAGs specific to each template.
+  The subject must be contained within a single line;
+- everything else in the file is considered the body of the email. You can use any HTML tag
+  and the specific TAGs for each file to format the email itself;
+- each template uses specific tags identified as {TAG}
+  It is important to note that tags are case sensitive, so `TAG` is different from `Tag`.
+  The tags available for each template are specified within the template itself.
+- each template can have conditional sections that will be included only in particular cases,
+  identified with <<COND>> .... <</COND>>
+  As with tags, each condition will be specified within the template file.
 
-- le righe che iniziano con il carattere # sono considerate commenti;
-- il file deve contenere una riga che inizi con @Subject: contenente l'oggetto della mail che sarà inviata. 
-  All'interno dell'oggetto possono essere presenti i TAG specifici per ogni template. 
-  L'oggetto deve essere contenuto all'interno di una singola riga;
-- tutto il resto del file è considerato come corpo della mail. E' possibile utilizzare qualsiasi tag 
-  HTML ed i TAG specifici per il singolo file per formattare la mail stessa;
-- ogni template si avvale di specifici tag identificati come {TAG}
-  E' importante notare che i tag sono case sensitive, quindi TAG è diverso da Tag.
-  I tags utilizzabili per ogni template sono specificati all'interno del template stesso.
-- ogni template può prevedere delle sezioni condizionali che saranno incluse solo in casi particolari,
-  identificate con <<COND>> .... <</COND>>
-  Come per i tags ogni condizione sarà specificata all'itnerno del file di template.
-
-Un file template valido può avere il seguente formato:
+A valid template file may have the following format:
 
 ----------------
 
 
-# Questo è un commento
-# {USERNAME} è un tag di test...
-@Subject: Mail di test per l'utente {USERNAME}
+# This is a comment
+# {USERNAME} is a test tag...
+@Subject: Test email for user {USERNAME}
 
-Buongiorno <strong>{USERNAME}</strong><br/>
-Ti diamo il benvenuto.<br/>
-# La seguente sezione sarà inclusa solo se la configuraizone non prevede una singola azienda
-<<NOSINGLE>>L'applicativo non &egrave; configurato per una singola azienda.<br/><</NOSINGLE>>
+Good morning <strong>{USERNAME}</strong><br/>
+Welcome.<br/>
+# The following section will be included only if the configuration does not provide for a single company
+<<NOSINGLE>>The application is not configured for a single company.<br/><</NOSINGLE>>
 
 
 ----------------

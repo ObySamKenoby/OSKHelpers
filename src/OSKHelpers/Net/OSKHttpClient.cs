@@ -142,6 +142,10 @@ namespace OSKHelpers.Net
 
         #region Test methods
 
+        /// <summary>
+        /// For testing purposes only, returns the HttpClient instance.
+        /// </summary>
+        /// <returns></returns>
         public static HttpClient GetHttpClientPrivateInstance() => _instance;
 
         #endregion

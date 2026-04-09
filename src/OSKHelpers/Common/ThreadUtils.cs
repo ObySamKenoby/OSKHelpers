@@ -5,6 +5,9 @@ using OSKHelpers.Logging;
 
 namespace OSKHelpers.Common
 {
+    /// <summary>
+    /// Utilities for running tasks on dedicated threads with built-in error handling.
+    /// </summary>
     public class ThreadUtils
     {
         /// <summary>

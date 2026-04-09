@@ -3,45 +3,45 @@
 namespace OSKHelpers.Templates.Json
 {
     /// <summary>
-    /// Classe template per l'utilizzo di <see cref="OSKHelpers.Json.JsonSettings{T}"/>
+    /// Template class for using <see cref="OSKHelpers.Json.JsonSettings{T}"/>.
     /// </summary>
     public class Settings : JsonSettings<Settings>
     {
-        #region Costanti
+        #region Constants
 
         /// <inheritdoc/>
         protected override int LASTVERSION => 1;
 
         #endregion
 
-        #region Membri
+        #region Members
 
-        // Membri privati dell'oggetto.
-
-        #endregion
-
-        #region Proprietà
-
-        // Proprietà private dell'oggetto.
+        // Private members of the object.
 
         #endregion
 
-        #region Costruttori
+        #region Properties
+
+        // Private properties of the object.
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
-        /// Costruttore di base, inizializza le proprietà necessarie.
+        /// Base constructor; initialises the required properties.
         /// </summary>
         public Settings() : base()
         { }
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         /// <inheritdoc/>
         public override void Init()
         {
-            // Aggiungere la logica di inizializzazione successiva al popolamento delle proprietà dell'oggetto.
+            // Add initialisation logic to be executed after the object properties have been populated.
         }
 
         /// <inheritdoc/>

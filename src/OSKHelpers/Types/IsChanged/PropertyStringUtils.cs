@@ -43,6 +43,10 @@ namespace OSKHelpers.Types.IsChanged
 
         #region Methods
 
+        /// <summary>
+        /// Validates that <see cref="DecimalSeparator"/>, <see cref="ThousandsSeparator"/> and <see cref="CultureInfo"/> are set.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"/>
         private static void CheckProperties()
         {
             if (string.IsNullOrEmpty(DecimalSeparator))
@@ -66,6 +70,12 @@ namespace OSKHelpers.Types.IsChanged
 
         #region SetProperty
 
+        /// <summary>
+        /// Sets the value of <paramref name="field"/> by parsing <paramref name="newValue"/> as a decimal.
+        /// </summary>
+        /// <param name="field">Field to update.</param>
+        /// <param name="newValue">String representation of the new decimal value.</param>
+        /// <returns>True if the field value changed.</returns>
         public static bool SetProperty(ref decimal field, string newValue)
         {
             var changed = TryParse(newValue, out decimal value) && field != value;
@@ -76,6 +86,12 @@ namespace OSKHelpers.Types.IsChanged
             return changed;
         }
 
+        /// <summary>
+        /// Sets the value of <paramref name="field"/> by parsing <paramref name="newValue"/> as a nullable decimal.
+        /// </summary>
+        /// <param name="field">Field to update.</param>
+        /// <param name="newValue">String representation of the new decimal value, or null/empty to set the field to null.</param>
+        /// <returns>True if the field value changed.</returns>
         public static bool SetProperty(ref decimal? field, string newValue)
         {
             bool changed = false;
@@ -98,6 +114,12 @@ namespace OSKHelpers.Types.IsChanged
             return changed;
         }
 
+        /// <summary>
+        /// Sets the value of <paramref name="field"/> by parsing <paramref name="newValue"/> as a DateTime.
+        /// </summary>
+        /// <param name="field">Field to update.</param>
+        /// <param name="newValue">String representation of the new DateTime value.</param>
+        /// <returns>True if the field value changed.</returns>
         public static bool SetProperty(ref DateTime field, string newValue)
         {
             var changed = TryParse(newValue, out DateTime value) && !field.Equals(value);
@@ -108,6 +130,12 @@ namespace OSKHelpers.Types.IsChanged
             return changed;
         }
 
+        /// <summary>
+        /// Sets the value of <paramref name="field"/> by parsing <paramref name="newValue"/> as a nullable DateTime.
+        /// </summary>
+        /// <param name="field">Field to update.</param>
+        /// <param name="newValue">String representation of the new DateTime value, or null/empty to set the field to null.</param>
+        /// <returns>True if the field value changed.</returns>
         public static bool SetProperty(ref DateTime? field, string newValue)
         {
             bool changed = false;
@@ -134,6 +162,12 @@ namespace OSKHelpers.Types.IsChanged
 
         #region TryParse
 
+        /// <summary>
+        /// Attempts to parse <paramref name="s"/> as a decimal, handling locale-specific separators.
+        /// </summary>
+        /// <param name="s">String to parse.</param>
+        /// <param name="result">Parsed decimal value, or 0 on failure.</param>
+        /// <returns>True if parsing succeeded.</returns>
         public static bool TryParse(string s, out decimal result)
         {
             CheckProperties();
@@ -164,6 +198,12 @@ namespace OSKHelpers.Types.IsChanged
             return parsed;
         }
 
+        /// <summary>
+        /// Attempts to parse <paramref name="s"/> as a nullable decimal.
+        /// </summary>
+        /// <param name="s">String to parse.</param>
+        /// <param name="result">Parsed decimal value, or null on failure.</param>
+        /// <returns>True if parsing succeeded.</returns>
         public static bool TryParse(string s, out decimal? result)
         {
             CheckProperties();
@@ -177,6 +217,12 @@ namespace OSKHelpers.Types.IsChanged
             return parsed;
         }
 
+        /// <summary>
+        /// Attempts to parse <paramref name="s"/> as a DateTime using <see cref="CultureInfo"/>.
+        /// </summary>
+        /// <param name="s">String to parse.</param>
+        /// <param name="result">Parsed DateTime value, or <see cref="DateTime.MinValue"/> on failure.</param>
+        /// <returns>True if parsing succeeded.</returns>
         public static bool TryParse(string s, out DateTime result)
         {
             CheckProperties();
@@ -184,6 +230,12 @@ namespace OSKHelpers.Types.IsChanged
             return DateTime.TryParse(s, CultureInfo, DateTimeStyles.None, out result);
         }
 
+        /// <summary>
+        /// Attempts to parse <paramref name="s"/> as a nullable DateTime.
+        /// </summary>
+        /// <param name="s">String to parse.</param>
+        /// <param name="result">Parsed DateTime value, or null on failure.</param>
+        /// <returns>True if parsing succeeded.</returns>
         public static bool TryParse(string s, out DateTime? result)
         {
             CheckProperties();
@@ -201,17 +253,31 @@ namespace OSKHelpers.Types.IsChanged
 
         #region Parse
 
+        /// <summary>Parses <paramref name="s"/> as a decimal; returns 0 on failure.</summary>
+        /// <param name="s">String to parse.</param>
         public static decimal ParseDecimal(string s) => TryParse(s, out decimal result) ? result : result;
+        /// <summary>Parses <paramref name="s"/> as a nullable decimal; returns null on failure.</summary>
+        /// <param name="s">String to parse.</param>
         public static decimal? ParseDecimalNullable(string s) => TryParse(s, out decimal? result) ? result : null;
+        /// <summary>Parses <paramref name="s"/> as a DateTime; returns <see cref="DateTime.MinValue"/> on failure.</summary>
+        /// <param name="s">String to parse.</param>
         public static DateTime ParseDateTime(string s) => TryParse(s, out DateTime result) ? result : result;
+        /// <summary>Parses <paramref name="s"/> as a nullable DateTime; returns null on failure.</summary>
+        /// <param name="s">String to parse.</param>
         public static DateTime? ParseDateTimeNullable(string s) => TryParse(s, out DateTime? result) ? result : null;
 
         #endregion
 
         #region gRPC Conversions
 
+        /// <summary>Converts a <see cref="DateTime"/> to a gRPC-compatible ISO 8601 string.</summary>
+        /// <param name="d">Date to convert.</param>
         public static string ToGRPCString(DateTime d) => $"{d:s}";
+        /// <summary>Converts a gRPC ISO 8601 string to a <see cref="DateTime"/>.</summary>
+        /// <param name="s">String to convert.</param>
         public static DateTime FromGRPCDateTime(string s) => TryParse(s, out DateTime result) ? result : result;
+        /// <summary>Converts a gRPC ISO 8601 string to a nullable <see cref="DateTime"/>.</summary>
+        /// <param name="s">String to convert.</param>
         public static DateTime? FromGRPCDateTimeNullable(string s) => TryParse(s, out DateTime? result) ? result : null;
 
         #endregion

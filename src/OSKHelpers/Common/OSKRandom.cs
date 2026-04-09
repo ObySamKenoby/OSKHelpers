@@ -41,7 +41,7 @@ namespace OSKHelpers.Common
         /// <summary>
         /// Constructor with a custom seed.
         /// </summary>
-        /// <param name="seed"></param>
+        /// <param name="seed">Custom seed value.</param>
         public OSKRandom(int seed) : base(seed) { }
 
         #endregion
