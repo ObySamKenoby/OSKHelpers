@@ -4,6 +4,10 @@
     <Platform Name="x86" />
   </Configurations>
   <Folder Name="/docs/" />
+  <Folder Name="/docs/root/">
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/OSKHelpers.Mail/OSKHelpers.Mail.csproj" />
     <Project Path="src/OSKHelpers/OSKHelpers.csproj">
