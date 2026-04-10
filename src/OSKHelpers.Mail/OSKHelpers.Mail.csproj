@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<Title>OSK Helpers - Mail utils</Title>
-		<VersionPrefix>1.2.0</VersionPrefix>
+		<VersionPrefix>1.2.1</VersionPrefix>
 		<Description>Support library to simplify sending mail.</Description>
 		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
 	</PropertyGroup>
@@ -16,7 +16,7 @@
 		<PackageLicenseFile>License.txt</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
-		<PackageReleaseNotes>First public available package version.</PackageReleaseNotes>
+		<PackageReleaseNotes>Updated reference to latest MailKit NuGet package.</PackageReleaseNotes>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
@@ -29,9 +29,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MailKit" Version="4.10.0" />
+		<PackageReference Include="MailKit" Version="4.15.1" />
 		<PackageReference Include="OSKHelpers" Version="1.7.0" />
-		<PackageReference Include="System.Text.Json" Version="10.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -45,7 +44,7 @@
 		</None>
 		<None Include="License.txt">
 			<Pack>True</Pack>
-			<PackagePath></PackagePath>
+			<PackagePath>\</PackagePath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<!-- Include SettingsTemplate.Mail.ini into NuGet package-->
