@@ -1,4 +1,6 @@
-﻿using OSKHelpers.Common;
+﻿using System;
+using System.IO;
+using OSKHelpers.Common;
 using OSKHelpers.Logging;
 
 namespace OSKHelpers.Tests.Common
@@ -6,19 +8,19 @@ namespace OSKHelpers.Tests.Common
     [TestClass]
     public class PathsTests
     {
-        #region Costanti
+        #region Constants
 
         private const string DockerEnvPath = "/.dockerenv";
 
         #endregion
 
-        #region MEmbri
+        #region Members
 
         private static string _appDataPath = string.Empty;
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -94,7 +96,7 @@ namespace OSKHelpers.Tests.Common
             Assert.AreEqual(expectedValue, Path.GetExtension(Paths.GetNewTempFilename(false, extension)));
         }
 
-        #region Test per Dockerization
+        #region Dockerization tests
 
         [TestMethod]
         [DataRow("Backups")]
@@ -103,7 +105,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow("Logs")]
         [DataRow("Output")]
         [DataRow("Temp")]
-        public void GetDomainDirectoryPath_ShouldUseAssemblyPath_WhenNotDocker(string dir)
+        public void GetDomainDirectoryPathShouldUseAssemblyPathWhenNotDocker(string dir)
         {
 #if DEBUG
             Paths.OverrideIsDockerized(false);
@@ -114,7 +116,7 @@ namespace OSKHelpers.Tests.Common
         }
 
         [TestMethod]
-        public void DefaultDirectories_ShouldBeInitialized()
+        public void DefaultDirectoriesShouldBeInitialized()
         {
             Assert.IsFalse(string.IsNullOrWhiteSpace(Paths.DefaultBackupDirectory));
             Assert.IsFalse(string.IsNullOrWhiteSpace(Paths.DefaultConfigsDirectory));
@@ -131,43 +133,43 @@ namespace OSKHelpers.Tests.Common
         [DataRow(nameof(Paths.DefaultLogsDirectory),        "Logs")]
         [DataRow(nameof(Paths.DefaultOutputDirectory),      "Output")]
         [DataRow(nameof(Paths.TempDirectory),               "Temp")]
-        public void DefaultDirectories_ShouldBeUnderAppdata(string propertyName, string expectedSubdir)
+        public void DefaultDirectoriesShouldBeUnderAppdata(string propertyName, string expectedSubdir)
         {
-            // Verifica che la directory venga creata se non esistente
+            // Verify the directory is created if not existing
             var appDir = Paths.GetDataDirectoryPath(expectedSubdir);
             Assert.IsFalse(Directory.Exists(appDir));
 
             Paths.CheckDirectory(appDir);
             Assert.IsTrue(Directory.Exists(appDir));
 
-            // Usa reflection per leggere la proprietà statica
+            // Use reflection to read the static property
             var prop = typeof(Paths).GetProperty(propertyName);
             Assert.IsNotNull(prop, $"Property {propertyName} not found");
 
             var value = prop.GetValue(null) as string;
             Assert.IsNotNull(value, $"{propertyName} should not be null");
 
-            // Deve iniziare con la sandbox
-            Assert.StartsWith(value, _appDataPath);
+            // Must start with the sandbox
+            Assert.StartsWith(_appDataPath, value);
 
-            // Deve contenere la sottodirectory attesa
-            Assert.Contains(value, expectedSubdir);
+            // Must contain the expected subdirectory
+            Assert.Contains(expectedSubdir, value);
 
-            // Deve esistere sul filesystem
+            // Must exist on the filesystem
             Assert.IsTrue(Directory.Exists(value), $"{propertyName} directory should exist");
         }
 
         [TestMethod]
-        public void DefaultSettingsFile_ShouldBeUnderAppdata()
+        public void DefaultSettingsFileShouldBeUnderAppdata()
         {
 #if DEBUG
             Paths.OverrideIsDockerized(true);
 
             string settingsFile = Paths.DefaultSettingsFile;
-            Assert.StartsWith(settingsFile, _appDataPath);
-            Assert.Contains(settingsFile, "Settings.ini");
+            Assert.StartsWith(_appDataPath, settingsFile);
+            Assert.Contains("Settings.ini", settingsFile);
 
-            // Il file Settings.ini non deve esistere di default.
+            // The Settings.ini file should not exist by default.
             var file = Path.GetDirectoryName(settingsFile);
             
             Assert.IsFalse(File.Exists(file));

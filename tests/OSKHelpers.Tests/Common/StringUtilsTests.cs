@@ -1,6 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using OSKHelpers.Common;
-using System;
 
 namespace OSKHelpers.Tests.Common
 {
@@ -101,9 +102,9 @@ namespace OSKHelpers.Tests.Common
         }
 
         /// <summary>
-        /// Check di ogni stringa attraverso i vari check automatizzati.<br/>
-        /// Ogni stringa deve essere accompagnata dalla desccrizione del contenuto.<br/>
-        /// Fail può essere utilizzato per forzare il risultato restituito, quando False tutti i check risulteranno false.
+        /// Checks each string through various automated checks.<br/>
+        /// Each string must be accompanied by a description of its content.<br/>
+        /// Fail can be used to force the returned result; when False all checks will return false.
         /// </summary>
         /// <param name="text">Testo da verificare.</param>
         /// <param name="isLowerCase">La stringa contiene caratteri minuscoli.</param>
@@ -198,6 +199,178 @@ namespace OSKHelpers.Tests.Common
             } while (!isLowerCase);
 
         }
+
+        #region AsASCII
+
+        /// <summary>
+        /// Verifies that non-ASCII characters are removed.
+        /// </summary>
+        [TestMethod]
+        [DataRow("hello",       false, false, "hello")]
+        [DataRow("héllo",       false, false, "hllo")]
+        [DataRow("café",        false, false, "caf")]
+        [DataRow(null,          false, false, "")]
+        public void AsASCIIVariousInputsReturnsExpected(string text, bool toUpper, bool trim, string expected)
+        {
+            var result = StringUtils.AsASCII(text, toUpper, trim);
+
+            Assert.AreEqual(expected, result);
+        }
+
+        /// <summary>
+        /// Verifies the toUpper parameter.
+        /// </summary>
+        [TestMethod]
+        public void AsASCIIToUpperReturnsUppercase()
+        {
+            var result = StringUtils.AsASCII("hello", toUpper: true);
+
+            Assert.AreEqual("HELLO", result);
+        }
+
+        /// <summary>
+        /// Verifies the trim parameter.
+        /// </summary>
+        [TestMethod]
+        public void AsASCIITrimRemovesWhitespace()
+        {
+            var result = StringUtils.AsASCII("  hello  ", trim: true);
+
+            Assert.AreEqual("hello", result);
+        }
+
+        /// <summary>
+        /// Verifies the length parameter for truncation.
+        /// </summary>
+        [TestMethod]
+        public void AsASCIIWithMaxLengthTruncatesString()
+        {
+            var result = StringUtils.AsASCII("hello world", length: 5);
+
+            Assert.AreEqual("hello", result);
+        }
+
+        /// <summary>
+        /// Verifies that padRight pads the string with spaces.
+        /// </summary>
+        [TestMethod]
+        public void AsASCIIWithPadRightPadsWithSpaces()
+        {
+            var result = StringUtils.AsASCII("hi", length: 5, padRight: true);
+
+            Assert.AreEqual("hi   ", result);
+        }
+
+        #endregion
+
+        #region GenerateString
+
+        /// <summary>
+        /// Verifies that GenerateString generates a string of the requested length.
+        /// </summary>
+        [TestMethod]
+        [DataRow(1)]
+        [DataRow(10)]
+        [DataRow(100)]
+        [DataRow(1000)]
+        public void GenerateStringValidLengthReturnsCorrectLength(int length)
+        {
+            var result = StringUtils.GenerateString(StringUtils.SCHARSNUMS, length);
+
+            Assert.AreEqual(length, result.Length);
+        }
+
+        /// <summary>
+        /// Verifies that GenerateString contains only the specified characters.
+        /// </summary>
+        [TestMethod]
+        public void GenerateStringSpecificCharsContainsOnlyThoseChars()
+        {
+            var chars   = "AB";
+            var result  = StringUtils.GenerateString(chars, 100);
+
+            Assert.IsTrue(result.All(c => chars.Contains(c)));
+        }
+
+        /// <summary>
+        /// Verifies that a zero length throws an exception.
+        /// </summary>
+        [TestMethod]
+        public void GenerateStringZeroLengthThrowsArgumentOutOfRangeException()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => StringUtils.GenerateString("abc", 0));
+        }
+
+        /// <summary>
+        /// Verifies that a negative length throws an exception.
+        /// </summary>
+        [TestMethod]
+        public void GenerateStringNegativeLengthThrowsArgumentOutOfRangeException()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => StringUtils.GenerateString("abc", -1));
+        }
+
+        /// <summary>
+        /// Verifies that a null or empty character set throws an exception.
+        /// </summary>
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        public void GenerateStringInvalidCharsThrowsArgumentException(string chars)
+        {
+            Assert.Throws<ArgumentException>(() => StringUtils.GenerateString(chars, 10));
+        }
+
+        /// <summary>
+        /// Verifies GenerateLowerCharsString.
+        /// </summary>
+        [TestMethod]
+        public void GenerateLowerCharsStringValidLengthReturnsOnlyLowercase()
+        {
+            var result = StringUtils.GenerateLowerCharsString(50);
+
+            Assert.AreEqual(50, result.Length);
+            Assert.IsTrue(Regex.IsMatch(result, @"^[a-z]+$"));
+        }
+
+        /// <summary>
+        /// Verifies GenerateUpperCharsString.
+        /// </summary>
+        [TestMethod]
+        public void GenerateUpperCharsStringValidLengthReturnsOnlyUppercase()
+        {
+            var result = StringUtils.GenerateUpperCharsString(50);
+
+            Assert.AreEqual(50, result.Length);
+            Assert.IsTrue(Regex.IsMatch(result, @"^[A-Z]+$"));
+        }
+
+        /// <summary>
+        /// Verifies GenerateAlphaString.
+        /// </summary>
+        [TestMethod]
+        public void GenerateAlphaStringValidLengthReturnsOnlyAlpha()
+        {
+            var result = StringUtils.GenerateAlphaString(50);
+
+            Assert.AreEqual(50, result.Length);
+            Assert.IsTrue(Regex.IsMatch(result, @"^[A-Za-z]+$"));
+        }
+
+        /// <summary>
+        /// Verifies GenerateAlphaNumericString.
+        /// </summary>
+        [TestMethod]
+        public void GenerateAlphaNumericStringValidLengthReturnsAlphaNumeric()
+        {
+            var result = StringUtils.GenerateAlphaNumericString(50);
+
+            Assert.AreEqual(50, result.Length);
+            Assert.IsTrue(Regex.IsMatch(result, @"^[A-Za-z0-9]+$"));
+        }
+
+        #endregion
 
     }
 }

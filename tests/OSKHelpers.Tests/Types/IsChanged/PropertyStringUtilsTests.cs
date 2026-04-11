@@ -7,14 +7,14 @@ namespace AffidamentiWebBlazor.Tests.Utils
     [TestClass]
     public class PropertyStringUtilsTests
     {
-        #region Membri
+        #region Members
 
         private static string _decimalSeparator;
         private static string _thousandSeparator;
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         static PropertyStringUtilsTests()
         {
@@ -39,14 +39,14 @@ namespace AffidamentiWebBlazor.Tests.Utils
         [TestMethod]
         public void CheckSeparators()
         {
-            Assert.AreEqual(PropertyStringUtils.DecimalSeparator, ",");
-            Assert.AreEqual(PropertyStringUtils.ThousandsSeparator, ".");
+            Assert.AreEqual(",", PropertyStringUtils.DecimalSeparator);
+            Assert.AreEqual(".", PropertyStringUtils.ThousandsSeparator);
             PropertyStringUtils.DecimalSeparator = "x";
-            Assert.AreEqual(PropertyStringUtils.DecimalSeparator, "x");
+            Assert.AreEqual("x", PropertyStringUtils.DecimalSeparator);
             PropertyStringUtils.DecimalSeparator = _decimalSeparator;
             Assert.AreEqual(PropertyStringUtils.DecimalSeparator, _decimalSeparator);
             PropertyStringUtils.ThousandsSeparator = "x";
-            Assert.AreEqual(PropertyStringUtils.ThousandsSeparator, "x");
+            Assert.AreEqual("x", PropertyStringUtils.ThousandsSeparator);
             PropertyStringUtils.ThousandsSeparator = _decimalSeparator;
             Assert.AreEqual(PropertyStringUtils.ThousandsSeparator, _decimalSeparator);
         }
@@ -84,7 +84,7 @@ namespace AffidamentiWebBlazor.Tests.Utils
         {
             decimal d = 10;
             Assert.AreEqual(result, PropertyStringUtils.SetProperty(ref d, value));
-            Assert.AreEqual(d, expected);
+            Assert.AreEqual(expected, d);
         }
 
         [TestMethod]
@@ -93,7 +93,7 @@ namespace AffidamentiWebBlazor.Tests.Utils
         {
             decimal? d = value;
             Assert.AreEqual(result, PropertyStringUtils.SetProperty(ref d, newValue));
-            Assert.AreEqual(d, expected);
+            Assert.AreEqual(expected, d);
         }
 
         public static IEnumerable<object[]> DecimalPropertyValues
@@ -140,7 +140,7 @@ namespace AffidamentiWebBlazor.Tests.Utils
         public void TryParseDecimalTests(bool result, string value, decimal expected)
         {
             Assert.AreEqual(result, PropertyStringUtils.TryParse(value, out decimal d));
-            Assert.AreEqual(d, expected);
+            Assert.AreEqual(expected, d);
         }
 
         [TestMethod]
@@ -148,7 +148,7 @@ namespace AffidamentiWebBlazor.Tests.Utils
         public void TryParseNullDecimalTests(bool result, string newValue, decimal? expected)
         {
             Assert.AreEqual(result, PropertyStringUtils.TryParse(newValue, out decimal? d));
-            Assert.AreEqual(d, expected);
+            Assert.AreEqual(expected, d);
         }
 
         public static IEnumerable<object[]> TryParseDecimalPropertyValues

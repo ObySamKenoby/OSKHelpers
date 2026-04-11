@@ -1,9 +1,11 @@
+using System;
 using OSKHelpers.Common;
 using OSKHelpers.Security;
 
 namespace OSKHelpers.Tests.Security;
 
 [TestClass]
+[DoNotParallelize]
 public class PasswordObfuscatorTests
 {
     [TestMethod]
@@ -40,8 +42,8 @@ public class PasswordObfuscatorTests
     {
         Assert.Throws<ArgumentException>(() => PasswordObfuscator.DecodePassword(null));
         Assert.Throws<ArgumentException>(() => PasswordObfuscator.DecodePassword(string.Empty));
-        // La riga da deoffuscare deve essere lunga almeno 5 caratteri (4 sono utilizzati per
-        // l'encoding del valore di inizio password all'interno dell'hash).
+        // The string to decode must be at least 5 characters long (4 are used for
+        // encoding the password start index within the hash).
         Assert.Throws<ArgumentException>(() => PasswordObfuscator.DecodePassword("1"));
         Assert.Throws<ArgumentException>(() => PasswordObfuscator.DecodePassword("1234567"));
         Assert.IsNotEmpty(PasswordObfuscator.DecodePassword("12345678"));

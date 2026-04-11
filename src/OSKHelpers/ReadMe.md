@@ -131,7 +131,8 @@ Password hashing and obfuscation.
 
 | Class | Description |
 |---|---|
-| `Hash` | Static helper to compute SHA-256 or SHA-512 hashes of a string (`ComputeSha256Hash`, `ComputeSha512Hash`). |
+| `Hash` | Static helper to compute SHA-256 or SHA-512 hashes of a string, not safe for use with passwords (`ComputeSha256Hash`, `ComputeSha512Hash`). |
+| `PasswordHelper`| Static helper to create and check hashes safe to store passwords. |
 | `PasswordHash` | PBKDF2/RFC-2898 password hasher with a random 16-byte salt and 10 000 iterations, suitable for storing credentials in a database. |
 | `PasswordObfuscator` | Obfuscates a password in memory using a randomly seeded byte array, to reduce plaintext exposure during the process lifetime (`EncodePassword` / `DecodePassword`). |
 

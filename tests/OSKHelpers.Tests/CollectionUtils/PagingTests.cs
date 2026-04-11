@@ -8,7 +8,7 @@ namespace OSKHelpers.Tests.CollectionUtils
     [TestClass]
     public class PagingTests
     {
-		#region Costanti
+		#region Constants
 
 		public const int FIRST				= (int)PagingControlChars.First;
 		public const int FASTREWINND		= (int)PagingControlChars.FastRewind;
@@ -29,11 +29,10 @@ namespace OSKHelpers.Tests.CollectionUtils
 
 		#endregion
 
-		#region Metodi
+		#region Methods
 
-		#region Metodi di test
-
-		#region Test relativi all'utilizzo come istanza 
+		#region Test methods
+		#region Instance usage tests 
 
 		private Paging GetTestPaging() => new Paging() { Elements = 100 };
 
@@ -41,12 +40,12 @@ namespace OSKHelpers.Tests.CollectionUtils
 		public void DefaultConstructor()
 		{
 			var paging = new Paging();
-			Assert.AreEqual(paging.Elements, 0);
-			Assert.AreEqual(paging.PageSize, Paging.DEFAULTPAGESIZE);
-			Assert.AreEqual(paging.Page, 1);
-			Assert.AreEqual(paging.GroupSize, Paging.DEFAULTGROUPSIZE);
-			Assert.AreEqual(paging.BorderSize, Paging.DEFAULTBORDERSIZE);
-			Assert.AreEqual(paging.Pages, 1);
+			Assert.AreEqual(0, paging.Elements);
+			Assert.AreEqual(Paging.DEFAULTPAGESIZE, paging.PageSize);
+			Assert.AreEqual(1, paging.Page);
+			Assert.AreEqual(Paging.DEFAULTGROUPSIZE, paging.GroupSize);
+			Assert.AreEqual(Paging.DEFAULTBORDERSIZE, paging.BorderSize);
+			Assert.AreEqual(1, paging.Pages);
 			Assert.IsTrue(paging.GetPagesArray().SequenceEqual(new int[] { 1 }));
 		}
 
@@ -97,9 +96,9 @@ namespace OSKHelpers.Tests.CollectionUtils
 		{
 			var paging = GetTestPaging();
 			paging.PageSize = 1;
-			Assert.AreEqual(paging.PageSize, MINPAGESIZE);
+			Assert.AreEqual(MINPAGESIZE, paging.PageSize);
 			paging.PageSize = 100;
-			Assert.AreEqual(paging.PageSize, 100);
+			Assert.AreEqual(100, paging.PageSize);
 		}
 
 		[TestMethod]
@@ -107,11 +106,11 @@ namespace OSKHelpers.Tests.CollectionUtils
 		{
 			var paging = GetTestPaging();
 			paging.GroupSize = MINGROUPSIZE - 1;
-			Assert.AreEqual(paging.GroupSize, MINGROUPSIZE);
+			Assert.AreEqual(MINGROUPSIZE, paging.GroupSize);
 			paging.GroupSize = MAXGROUPSIZE + 1;
-			Assert.AreEqual(paging.GroupSize, MAXGROUPSIZE);
+			Assert.AreEqual(MAXGROUPSIZE, paging.GroupSize);
 			paging.GroupSize = 4;
-			Assert.AreEqual(paging.GroupSize, 5);
+			Assert.AreEqual(5, paging.GroupSize);
 		}
 
 		[TestMethod]
@@ -119,9 +118,9 @@ namespace OSKHelpers.Tests.CollectionUtils
 		{
 			var paging = GetTestPaging();
 			paging.BorderSize = MINBORDERSIZE - 1;
-			Assert.AreEqual(paging.BorderSize, MINBORDERSIZE);
+			Assert.AreEqual(MINBORDERSIZE, paging.BorderSize);
 			paging.BorderSize = MAXBORDERSIZE + 1;
-			Assert.AreEqual(paging.BorderSize, MAXBORDERSIZE);
+			Assert.AreEqual(MAXBORDERSIZE, paging.BorderSize);
 		}
 
         #endregion
@@ -143,13 +142,13 @@ namespace OSKHelpers.Tests.CollectionUtils
 		[TestMethod]
 		public void GetPageFirstElementIndex()
         {
-			Assert.AreEqual(0,	Paging.GetPageFirstElementIndex(-1, 10, 10));
-			Assert.AreEqual(0,	Paging.GetPageFirstElementIndex(0, 10, 10));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(-1, 10, 10));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(0, 10, 10));
 			Assert.AreEqual(45, Paging.GetPageFirstElementIndex(100, -1, 10));
-			Assert.AreEqual(0,	Paging.GetPageFirstElementIndex(100, 10, -1));
-			Assert.AreEqual(0,	Paging.GetPageFirstElementIndex(100, 10, 1));
-			Assert.AreEqual(0,	Paging.GetPageFirstElementIndex(3, 10, 1));
-			Assert.AreEqual(0,	Paging.GetPageFirstElementIndex(9, 10, 2));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(100, 10, -1));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(100, 10, 1));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(3, 10, 1));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(9, 10, 2));
 			Assert.AreEqual(10, Paging.GetPageFirstElementIndex(100, 10, 2));
 			Assert.AreEqual(10, Paging.GetPageFirstElementIndex(11, 10, 2));
 			Assert.AreEqual(10, Paging.GetPageFirstElementIndex(11, 10, 2));
@@ -159,12 +158,12 @@ namespace OSKHelpers.Tests.CollectionUtils
 		[TestMethod]
 		public void GetPageLastElementIndex()
         {
-			Assert.AreEqual(0,	Paging.GetPageLastElementIndex(-1, 10, 10));
-			Assert.AreEqual(0,	Paging.GetPageLastElementIndex(0, 10, 10));
-			Assert.AreEqual(0,	Paging.GetPageLastElementIndex(1, 10, 10));
-			Assert.AreEqual(4,	Paging.GetPageLastElementIndex(10, 4, 1));
-			Assert.AreEqual(4,	Paging.GetPageLastElementIndex(10, 5, -1));
-			Assert.AreEqual(9,	Paging.GetPageLastElementIndex(10, 10, 2));
+			Assert.AreEqual(0, Paging.GetPageLastElementIndex(-1, 10, 10));
+			Assert.AreEqual(0, Paging.GetPageLastElementIndex(0, 10, 10));
+			Assert.AreEqual(0, Paging.GetPageLastElementIndex(1, 10, 10));
+			Assert.AreEqual(4, Paging.GetPageLastElementIndex(10, 4, 1));
+			Assert.AreEqual(4, Paging.GetPageLastElementIndex(10, 5, -1));
+			Assert.AreEqual(9, Paging.GetPageLastElementIndex(10, 10, 2));
 			Assert.AreEqual(19, Paging.GetPageLastElementIndex(20, 10, 2));
 			Assert.AreEqual(19, Paging.GetPageLastElementIndex(20, 10, 3));
 			Assert.AreEqual(93, Paging.GetPageLastElementIndex(94, 10, 10));
@@ -215,12 +214,12 @@ namespace OSKHelpers.Tests.CollectionUtils
 			test = new int[] { FIRST, FASTREWINND, PREVIOUS, 1, 2, SUSPENSIONPOINTS, 11, 12 };
 			Assert.IsTrue(Paging.GetPagesArray(115, 10, 15, 2, 3).SequenceEqual(test));
 
-			// Verifica dei parametri fuori dai limiti
-			// Limiti di default: 
+			// Test out-of-bounds parameters
+			// Default limits: 
 			// PageSize:	5 - 
 			// BorderSize:	2 - 5
-			// GroupSize:	3 - 7, solo numeri dispari
-			// Pagina:		1 - max pagina 
+			// GroupSize:	3 - 7, odd numbers only
+			// Page:		1 - max page
 			test = new int[] { 1 };
 			Assert.IsTrue(Paging.GetPagesArray(-1, 10, 1, 2, 3).SequenceEqual(test));
 
@@ -247,63 +246,62 @@ namespace OSKHelpers.Tests.CollectionUtils
 		[TestMethod]
 		public void GetPageFirstElementIndexTests()
         {
-			// Verifica parametri fuori dai limiti
-			// Limiti di default: 
-			// PageSize:	5 - 
-			Assert.AreEqual(0,  Paging.GetPageFirstElementIndex(-1, -1, -1));
-			Assert.AreEqual(0,  Paging.GetPageFirstElementIndex(-1, Paging.MINPAGESIZE, 1));
-			Assert.AreEqual(0,  Paging.GetPageFirstElementIndex(10, -1, 1));
-			Assert.AreEqual(0,  Paging.GetPageFirstElementIndex(10, Paging.MINPAGESIZE, -1));
+			// Test out-of-bounds parameters
+			// Default limits: 
+			// PageSize:	5 -
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(-1, Paging.MINPAGESIZE, 1));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(10, -1, 1));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(10, Paging.MINPAGESIZE, -1));
 			// Verifica dei risultati con parametri corretti
-			Assert.AreEqual(0,  Paging.GetPageFirstElementIndex(10, 10, 1));
-			Assert.AreEqual(0,  Paging.GetPageFirstElementIndex(20, 10, 1));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(10, 10, 1));
+			Assert.AreEqual(0, Paging.GetPageFirstElementIndex(20, 10, 1));
 			Assert.AreEqual(10, Paging.GetPageFirstElementIndex(20, 10, 2));
-			Assert.AreEqual(21, Paging.GetPageFirstElementIndex(22,  7, 4));
+			Assert.AreEqual(21, Paging.GetPageFirstElementIndex(22, 7, 4));
 		}
 
 		[TestMethod]
 		public void GetPageLastElementIndexTests()
 		{
-			// Verifica parametri fuori dai limiti
-			// Limiti di default: 
-			// PageSize:	5 - 
-			Assert.AreEqual(0,  Paging.GetPageLastElementIndex(-1, -1, -1));
-			Assert.AreEqual(0,  Paging.GetPageLastElementIndex(-1, Paging.MINPAGESIZE, 1));
-			Assert.AreEqual(4,  Paging.GetPageLastElementIndex(10, -1, 1));
-			Assert.AreEqual(4,  Paging.GetPageLastElementIndex(10, Paging.MINPAGESIZE, -1));
-			Assert.AreEqual(19, Paging.GetPageLastElementIndex(31,  3, 4));
+			// Test out-of-bounds parameters
+			// Default limits: 
+			// PageSize:	5 -
+				Assert.AreEqual(0, Paging.GetPageLastElementIndex(-1, -1, -1));
+			Assert.AreEqual(0, Paging.GetPageLastElementIndex(-1, Paging.MINPAGESIZE, 1));
+			Assert.AreEqual(4, Paging.GetPageLastElementIndex(10, -1, 1));
+			Assert.AreEqual(4, Paging.GetPageLastElementIndex(10, Paging.MINPAGESIZE, -1));
+			Assert.AreEqual(19, Paging.GetPageLastElementIndex(31, 3, 4));
 			// Verifica dei risultati con parametri corretti
-			Assert.AreEqual(9,  Paging.GetPageLastElementIndex(10, 10, 1));
-			Assert.AreEqual(9,  Paging.GetPageLastElementIndex(20, 10, 1));
+			Assert.AreEqual(9, Paging.GetPageLastElementIndex(10, 10, 1));
+			Assert.AreEqual(9, Paging.GetPageLastElementIndex(20, 10, 1));
 			Assert.AreEqual(19, Paging.GetPageLastElementIndex(20, 10, 2));
-			Assert.AreEqual(19, Paging.GetPageLastElementIndex(31,  5, 4));
-			Assert.AreEqual(14, Paging.GetPageLastElementIndex(24,  5, 3));
-			Assert.AreEqual(20, Paging.GetPageLastElementIndex(24,  7, 3));
-			Assert.AreEqual(23, Paging.GetPageLastElementIndex(24,  7, 4));
+			Assert.AreEqual(19, Paging.GetPageLastElementIndex(31, 5, 4));
+			Assert.AreEqual(14, Paging.GetPageLastElementIndex(24, 5, 3));
+			Assert.AreEqual(20, Paging.GetPageLastElementIndex(24, 7, 3));
+			Assert.AreEqual(23, Paging.GetPageLastElementIndex(24, 7, 4));
 		}
 
 		[TestMethod]
 		public void InstanceGetPageFirstElementIndexTests()
 		{
-			// Verifica dei risultati con parametri corretti,
-			// la proprietà è solamente un'interfaccia verso il metodo statico
-			Paging paging = new Paging(10, 10, 1, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
-			Assert.AreEqual(0, paging.PageFirstElementIndex);
-			paging = new Paging(20, 10, 1, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
-			Assert.AreEqual(0, paging.PageFirstElementIndex);
-			paging = new Paging(20, 10, 2, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE); 
-			Assert.AreEqual(10, paging.PageFirstElementIndex);
-			paging = new Paging(22, 7, 4, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
-			Assert.AreEqual(21, paging.PageFirstElementIndex);
+			// Test correct results,
+			// the property is only an interface to the static method
+				Paging paging = new Paging(10, 10, 1, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
+				Assert.AreEqual(0, paging.PageFirstElementIndex);
+				paging = new Paging(20, 10, 1, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
+				Assert.AreEqual(0, paging.PageFirstElementIndex);
+				paging = new Paging(20, 10, 2, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE); 
+				Assert.AreEqual(10, paging.PageFirstElementIndex);
+				paging = new Paging(22, 7, 4, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
+				Assert.AreEqual(21, paging.PageFirstElementIndex);
 		}
 
 		[TestMethod]
 		public void InstanceGetPageLastElementIndexTests()
 		{
-			// Verifica dei risultati con parametri corretti,
-			// la proprietà è solamente un'interfaccia verso il metodo statico
-			Paging paging = new Paging(10, 10, 1, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
-			Assert.AreEqual(9, paging.PageLastElementIndex);
+			// Test correct results,
+			// the property is only an interface to the static method
+				Paging paging = new Paging(10, 10, 1, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
+				Assert.AreEqual(9, paging.PageLastElementIndex);
 			paging = new Paging(20, 10, 1, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
 			Assert.AreEqual(9, paging.PageLastElementIndex);
 			paging = new Paging(20, 10, 2, DEFAULTBORDERSIZE, DEFAULTGROUPSIZE);
