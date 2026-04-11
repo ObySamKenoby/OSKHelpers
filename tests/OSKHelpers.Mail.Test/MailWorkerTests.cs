@@ -1,9 +1,13 @@
-﻿namespace OSKHelpers.Mail.Test
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace OSKHelpers.Mail.Test
 {
     [TestClass]
     public class MailWorkerTests
     {
-        #region Proprietà
+        #region Properties
 
         private static IEnumerable<object[]> ParseStringTestsData
         {
@@ -27,7 +31,7 @@
 
                 var textWCond1      = "AAA<<COND1>>XXX<</COND1>>BBB";
                 var textWCond2      = "CCC<<COND2>>YYY<</COND2>>DDD";
-                // Testo con tag aperutra / chiusura inverititi
+                // Text with opening/closing tags reversed
                 var textWCond1Err1  = "AAA<</COND1>>XXX<<COND1>>BBB";
                 var textWCond1Err2  = "AAA<<COND1>>XXXBBB";
                 var textWCond1Err3  = "AAA<XXX<</COND1>>BBB";
@@ -53,7 +57,7 @@
                     new object[] { textWTag1,   new List<(string, string)>() { tags2 }, null, textWTag1 },
                     new object[] { textWTag2,   new List<(string, string)>() { tags1 }, null, textWTag2 },
                     new object[] { textWTag1 + textWTag2,   new List<(string, string)>() { tags1, tags2 }, null, textSTag1 + textSTag2 },
-                    // Condizioni
+                    // Conditions
                     new object[] { textWCond1,  null, new List<(string, Func<bool>)>() { cond1True },   textSTag1 },
                     new object[] { textWCond1,  null, new List<(string, Func<bool>)>() { cond1False },  textETag1 },
                     new object[] { textWCond2,  null, new List<(string, Func<bool>)>() { cond2True },   textSTag2 },
@@ -66,15 +70,15 @@
                     new object[] { textWCond1 + textWCond1, null, new List<(string, Func<bool>)>() { cond1False },              textETag1 + textETag1 },
                     new object[] { textWCond1 + textWCond1 + textWCond2, null, new List<(string, Func<bool>)>() { cond1True, cond2False }, textSTag1 + textSTag1 + textETag2 },
                     new object[] { textWCond1 + textWCond1 + textWCond2, null, new List<(string, Func<bool>)>() { cond1False, cond2True }, textETag1 + textETag1 + textSTag2 },
-                    // Aggiunta di condizioni con nome vuoto o condizione nulla
+                    // Adding conditions with empty name or null condition
                     new object[] { textWCond1 + textWCond2,  null, new List<(string, Func<bool>)>() { cond1True, condTagEmpty },    textSTag1 + textWCond2 },
                     new object[] { textWCond1 + textWCond2,  null, new List<(string, Func<bool>)>() { cond1True, condTagNull },     textSTag1 + textWCond2 },
                     new object[] { textWCond1 + textWCond2,  null, new List<(string, Func<bool>)>() { cond1True, condCond1Null },   textSTag1 + textWCond2 },
-                    // Condizioni con errori
+                    // Conditions with errors
                     new object[] { textWCond1Err1,  null, new List<(string, Func<bool>)>() { cond1True }, textWCond1Err1 },
                     new object[] { textWCond1Err2,  null, new List<(string, Func<bool>)>() { cond1True }, textWCond1Err2 },
                     new object[] { textWCond1Err3,  null, new List<(string, Func<bool>)>() { cond1True }, textWCond1Err3 },
-                    // Condizioni e Tags
+                    // Conditions and Tags
                     new object[] { textWTag1 + textWTag2 + textWCond1 + textWCond2, new List<(string, string)>() { tags1, tags2 },  new List<(string, Func<bool>)>() { cond1True, cond2True },  textSTag1 + textSTag2 + textSTag1 + textSTag2 },
                     new object[] { textWTag1 + textWTag2 + textWCond1 + textWCond2, new List<(string, string)>() { tags1 },         new List<(string, Func<bool>)>() { cond1True, cond2False }, textSTag1 + textWTag2 + textSTag1 + textETag2 }
 
@@ -103,79 +107,79 @@
                 var condFalse   = (CONDFALSE, condFalseFn);
 
                 var fileContent = @"
-# Commento
+# Comment
 @Subject: Test {TAG1} <<COND1>>{TAG1}<</COND1>> <<COND2>>{TAG2}<</COND2>>
-# Commento 2
-Testo <<COND1>>Interno Condizione Vera {TAG1}<</COND1>> <<COND1>>Interno   
-Condizione Vera Multiline {TAG1}<</COND1>> <<COND2>>Interno Condizione Falsa<</COND2>> {TAG2} <<COND2>>Interno 
-Condizione Falsa Miltiline<</COND2>> FINE
+# Comment 2
+Text <<COND1>>Inside True Condition {TAG1}<</COND1>> <<COND1>>Inside True  
+Condition Multiline {TAG1}<</COND1>> <<COND2>>Inside False Condition<</COND2>> {TAG2} <<COND2>>Inside 
+False Condition Multiline<</COND2>> END
 ";
                 var fileContent2Subject1 = @"
-# Commento
+# Comment
 <<COND1>>@Subject: Test {TAG1} <</COND1>>
 <<COND2>>@Subject: Test {TAG2} <</COND2>>
-# Commento 2
-Testo <<COND1>>Interno Condizione Vera {TAG1}<</COND1>> <<COND1>>Interno   
-Condizione Vera Multiline {TAG1}<</COND1>> <<COND2>>Interno Condizione Falsa<</COND2>> {TAG2} <<COND2>>Interno 
-Condizione Falsa Miltiline<</COND2>> FINE
+# Comment 2
+Text <<COND1>>Inside True Condition {TAG1}<</COND1>> <<COND1>>Inside True  
+Condition Multiline {TAG1}<</COND1>> <<COND2>>Inside False Condition<</COND2>> {TAG2} <<COND2>>Inside 
+False Condition Multiline<</COND2>> END
 ";
                 var fileContent2Subject2 = @"
-# Commento
+# Comment
 <<COND2>>@Subject: Test {TAG1} <</COND2>>
 <<COND1>>@Subject: Test {TAG2} <</COND1>>
-# Commento 2
-Testo <<COND1>>Interno Condizione Vera {TAG1}<</COND1>> <<COND1>>Interno   
-Condizione Vera Multiline {TAG1}<</COND1>> <<COND2>>Interno Condizione Falsa<</COND2>> {TAG2} <<COND2>>Interno 
-Condizione Falsa Miltiline<</COND2>> FINE
+# Comment 2
+Text <<COND1>>Inside True Condition {TAG1}<</COND1>> <<COND1>>Inside True  
+Condition Multiline {TAG1}<</COND1>> <<COND2>>Inside False Condition<</COND2>> {TAG2} <<COND2>>Inside 
+False Condition Multiline<</COND2>> END
 ";
                 var fileContent2Subject1Error = @"
-# Commento
+# Comment
 <<COND1>>@Subject: Test {TAG1} <</COND1>>{TAG1}<</COND1>> <<COND2>>{TAG2}<</COND2>><</COND1>>
 <<COND2>>@Subject: Test {TAG1} <</COND2>>{TAG1}<</COND1>> <<COND2>>{TAG2}<</COND2>><</COND2>>
-# Commento 2
-Testo <<COND1>>Interno Condizione Vera {TAG1}<</COND1>> <<COND1>>Interno   
-Condizione Vera Multiline {TAG1}<</COND1>> <<COND2>>Interno Condizione Falsa<</COND2>> {TAG2} <<COND2>>Interno 
-Condizione Falsa Miltiline<</COND2>> FINE
+# Comment 2
+Text <<COND1>>Inside True Condition {TAG1}<</COND1>> <<COND1>>Inside True  
+Condition Multiline {TAG1}<</COND1>> <<COND2>>Inside False Condition<</COND2>> {TAG2} <<COND2>>Inside 
+False Condition Multiline<</COND2>> END
 ";
                 var fileContent2Subject2Error = @"
-# Commento
+# Comment
 <<COND2>>@Subject: Test {TAG1} <</COND2>>{TAG1}<</COND1>> <<COND2>>{TAG2}<</COND2>><</COND2>>
 <<COND1>>@Subject: Test {TAG1} <</COND1>>{TAG2}<</COND1>> <<COND2>>{TAG1}<</COND2>><</COND1>>
-# Commento 2
-Testo <<COND1>>Interno Condizione Vera {TAG1}<</COND1>> <<COND1>>Interno   
-Condizione Vera Multiline {TAG1}<</COND1>> <<COND2>>Interno Condizione Falsa<</COND2>> {TAG2} <<COND2>>Interno 
-Condizione Falsa Miltiline<</COND2>> FINE
+# Comment 2
+Text <<COND1>>Inside True Condition {TAG1}<</COND1>> <<COND1>>Inside True  
+Condition Multiline {TAG1}<</COND1>> <<COND2>>Inside False Condition<</COND2>> {TAG2} <<COND2>>Inside 
+False Condition Multiline<</COND2>> END
 ";
                 var fileContentNoSubject = @"
-# Commento
-# Commento 2
-Testo <<COND1>>Interno Condizione Vera {TAG1}<</COND1>> <<COND1>>Interno   
-Condizione Vera Multiline {TAG1}<</COND1>> <<COND2>>Interno Condizione Falsa<</COND2>> {TAG2} <<COND2>>Interno 
-Condizione Falsa Miltiline<</COND2>> FINE
+# Comment
+# Comment 2
+Text <<COND1>>Inside True Condition {TAG1}<</COND1>> <<COND1>>Inside True  
+Condition Multiline {TAG1}<</COND1>> <<COND2>>Inside False Condition<</COND2>> {TAG2} <<COND2>>Inside 
+False Condition Multiline<</COND2>> END
 ";
                 var fileContentNoBody = @"
-# Commento
+# Comment
 @Subject: Test {TAG1} <<COND1>>{TAG1}<</COND1>> <<COND2>>{TAG2}<</COND2>>
-# Commento 2
+# Comment 2
 
 ";
                 var mailSubject = "Test XXX XXX";
                 var mail2Subject1 = "Test XXX";
                 var mail2Subject2 = "Test YYY";
-                var mailBody    = "Testo Interno Condizione Vera XXX Interno Condizione Vera Multiline XXX  YYY  FINE";
+                var mailBody    = "Text Inside True Condition XXX Inside True Condition Multiline XXX  YYY  END";
 
                 var objects = new List<object[]>()
                 {
-                    // Lista righe vuota o nulla
+                    // Empty or null row list
                     new object[] { null, null, null, (false, string.Empty, string.Empty, (Dictionary<string, string>)null) },
                     new object[] { new List<string>(), null, null, (false, string.Empty, string.Empty, (Dictionary<string, string>)null) },
-                    // Contenuto valido
+                    // Valid content
                     new object[] { fileContent.Split("\r\n").ToList(), new List<(string, string)> { tags1, tags2 }, new List<(string, Func<bool>)> { condTrue, condFalse }, (true, mailSubject, mailBody, (Dictionary<string, string>)null) },
-                    // Oggetto assente
+                    // No subject
                     new object[] { fileContentNoSubject.Split("\r\n").ToList(), new List<(string, string)> { tags1, tags2 }, new List<(string, Func<bool>)> { condTrue, condFalse }, (false, string.Empty, string.Empty, (Dictionary<string, string>)null) },
-                    // Nessuna riga per il corpo
+                    // No body lines
                     new object[] { fileContentNoBody.Split("\r\n").ToList(), new List<(string, string)> { tags1, tags2 }, new List<(string, Func<bool>)> { condTrue, condFalse }, (false, string.Empty, string.Empty, (Dictionary<string, string>)null) },
-                    // Due oggetti, alternativamente validi il primo o il secondo. I primi due corretti, i secondi contengono un errore nei tag (test di timeout)
+                    // Two subjects, alternately valid: first or second. First two correct, second two contain a tag error (timeout test)
                     new object[] { fileContent2Subject1.Split("\r\n").ToList(), new List<(string, string)> { tags1, tags2 }, new List<(string, Func<bool>)> { condTrue, condFalse }, (true, mail2Subject1, mailBody, (Dictionary<string, string>)null) },
                     new object[] { fileContent2Subject2.Split("\r\n").ToList(), new List<(string, string)> { tags1, tags2 }, new List<(string, Func<bool>)> { condTrue, condFalse }, (true, mail2Subject2, mailBody, (Dictionary<string, string>)null) },
                     new object[] { fileContent2Subject1Error.Split("\r\n").ToList(), new List<(string, string)> { tags1, tags2 }, new List<(string, Func<bool>)> { condTrue, condFalse }, (false, string.Empty, string.Empty, (Dictionary<string, string>)null) },
@@ -188,7 +192,7 @@ Condizione Falsa Miltiline<</COND2>> FINE
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         [TestMethod]
         [DynamicData(nameof(ParseStringTestsData))]

@@ -107,7 +107,7 @@ namespace OSKHelpers.Security
 
             for (int i = 0; i < encodedBytes.Length; i++)
             {
-                decoded[i] = (byte)(encodedBytes[i] ^ (_seed[(startIndex + i) % SEEDLENGTH]));
+                decoded[i] = (byte)(encodedBytes[i] ^ _seed[(int)(((long)startIndex + i) % SEEDLENGTH + SEEDLENGTH) % SEEDLENGTH]);
             }
 
             return Encoding.UTF8.GetString(decoded);

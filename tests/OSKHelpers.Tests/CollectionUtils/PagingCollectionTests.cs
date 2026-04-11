@@ -9,7 +9,7 @@ namespace OSKHelpers.Tests.CollectionUtils
 	[TestClass]
 	public class PagingCollectionTests
 	{
-		#region Costanti
+		#region Constants
 
 		public const int MINPAGESIZE		= PagingCollection<int>.MINPAGESIZE;
 		public const int DEFAULTPAGESIZE	= PagingCollection<int>.DEFAULTPAGESIZE;
@@ -22,7 +22,7 @@ namespace OSKHelpers.Tests.CollectionUtils
 
 		#endregion
 
-		#region Metodi
+		#region Methods
 
 		private PagingCollection<int> GetTestPaging()
 		{
@@ -34,17 +34,17 @@ namespace OSKHelpers.Tests.CollectionUtils
 			return new PagingCollection<int>(intList);
 		}
 
-		#region Metodi di test
+		#region Test methods
 
 		[TestMethod]
 		public void DefaultConstructor()
 		{
 			var paging = new PagingCollection<int>();
-			Assert.AreEqual(paging.PageSize, PagingCollection<int>.DEFAULTPAGESIZE);
-			Assert.AreEqual(paging.Page, 1);
-			Assert.AreEqual(paging.GroupSize, PagingCollection<int>.DEFAULTGROUPSIZE);
-			Assert.AreEqual(paging.BorderSize, PagingCollection<int>.DEFAULTBORDERSIZE);
-			Assert.AreEqual(paging.Pages, 1);
+			Assert.AreEqual(PagingCollection<int>.DEFAULTPAGESIZE, paging.PageSize);
+			Assert.AreEqual(1, paging.Page);
+			Assert.AreEqual(PagingCollection<int>.DEFAULTGROUPSIZE, paging.GroupSize);
+			Assert.AreEqual(PagingCollection<int>.DEFAULTBORDERSIZE, paging.BorderSize);
+			Assert.AreEqual(1, paging.Pages);
 			Assert.IsTrue(paging.GetPagesArray().SequenceEqual(new int[] { 1 }));
 		}
 
@@ -53,11 +53,11 @@ namespace OSKHelpers.Tests.CollectionUtils
 		{
 			List<int> elements = null;
 			var paging = new PagingCollection<int>(elements, 0, 0, 0, 0);
-			Assert.AreEqual(paging.PageSize, PagingCollection<int>.MINPAGESIZE);
-			Assert.AreEqual(paging.Page, 1);
-			Assert.AreEqual(paging.GroupSize, PagingCollection<int>.MINGROUPSIZE);
-			Assert.AreEqual(paging.BorderSize, PagingCollection<int>.MINBORDERSIZE);
-			Assert.AreEqual(paging.Pages, 1);
+			Assert.AreEqual(PagingCollection<int>.MINPAGESIZE, paging.PageSize);
+			Assert.AreEqual(1, paging.Page);
+			Assert.AreEqual(PagingCollection<int>.MINGROUPSIZE, paging.GroupSize);
+			Assert.AreEqual(PagingCollection<int>.MINBORDERSIZE, paging.BorderSize);
+			Assert.AreEqual(1, paging.Pages);
 			Assert.IsTrue(paging.GetPagesArray().SequenceEqual(new int[] { 1 }));
 		}
 
@@ -68,10 +68,10 @@ namespace OSKHelpers.Tests.CollectionUtils
 			paging.Page = paging.Pages + 1;
 			Assert.AreEqual(paging.Page, paging.Pages);
 			paging.Page = 0;
-			Assert.AreEqual(paging.Page, 1);
+			Assert.AreEqual(1, paging.Page);
 			paging.Page = paging.Pages;
 			paging.SetElements(Array.Empty<int>());
-			Assert.AreEqual(paging.Page, 1);
+			Assert.AreEqual(1, paging.Page);
 		}
 
 		[TestMethod]
@@ -79,9 +79,9 @@ namespace OSKHelpers.Tests.CollectionUtils
 		{
 			var paging = GetTestPaging();
 			paging.PageSize = 1;
-			Assert.AreEqual(paging.PageSize, MINPAGESIZE);
+			Assert.AreEqual(MINPAGESIZE, paging.PageSize);
 			paging.PageSize = 100;
-			Assert.AreEqual(paging.PageSize, 100);
+			Assert.AreEqual(100, paging.PageSize);
 		}
 
 		[TestMethod]
@@ -89,11 +89,11 @@ namespace OSKHelpers.Tests.CollectionUtils
 		{
 			var paging = GetTestPaging();
 			paging.GroupSize = MINGROUPSIZE - 1;
-			Assert.AreEqual(paging.GroupSize, MINGROUPSIZE);
+			Assert.AreEqual(MINGROUPSIZE, paging.GroupSize);
 			paging.GroupSize = MAXGROUPSIZE + 1;
-			Assert.AreEqual(paging.GroupSize, MAXGROUPSIZE);
+			Assert.AreEqual(MAXGROUPSIZE, paging.GroupSize);
 			paging.GroupSize = 4;
-			Assert.AreEqual(paging.GroupSize, 5);
+			Assert.AreEqual(5, paging.GroupSize);
 		}
 
 		[TestMethod]
@@ -101,9 +101,9 @@ namespace OSKHelpers.Tests.CollectionUtils
 		{
 			var paging = GetTestPaging();
 			paging.BorderSize = MINBORDERSIZE- 1;
-			Assert.AreEqual(paging.BorderSize, MINBORDERSIZE);
+			Assert.AreEqual(MINBORDERSIZE, paging.BorderSize);
 			paging.BorderSize= MAXBORDERSIZE+ 1;
-			Assert.AreEqual(paging.BorderSize, MAXBORDERSIZE);
+			Assert.AreEqual(MAXBORDERSIZE, paging.BorderSize);
 		}
 
 		[TestMethod]
@@ -130,7 +130,7 @@ namespace OSKHelpers.Tests.CollectionUtils
 			for (var i = 0; i < elementsForPage; i++)
 				nums.Add(startNum + i);
 			Assert.IsTrue(paging.GetPageElements().SequenceEqual(nums));
-			// Ultima pagina: il numero di elementi è quello di default meno uno (vedere come viene creato l'array di test)
+			// Last page: element count is the default minus one (see how the test array is created)
 			nums.Clear();
 			page = pages;
 			paging.Page = paging.Pages;
@@ -156,7 +156,7 @@ namespace OSKHelpers.Tests.CollectionUtils
 			paging.Page = 1;
 			nums.Clear();
 			nums.AddRange(new int[] { 1, 2, 3, 4 });
-			Assert.AreEqual(paging.Pages, 4);
+			Assert.AreEqual(4, paging.Pages);
 			var numArray = paging.GetPagesArray();
 			Assert.IsTrue(numArray.SequenceEqual(nums));
 			nums.Clear();
@@ -167,7 +167,7 @@ namespace OSKHelpers.Tests.CollectionUtils
 			paging.SetElements(nums);
 			nums.Clear();
 			nums.AddRange(new int[] { 1, 2, 3, 4, 5, 6, 7 });
-			Assert.AreEqual(paging.Pages, 7);
+			Assert.AreEqual(7, paging.Pages);
 			numArray = paging.GetPagesArray();
 			Assert.IsTrue(numArray.SequenceEqual(nums));
 

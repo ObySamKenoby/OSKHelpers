@@ -290,7 +290,7 @@ namespace OSKHelpers.Mail
         {
             var check =
                 !string.IsNullOrWhiteSpace(ImapServer) &&
-                SmtpPort > 0 &&
+                ImapPort > 0 &&
                 !ImapAuthConfigError;
 
             if (logResult)

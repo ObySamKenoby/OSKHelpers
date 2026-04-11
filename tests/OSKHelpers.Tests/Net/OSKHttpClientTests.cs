@@ -12,15 +12,15 @@ namespace OSKHelpers.Tests.Net
         public void InitTests()
         {
 #if DEBUG
-            // Verifica stato iniziale
+            // Check initial state
             Assert.IsNull(OSKHttpClient.GetHttpClientPrivateInstance());
-            // Creazione di Instance con AcceptInsecureConnections = false
+            // Create Instance with AcceptInsecureConnections = false
             OSKHttpClient.AcceptInsecureConnections = false;
             Assert.IsNotNull(OSKHttpClient.Instance);
             Assert.IsNotNull(OSKHttpClient.GetHttpClientPrivateInstance());
-            // Quando Instance non è null è atteso che la modifica di AcceptInsecureConnections restituisca InvalidOperationException
+            // When Instance is not null, modifying AcceptInsecureConnections is expected to throw InvalidOperationException
             Assert.Throws<InvalidOperationException>(() => OSKHttpClient.AcceptInsecureConnections = true);
-            // E' necessario richiamare il metodo dispose prima di poter modificare il valore di AcceptInsecureConnections
+            // Dispose must be called before modifying AcceptInsecureConnections
             OSKHttpClient.Dispose();
             Assert.IsNull(OSKHttpClient.GetHttpClientPrivateInstance());
             OSKHttpClient.AcceptInsecureConnections = true;
@@ -28,7 +28,7 @@ namespace OSKHelpers.Tests.Net
             Assert.IsNotNull(OSKHttpClient.Instance);
             Assert.IsNotNull(OSKHttpClient.GetHttpClientPrivateInstance());
             OSKHttpClient.Dispose();
-            // Test per SetInstance. Può essere utilizzato esclusivamente quando Instane è null.
+            // Test for SetInstance. Can only be used when Instance is null.
             var instance = new HttpClient();
             Assert.IsNull(OSKHttpClient.GetHttpClientPrivateInstance());
             OSKHttpClient.SetInstance(instance);
