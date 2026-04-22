@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<Title>OSK Helpers - Mail utils</Title>
-		<VersionPrefix>1.2.2</VersionPrefix>
+		<VersionPrefix>1.2.3</VersionPrefix>
 		<Description>Support library to simplify sending mail.</Description>
 		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
 	</PropertyGroup>
@@ -16,7 +16,7 @@
 		<PackageLicenseFile>License.txt</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
-		<PackageReleaseNotes>Updated reference to latest MailKit NuGet package.</PackageReleaseNotes>
+		<PackageReleaseNotes>Updated reference to latest (4.16.0) MailKit NuGet package.</PackageReleaseNotes>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<PackageProjectUrl>https://github.com/ObySamKenoby/OSKHelpers</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/ObySamKenoby/OSKHelpers</RepositoryUrl>
@@ -31,7 +31,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MailKit" Version="4.15.1" />
+		<PackageReference Include="MailKit" Version="4.16.0" />
 		<PackageReference Include="OSKHelpers" Version="1.7.1" />
 	</ItemGroup>
 
