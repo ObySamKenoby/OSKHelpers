@@ -150,7 +150,8 @@ namespace OSKHelpers.Json
                 DefaultIgnoreCondition      = JsonIgnoreCondition.Never,
                 IgnoreReadOnlyProperties    = true,
                 PropertyNameCaseInsensitive = true,
-                WriteIndented               = true
+                WriteIndented               = true,
+                ReadCommentHandling         = JsonCommentHandling.Skip
             };
         }
 
