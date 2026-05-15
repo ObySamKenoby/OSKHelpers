@@ -7,7 +7,7 @@
 		<Configurations>Debug;Release;G2DataExport_Debug;G2DataExport_Release</Configurations>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>OSK Helpers</Title>
-		<VersionPrefix>1.7.1</VersionPrefix>
+		<VersionPrefix>1.7.2</VersionPrefix>
 		<UserSecretsId>4af1c825-22b9-438f-9703-901735ed504c</UserSecretsId>
 		<Authors>Samuele Gaggioli</Authors>
 		<Description>General purpose utilities, including Logging and settings (.ini / json) files.</Description>
@@ -59,7 +59,7 @@
 		<PackageLicenseFile>License.txt</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
-		<PackageReleaseNotes>First public available package version.</PackageReleaseNotes>
+		<PackageReleaseNotes>Updated JsonSettings default serializer options to enable comments inside Settings.json file.</PackageReleaseNotes>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<PackageProjectUrl>https://github.com/ObySamKenoby/OSKHelpers</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/ObySamKenoby/OSKHelpers</RepositoryUrl>
