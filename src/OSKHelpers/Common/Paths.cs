@@ -201,8 +201,8 @@ namespace OSKHelpers.Common
             if (!_isDockerized)
             {
                 AppdataDirectory = Path.Combine(AssemblyPath, "Appdata");
-                InitializeDefaultDirectories(true);
             }
+            InitializeDefaultDirectories(true);
         }
 
         /// <summary>
