@@ -273,7 +273,7 @@ namespace OSKHelpers.Logging
         /// <param name="inline">If true the serialised object is appended to the text; otherwise it is written on a new line.</param>
         public void Write(LogLevel logLevel, string line, object obj = null, bool inline = false)
         {
-            if (ToLog(LogLevel))
+            if (ToLog(logLevel))
             {
                 try
                 {
@@ -362,7 +362,7 @@ namespace OSKHelpers.Logging
         {
             try
             {
-                if (ToLog(LogLevel) && (lines?.Any() ?? false))
+                if (ToLog(logLevel) && (lines?.Any() ?? false))
                 {
                     string prefix = GetLogLinePrefix(logLevel);
 
