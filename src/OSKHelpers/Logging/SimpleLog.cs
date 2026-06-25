@@ -79,11 +79,11 @@ namespace OSKHelpers.Logging
 
         /// <inheritdoc cref="SimpleLogger.ToLog(LogLevel)"/>
         public static bool ToLog(LogLevel logLevel)
-            => _logger.ToLog(LogLevel);
+            => _logger.ToLog(logLevel);
 
         /// <inheritdoc cref="SimpleLogger.Write(string, LogLevel)"/>
         public static void Write(string line, LogLevel logLevel = LogLevel.None) 
-            => _logger.Write(line, LogLevel);
+            => _logger.Write(line, logLevel);
 
         /// <inheritdoc cref="SimpleLogger.Write(LogLevel, string, object, bool)"/>
         public static void Write(LogLevel logLevel, string line, object obj = null, bool inline = false) 
