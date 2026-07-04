@@ -10,6 +10,7 @@ using System.IO;
 using OSKHelpers.INIFile;
 using OSKHelpers.Common;
 using System.Text.Json;
+using OSKHelpers.Mail.Interfaces;
 
 namespace OSKHelpers.Mail
 {
@@ -119,6 +120,8 @@ namespace OSKHelpers.Mail
         /// </summary>
         public static bool SetupSmtp(IniFileHelper iniFile)
         {
+            if (iniFile == null)
+                throw new ArgumentNullException(nameof(iniFile));
             SimpleLog.SetLogLevel(iniFile);
             SmtpServer      = iniFile.GetString(nameof(SmtpServer));
             SmtpPort        = iniFile.GetInt(nameof(SmtpPort));
@@ -138,12 +141,53 @@ namespace OSKHelpers.Mail
         /// </summary>
         public static bool SetupImap(IniFileHelper iniFile)
         {
+            if (iniFile == null)
+                throw new ArgumentNullException(nameof(iniFile));
             SimpleLog.SetLogLevel(iniFile);
-            ImapServer = iniFile.GetString(nameof(ImapServer));
+            ImapServer      = iniFile.GetString(nameof(ImapServer));
             ImapPort        = iniFile.GetInt(nameof(ImapPort));
             ImapSSL         = iniFile.GetBool(nameof(ImapSSL));
             ImapUsername    = iniFile.GetString(nameof(ImapUsername));
             ImapPassword    = iniFile.GetString(nameof(ImapPassword));
+            if (SimpleLog.LogLevelDebug)
+            {
+                DumpImapParameters();
+            }
+            return CheckImapParameters();
+        }
+
+        /// <summary>
+        /// Sets the default parameters for the SMTP connection.
+        /// </summary>
+        public static bool SetupSmtp(ISettingsSmtp settings)
+        {
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+            SmtpServer      = settings.SmtpServer;
+            SmtpPort        = settings.SmtpPort;
+            SmtpSSL         = settings.SmtpSSL;
+            SmtpUsername    = settings.SmtpUsername;
+            SmtpPassword    = settings.SmtpPassword;
+            SmtpFrom        = settings.SmtpFrom;
+            if (SimpleLog.LogLevelDebug)
+            {
+                DumpStmpParameters();
+            }
+            return CheckSmtpParameters();
+        }
+
+        /// <summary>
+        /// Sets the default parameters for the IMAP connection.
+        /// </summary>
+        public static bool SetupImap(ISettingsImap settings)
+        {
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+            ImapServer      = settings.ImapServer;
+            ImapPort        = settings.ImapPort;
+            ImapSSL         = settings.ImapSSL;
+            ImapUsername    = settings.ImapUsername;
+            ImapPassword    = settings.ImapPassword;
             if (SimpleLog.LogLevelDebug)
             {
                 DumpImapParameters();

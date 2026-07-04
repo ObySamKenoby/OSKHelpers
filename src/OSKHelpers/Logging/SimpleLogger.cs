@@ -1,4 +1,5 @@
 ﻿using OSKHelpers.Common;
+using OSKHelpers.Interfaces;
 using OSKHelpers.INIFile;
 using System;
 using System.Collections.Generic;
@@ -594,33 +595,52 @@ namespace OSKHelpers.Logging
             => ConditionalLog(line, LogLevel.Debug, LogLevel.Protocol, obj, inline, disableConsoleLog);
 
         /// <summary>
-        /// Reads the log level from the "LogLevel" key in the given IniFileHelper object.
-        /// If the key does not exist or has an invalid value, the default (Error) is used.
-        /// In Debug builds, the level is always set to at least Debug.
+        /// Sets <see cref="LogLevel"/> according to <paramref name="logLevel"/>.<br/>
+        /// If the value is not valid, the default (<see cref="LogLevel.Error"/>) is used.
         /// </summary>
-        /// <param name="iniFile">IniFileHelper object from which to read LogLevel.</param>
-        public void SetLogLevel(IniFileHelper iniFile)
+        /// <param name="logLevel">New value for LogLevel.</param>
+        public void SetLogLevel(int logLevel)
         {
-            var logLevel = LogLevel.Error;
-
-            if (iniFile != null)
+            var lvl = LogLevel.Error;
+            if (Enum.IsDefined(typeof(LogLevel), logLevel))
             {
-                if (iniFile.HasKey(nameof(LogLevel)))
-                {
-                    var iniLogLevel = iniFile.GetInt(nameof(LogLevel));
-                    if (Enum.IsDefined(typeof(LogLevel), iniLogLevel))
-                    {
-                        logLevel = (LogLevel)iniLogLevel;
-                    }
-                }
+                lvl = (LogLevel)logLevel;
             }
-#if DEBUG
-            if (logLevel != LogLevel.Debug && logLevel != LogLevel.Protocol)
+            else
             {
-                logLevel = LogLevel.Debug;
+                Write($"{GetCallerTypeMethodName()}: {nameof(LogLevel)} value is not valid, {nameof(LogLevel.Error)} will be used.");
+            }
+            
+#if DEBUG
+            if (lvl < LogLevel.Debug)
+            {
+                lvl = LogLevel.Debug;
+                Write($"{GetCallerTypeMethodName()}: Debug mode, {nameof(LogLevel.Debug)} will be used.");
             }
 #endif
-            LogLevel = logLevel;
+            LogLevel = lvl;
+        }
+
+        /// <summary>
+        /// Sets <see cref="LogLevel"/> from <see cref="ISettingsBase.LogLevel"/> in <paramref name="settings"/>.<br/>
+        /// If <paramref name="settings"/> is null or value is not valid, the default (<see cref="LogLevel.Error"/>) is used.
+        /// </summary>
+        /// <param name="settings"><see cref="ISettingsBase"/> object from which to read <see cref="ISettingsBase.LogLevel"/>.</param>
+        public void SetLogLevel(ISettingsBase settings)
+        {
+            var logLevel = settings?.LogLevel ?? (int)LogLevel.Error;
+            SetLogLevel(logLevel);
+        }
+
+        /// <summary>
+        /// Sets <see cref="LogLevel"/> from the "LogLevel" key in <paramref name="iniFile"/>.<br/>
+        /// If the value is not valid, the default (<see cref="LogLevel.Error"/>) is used.
+        /// </summary>
+        /// <param name="iniFile"><see cref="IniFileHelper"/> object from which to read LogLevel.</param>
+        public void SetLogLevel(IniFileHelper iniFile)
+        {
+            var logLevel = iniFile?.GetInt(nameof(LogLevel), (int)LogLevel.Error) ?? (int)LogLevel.Error;
+            SetLogLevel(logLevel);
         }
 
         /// <summary>
@@ -640,7 +660,7 @@ namespace OSKHelpers.Logging
             return prefix;
         }
 
-        #endregion
+#endregion
 
     }
 
