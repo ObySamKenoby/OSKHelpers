@@ -1,4 +1,5 @@
 ﻿using OSKHelpers.INIFile;
+using OSKHelpers.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -183,6 +184,14 @@ namespace OSKHelpers.Logging
         /// <inheritdoc cref="SimpleLogger.DebugProtocolConditionalLog(string, object, bool, bool?)"/>
         public static void DebugProtocolConditionalLog(string line, object obj = null, bool inline = false, bool? disableConsoleLog = null)
             => _logger?.DebugProtocolConditionalLog(line, obj, inline, disableConsoleLog);
+
+        /// <inheritdoc cref="SimpleLogger.SetLogLevel(int)"/>
+        public static void SetLogLevel(int logLevel)
+            => _logger?.SetLogLevel(logLevel);
+
+        /// <inheritdoc cref="SimpleLogger.SetLogLevel(ISettingsBase)"/>
+        public static void SetLogLevel(ISettingsBase settings)
+            => _logger?.SetLogLevel(settings);
 
         /// <inheritdoc cref="SimpleLogger.SetLogLevel(IniFileHelper)"/>
         public static void SetLogLevel(IniFileHelper iniFile)
