@@ -3,19 +3,18 @@
     <Platform Name="Any CPU" />
     <Platform Name="x86" />
   </Configurations>
-  <Folder Name="/docs/" />
-  <Folder Name="/docs/root/">
-    <File Path="LICENSE.txt" />
-    <File Path="README.md" />
+  <Folder Name="/docs/">
+    <Project Path="docs/Docs.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/OSKHelpers.Mail/OSKHelpers.Mail.csproj" />
+    <Project Path="src/OSKHelpers.WPF/OSKHelpers.WPF.csproj" Id="b758e344-3300-47db-b468-c8670e9007a8" />
     <Project Path="src/OSKHelpers/OSKHelpers.csproj">
       <Platform Solution="*|x86" Project="x86" />
     </Project>
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/OSKHelpers.Mail.Test/OSKHelpers.Mail.Test.csproj">
+    <Project Path="tests/OSKHelpers.Mail.Tests/OSKHelpers.Mail.Tests.csproj">
       <Build Solution="Release|Any CPU" Project="false" />
     </Project>
     <Project Path="tests/OSKHelpers.Tests.Interactive/OSKHelpers.Tests.Interactive.csproj">

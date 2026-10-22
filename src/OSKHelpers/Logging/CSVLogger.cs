@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 
 namespace OSKHelpers.Logging
 {
@@ -13,9 +12,9 @@ namespace OSKHelpers.Logging
 
         private DateTime? _lastDate;
 
-        private static readonly string _defaultLogPath;
         private string _logPath;
         private string _logFilename;
+        private string _logFileDirectory;
 
         private string _prefix;
         private bool _usePrefixAsLogFile;
@@ -28,14 +27,16 @@ namespace OSKHelpers.Logging
         /// <summary>
         /// Path of the log file.<br/>
         /// The folder is checked at write time; if it does not exist, a creation attempt is made.<br/>
-        /// By default the "Log" folder inside the application path is used.
+        /// Until a value is assigned, <see cref="SimpleLogger.DefaultLogPath"/> (<see cref="Common.Paths.DefaultLogsDirectory"/>)
+        /// is used and its changes are followed;<br/>
+        /// assigning null or an empty string restores this behaviour.
         /// </summary>
         public string LogPath
         {
-            get => _logPath;
+            get => _logPath ?? SimpleLogger.DefaultLogPath;
             set
             {
-                _logPath = value;
+                _logPath = string.IsNullOrWhiteSpace(value) ? null : value;
                 // _lastDate is set to null to force file name regeneration
                 _lastDate = null;
             }
@@ -74,16 +75,19 @@ namespace OSKHelpers.Logging
 
         /// <summary>
         /// Log file name.<br/>
-        /// The name follows the pattern PREFIXLogYYYYMMDD.csv; different logs in the same folder can be distinguished by changing Prefix.
+        /// The name follows the pattern PREFIXLogYYYYMMDD.csv; different logs in the same folder can be distinguished by changing Prefix.<br/>
+        /// The name is regenerated when the date or the log folder changes.
         /// </summary>
         public string LogFile
         {
             get
             {
-                if (DateTime.Now.Date != (_lastDate?.Date ?? DateTime.MinValue))
+                var logPath = LogPath;
+                if (DateTime.Now.Date != (_lastDate?.Date ?? DateTime.MinValue) || logPath != _logFileDirectory)
                 {
-                    _logFilename = Path.Combine(_logPath, _usePrefixAsLogFile ? $"{_prefix}.csv" : $"{_prefix}Log{DateTime.Now:yyyyMMdd}.csv");
-                    _lastDate = DateTime.Now.Date;
+                    _logFilename        = Path.Combine(logPath, _usePrefixAsLogFile ? $"{_prefix}.csv" : $"{_prefix}Log{DateTime.Now:yyyyMMdd}.csv");
+                    _logFileDirectory   = logPath;
+                    _lastDate           = DateTime.Now.Date;
                 }
 
                 return _logFilename;
@@ -94,11 +98,6 @@ namespace OSKHelpers.Logging
 
         #region Constructors
 
-        static CSVLogger()
-        {
-            _defaultLogPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Logs");
-        }
-
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -106,8 +105,9 @@ namespace OSKHelpers.Logging
         {
             _usePrefixAsLogFile = false;
             _lastDate           = null;
-            LogPath             = _defaultLogPath;
+            _logPath            = null;
             _logFilename        = null;
+            _logFileDirectory   = null;
         }
 
         #endregion
@@ -128,9 +128,9 @@ namespace OSKHelpers.Logging
                     {
                         if (!File.Exists(LogFile))
                         {
-                            if (!Directory.Exists(_logPath))
+                            if (!Directory.Exists(LogPath))
                             {
-                                Directory.CreateDirectory(_logPath);
+                                Directory.CreateDirectory(LogPath);
                             }
                             var t = new T();
                             File.AppendAllText(_logFilename, $"{t.GetCSVHeader()}\r\n");
@@ -140,13 +140,8 @@ namespace OSKHelpers.Logging
                     }
                     catch (Exception ex)
                     {
-                        try
-                        {
-                            // If an error occurs during writing, a fallback log is created in the application folder, if possible.
-                            var line = $"Error writing log.\r\n  Log file name: {LogFile}\r\n  Error: {SimpleLog.FormattedException(ex, true)}\r\n";
-                            File.AppendAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ERRORSLOG.txt"), $"{line}\r\n");
-                        }
-                        catch { }
+                        SimpleLogger.WriteErrorsLog(
+                            $"Error writing log.\r\n  Log file name: {LogFile}\r\n  Error: {SimpleLog.FormattedException(ex, true)}\r\n");
                     }
                 }
             }

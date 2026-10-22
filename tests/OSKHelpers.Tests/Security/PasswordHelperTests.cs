@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using OSKHelpers.Common;
 using OSKHelpers.Security;
 
@@ -15,7 +16,7 @@ public class PasswordHelperTests
     /// Repeated for three different passwords.
     /// </summary>
     [TestMethod]
-    public void HashAndVerifyTests()
+    public void HashPasswordAndVerifyPassword_RandomPasswords_VerifyWithUniqueHashes()
     {
         // For simplicity the hashes will be stored as string representation of the byte arrays.
         var hashes = new List<string>();
@@ -34,5 +35,35 @@ public class PasswordHelperTests
         }
         // There must be no duplicates in hashes.
         Assert.IsFalse(hashes.GroupBy(h => h).Any(g => g.Count() > 1));
+    }
+
+    /// <summary>
+    /// Verifies that a new hash does not require a rehash, while a legacy one (36 bytes, PBKDF2-HMAC-SHA1) does
+    /// and is still verified.
+    /// </summary>
+    [TestMethod]
+    public void RequiresRehash_CurrentAndLegacyHash_ReturnsExpected()
+    {
+        var salt    = RandomNumberGenerator.GetBytes(16);
+        var legacy  = salt.Concat(Rfc2898DeriveBytes.Pbkdf2("Password", salt, 10000, HashAlgorithmName.SHA1, 20)).ToArray();
+        var current = PasswordHelper.HashPassword("Password");
+
+        Assert.IsFalse(PasswordHelper.RequiresRehash(current));
+        Assert.IsTrue(PasswordHelper.RequiresRehash(legacy));
+        Assert.IsTrue(PasswordHelper.VerifyPassword("Password", legacy));
+    }
+
+    /// <summary>
+    /// Verifies that a wrong password is rejected, for both the current and the legacy format.
+    /// </summary>
+    [TestMethod]
+    public void VerifyPassword_WrongPassword_ReturnsFalse()
+    {
+        var salt    = RandomNumberGenerator.GetBytes(16);
+        var legacy  = salt.Concat(Rfc2898DeriveBytes.Pbkdf2("Password", salt, 10000, HashAlgorithmName.SHA1, 20)).ToArray();
+        var current = PasswordHelper.HashPassword("Password");
+
+        Assert.IsFalse(PasswordHelper.VerifyPassword("password", current));
+        Assert.IsFalse(PasswordHelper.VerifyPassword("password", legacy));
     }
 }

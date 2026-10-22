@@ -143,32 +143,32 @@ namespace OSKHelpers.INIFile
                 {
                     var file        = Path.Combine(useDefaultPath ? Paths.AssemblyPath : string.Empty, iniFile);
                     var template    = Path.Combine(useDefaultPath ? Paths.AssemblyPath : string.Empty, templateFile);
-                    SimpleLog.Write($"IniFile: {iniFile}");
+                    SimpleLog.Write($"IniFile: {file}");
                     SimpleLog.Write($"Template: {template}");
-                    if (!File.Exists(iniFile))
+                    if (File.Exists(file))
                     {
-                        File.Copy(template, iniFile);
-                        exists  = false;
-                        message = "Primo avvio, verificare il contenuto di Settings.ini ed eseguire di nuovo il programma";
+                        exists = true;
                     }
                     else
                     {
-                        exists = true;
+                        File.Copy(template, file);
+                        exists  = false;
+                        message = $"First run: check the content of {iniFile} and run the program again.";
                     }
                 }
                 else
                 {
                     exists  = false;
-                    message = $"{SimpleLog.GetCallerTypeMethodName()}('{iniFile}', '{templateFile}'): uno dei parametri non è valido.";
+                    message = $"{SimpleLog.GetCallerTypeMethodName()}('{iniFile}', '{templateFile}'): one of the parameters is not valid.";
                     SimpleLog.Write(message);
                 }
             }
             catch (Exception ex)
             {
                 exists = false;
-                message = "Errore durante la lettura del file Settings.ini";
+                message = $"Error while checking the file {iniFile}.";
                 SimpleLog.Write(message);
-                SimpleLog.Write($"Errore in {SimpleLog.GetCallerTypeMethodName()}: {SimpleLog.FormattedException(ex)}");
+                SimpleLog.Write($"Error in {SimpleLog.GetCallerTypeMethodName()}: {SimpleLog.FormattedException(ex)}");
             }
 
             return (exists, message);
@@ -225,47 +225,25 @@ namespace OSKHelpers.INIFile
         /// Processes the lines passed as argument, extracts key/value pairs,
         /// sets IniFileRead accordingly and returns its value.
         /// </summary>
+        /// <remarks>
+        /// Pragmas are recognised only on the first physical lines of <paramref name="iniLines"/>, before any comment or empty line.<br/>
+        /// The list passed as parameter is not modified.
+        /// </remarks>
+        /// <param name="iniLines">Lines to parse.</param>
         /// <returns>True if all non-empty, non-comment lines contain valid key/value pairs.</returns>
         public bool Parse(List<string> iniLines)
         {
             _keys.Clear();
             _arrays.Clear();
-            IniFileRead = false;
+            _showKeyValue   = false;
+            IniFileRead     = false;
 
             if (iniLines != null && iniLines.Any())
             {
-                bool testPragmas = true;
-
-                // Check for control pragmas
-                while (testPragmas)
-                {
-                    var pragma = iniLines.First().Trim().ToUpper();
-                    if (pragma == SHOWKEYVALUE)
-                    {
-                        SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: abilitazione log dei valori rilevati all'interno del file ini");
-                        _showKeyValue = true;
-                    }
-                    else if (pragma == FORCEDEBUG)
-                    {
-                        SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: forzatura livello log a DEBUG");
-                        SimpleLog.ForceDebug = true;
-                    }
-                    else if (pragma == FORCEPROTOCOL)
-                    {
-                        SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: forzatura livello log a PROTOCOL");
-                        SimpleLog.ForceProtocol = true;
-                    }
-                    else
-                        testPragmas = false;
-
-                    // If testPragmas is true we found a valid pragma, so remove the first line
-                    if (testPragmas)
-                        iniLines.RemoveAt(0);
-                }
-
                 try
                 {
-                    var lines = iniLines.Select(l => l.Trim()).Where(l => !string.IsNullOrWhiteSpace(l) && l[0] != '#').ToArray();
+                    var firstLine = ParsePragmas(iniLines);
+                    var lines = iniLines.Skip(firstLine).Select(l => l?.Trim()).Where(l => !string.IsNullOrWhiteSpace(l) && l[0] != '#').ToArray();
                     if (lines.Any())
                     {
                         bool valid = true;
@@ -276,14 +254,14 @@ namespace OSKHelpers.INIFile
                             if (i < 1 || i == line.Length - 1)
                             {
                                 valid = false;
-                                SimpleLog.Write($"Errore di sintassi nella riga {line}. Se è presente il carattere '=' devono essere presenti un parametro ed un valore." );
+                                SimpleLog.Write($"Syntax error in line {line}. When the '=' character is present, both a key and a value are required.");
                             }
                             var key = line.Substring(0, i).Trim().ToUpper();
                             var value = line.Substring(i + 1).Trim();
                             if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value) || _keys.ContainsKey(key))
                             {
                                 valid = false;
-                                SimpleLog.Write($"Errore di sintassi nella riga {line}. Se è presente il carattere '=' devono essere presenti un parametro ed un valore.");
+                                SimpleLog.Write($"Syntax error in line {line}. When the '=' character is present, both a key and a value are required.");
                             }
                             // Check whether the key value identifies a single key or an array
                             if (key[0] != '*')
@@ -307,7 +285,7 @@ namespace OSKHelpers.INIFile
                             else
                             {
                                 valid = false;
-                                SimpleLog.Write($"Errore di sintassi nella riga {line}. Se la riga inizia con '*' deve essere presente il nome dell'Array.");
+                                SimpleLog.Write($"Syntax error in line {line}. When the line starts with '*', the array name is required.");
                             }
                         }
                         IniFileRead = valid;
@@ -320,7 +298,7 @@ namespace OSKHelpers.INIFile
                     }
                     else
                     {
-                        SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: nessuna riga valida trovata.");
+                        SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: no valid lines found.");
                     }
                 }
                 catch (Exception ex)
@@ -329,32 +307,83 @@ namespace OSKHelpers.INIFile
                     LogKeyValues();
                     SimpleLog.LogError(ex);
                     _keys.Clear();
+                    _arrays.Clear();
                 }
             }
             else
             {
-                SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: nessuna riga valida trovata.");
-                IniFileRead = false;
-                _keys.Clear();
+                SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: no valid lines found.");
             }
             return IniFileRead;
         }
 
+        /// <summary>
+        /// Applies the control pragmas found on the first lines of <paramref name="iniLines"/>.
+        /// </summary>
+        /// <param name="iniLines">Lines of the INI file.</param>
+        /// <returns>Index of the first line that is not a pragma.</returns>
+        private int ParsePragmas(List<string> iniLines)
+        {
+            var firstLine   = 0;
+            var testPragmas = true;
+
+            while (testPragmas && firstLine < iniLines.Count)
+            {
+                var pragma = iniLines[firstLine]?.Trim().ToUpper();
+                if (pragma == SHOWKEYVALUE)
+                {
+                    SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: logging of the values read from the ini file enabled");
+                    _showKeyValue = true;
+                }
+                else if (pragma == FORCEDEBUG)
+                {
+                    SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: log level forced to DEBUG");
+                    SimpleLog.ForceDebug = true;
+                }
+                else if (pragma == FORCEPROTOCOL)
+                {
+                    SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: log level forced to PROTOCOL");
+                    SimpleLog.ForceProtocol = true;
+                }
+                else
+                {
+                    testPragmas = false;
+                }
+
+                // A valid pragma was found: move on to the next line
+                if (testPragmas)
+                {
+                    firstLine++;
+                }
+            }
+
+            return firstLine;
+        }
+
+        /// <summary>
+        /// Logs the keys and arrays read, when enabled by the <see cref="SHOWKEYVALUE"/> pragma.
+        /// </summary>
         private void LogKeyValues()
         {
             if (_showKeyValue)
             {
                 List<string> lines = new List<string>();
-                lines.Add("Valore delle impostazioni (chiave -> valore):");
+                lines.Add("Settings values (key -> value):");
                 var maxKeyNameLength    = _keys.Any() ? _keys.Keys.Max(k => k.Length) : 0;
                 // Array name length is incremented by 1 because arrays are identified in the log with a leading asterisk
                 var maxArrayNameLength  = _arrays.Any() ? _arrays.Keys.Max(k => k.Length) + 1 : 0;
                 var l = maxKeyNameLength > maxArrayNameLength ? maxKeyNameLength : maxArrayNameLength;
                 if (_keys.Any())
+                {
                     lines.AddRange(_keys.Select(k => $"    {k.Key.PadRight(l)} -> {k.Value}"));
+                }
+
                 if (_arrays.Any())
+                {
                     lines.AddRange(_arrays.SelectMany(a => a.Value.Select(v => $"    *{a.Key.PadRight(l)} -> {v}")));
-                lines.Add($"file INI valido: {IniFileRead}");
+                }
+
+                lines.Add($"Valid INI file: {IniFileRead}");
                 SimpleLog.LogLines(lines);
             }
         }
@@ -384,7 +413,7 @@ namespace OSKHelpers.INIFile
                     if (!HasKey(TrimUpper(key)))
                     {
                         res = false;
-                        SimpleLog.Write($"Il file .ini non contiene una definizione per {key.ToUpper()}.");
+                        SimpleLog.Write($"The .ini file does not contain a definition for {key.ToUpper()}.");
                     }
                 }
             }
@@ -623,7 +652,8 @@ namespace OSKHelpers.INIFile
                 {
                     _arrays.Add(arrName, new List<string>());
                 }
-                var elems = elements.Select(e => e.ToString().Trim()).ToList();
+                // Distinct removes also the duplicates contained in the list passed as parameter
+                var elems = elements.Select(e => e.ToString().Trim()).Distinct().ToList();
                 _arrays[arrName].AddRange(elems.Where(e => !_arrays[arrName].Contains(e)).ToArray());
             }
         }
@@ -758,12 +788,12 @@ namespace OSKHelpers.INIFile
                 }
                 else
                 {
-                    SimpleLog.Write("Impossibile aggiornare il file INI, è necessario che il file SettingsTemplate.ini sia presente all'interno della cartella dell'applicativo.");
+                    SimpleLog.Write("Unable to update the INI file: the file SettingsTemplate.ini must be present in the application folder.");
                 }
             }
             else
             {
-                SimpleLog.Write("Impossibile aggiornare il file INI, non è stato specificato il nome del file.");
+                SimpleLog.Write("Unable to update the INI file: the file name was not specified.");
             }
 
             return saved;

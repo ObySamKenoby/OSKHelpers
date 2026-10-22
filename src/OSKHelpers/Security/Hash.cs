@@ -21,10 +21,15 @@ namespace OSKHelpers.Security
         /// <exception cref="ArgumentNullException" />
         private static string ComputeHash(HashAlgorithm algoritm, string rawData)
         {
-            if (rawData == null) 
+            if (rawData == null)
+            {
                 throw new ArgumentNullException(nameof(rawData));
+            }
+
             if (algoritm == null)
+            {
                 throw new ArgumentNullException(nameof(algoritm));
+            }
             // ComputeHash - returns byte array
             byte[] bytes = algoritm.ComputeHash(Encoding.UTF8.GetBytes(rawData));
             // Build the hash string
@@ -38,14 +43,18 @@ namespace OSKHelpers.Security
         public static string ComputeSha256Hash(string rawData)
         {
             using (var algoritm = SHA256.Create())
+            {
                 return ComputeHash(algoritm, rawData);
+            }
         }
 
         /// <inheritdoc cref="ComputeHash(HashAlgorithm, string)"/>
         public static string ComputeSha512Hash(string rawData)
         {
             using (var algoritm = SHA512.Create())
+            {
                 return ComputeHash(algoritm, rawData);
+            }
         }
 
     }

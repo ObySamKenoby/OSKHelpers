@@ -6,55 +6,53 @@ namespace OSKHelpers.Tests.Interactive.Common
 {
     public class ObjectUtilsTests
     {
-        #region Classi di supporto
+        #region Support classes
 
-        private class Persona
+        private class Person
         {
-            public string Nome { get; set; }
-            public int Età { get; set; }
-            public DateTime DataNascita { get; set; }
+            public string Name { get; set; }
+            public int Age { get; set; }
+            public DateTime BirthDate { get; set; }
         }
 
-        private class Ordine
+        private class Order
         {
             public int Id { get; set; }
-            public decimal Importo { get; set; }
-            public DateTime DataOrdine { get; set; }
+            public decimal Amount { get; set; }
+            public DateTime OrderDate { get; set; }
         }
 
-        private class Prodotto
+        private class Product
         {
-            public string Nome { get; set; }
-            public double Prezzo { get; set; }
-            public bool Disponibile { get; set; }
+            public string Name { get; set; }
+            public double Price { get; set; }
+            public bool Available { get; set; }
         }
 
         #endregion
 
-        #region Metodi
+        #region Methods
 
         public static void TestDump()
         {
-            // Creazione di una lista di oggetti di test
-            List<object> oggettiDiTest = new List<object>
+            // List of test objects
+            List<object> testObjects = new List<object>
             {
-                new Persona { Nome = "Samuele", Età = 30, DataNascita = new DateTime(1995, 5, 27) },
-                new Ordine { Id = 1, Importo = 150.75m, DataOrdine = DateTime.UtcNow },
-                new Prodotto { Nome = "Laptop", Prezzo = 999.99, Disponibile = true },
-                "Test stringa",
+                new Person { Name = "Samuele", Age = 30, BirthDate = new DateTime(1995, 5, 27) },
+                new Order { Id = 1, Amount = 150.75m, OrderDate = DateTime.UtcNow },
+                new Product { Name = "Laptop", Price = 999.99, Available = true },
+                "Test string",
                 42,
                 3.14,
                 DateTime.UtcNow,
                 new DateTimeOffset(DateTime.UtcNow),
                 Guid.NewGuid(),
-                new List<int> { 1, 2, 3, 4, 5 } // Test su una collezione
+                new List<int> { 1, 2, 3, 4, 5 } // Collection test
             };
 
-            string separatore = ";";
-
-            // Esecuzione del test
-            Console.WriteLine("Test CSVLogItem:");
-            foreach (var obj in oggettiDiTest)
+            // Test execution
+            Console.WriteLine("Test ObjectUtils.Dump:");
+            foreach (var obj in testObjects)
             {
                 Console.WriteLine();
                 ObjectUtils.Dump(obj);

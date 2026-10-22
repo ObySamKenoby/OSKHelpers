@@ -14,7 +14,7 @@ namespace OSKHelpers.Templates.INIFile
         /// <summary>
         /// Product name
         /// </summary>
-        public const string PRODUCTNAME = "Applicazione";
+        public const string PRODUCTNAME = "Application";
         /// <summary>
         /// Product version
         /// </summary>
@@ -26,7 +26,7 @@ namespace OSKHelpers.Templates.INIFile
         /// <summary>
         /// Full product name / version
         /// </summary>
-        public const string PRODUCTFULLNAME = PRODUCTNAME + " Ver. " + PRODUCTVERSION + " del" + PRODUCTDATE;
+        public const string PRODUCTFULLNAME = PRODUCTNAME + " Ver. " + PRODUCTVERSION + " of " + PRODUCTDATE;
 
         #endregion
 
@@ -61,7 +61,7 @@ namespace OSKHelpers.Templates.INIFile
                 }
                 else
                 {
-                    SimpleLog.Write("Impossible leggere il file Settings.ini o il file è male formattato.");
+                    SimpleLog.Write("Unable to read the Settings.ini file, or the file is badly formatted.");
                     IsValid = false;
                 }
             }
@@ -92,7 +92,7 @@ namespace OSKHelpers.Templates.INIFile
 
             if (!IsValid)
             {
-                SimpleLog.Write("Il file Settings.ini contiene errori e non è valido.");
+                SimpleLog.Write("The Settings.ini file contains errors and is not valid.");
             }
 
             return IsValid;

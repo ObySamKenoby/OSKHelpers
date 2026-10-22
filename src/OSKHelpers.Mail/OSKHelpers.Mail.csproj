@@ -26,13 +26,10 @@
 		<Version>$(VersionPrefix)-pre01</Version>
 	</PropertyGroup>
 
-	<PropertyGroup Label="Normalize stack trace path." Condition="'$(Configuration)'=='Release'">
-		<PathMap>$([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))=$(AssemblyName):\</PathMap>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="MailKit" Version="4.16.0" />
-		<PackageReference Include="OSKHelpers" Version="1.7.4" />
+		<PackageReference Include="OSKHelpers" Version="1.7.5" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -51,7 +51,7 @@ namespace OSKHelpers.ODBC
                 {
                     if (Environment.UserInteractive)
                     {
-                        Console.WriteLine($"Eccezione in GetODBCSources:\n  {ex.GetType()}\n  {ex.Message}\n{FormatInnerException(ex)} Stack: {ex.StackTrace}");
+                        Console.WriteLine($"Exception in GetODBCSources:\n  {ex.GetType()}\n  {ex.Message}\n{FormatInnerException(ex)} Stack: {ex.StackTrace}");
                     }
                 }
             }
@@ -81,7 +81,7 @@ namespace OSKHelpers.ODBC
                 sb.Append("DSN=").Append(dsnName.Trim()).Append(";");
                 if (!string.IsNullOrWhiteSpace(username) || !string.IsNullOrWhiteSpace(password))
                 {
-                    sb.Append("Uid=").Append(password.Trim()).Append(";Pwd=").Append(password.Trim()).Append(';');
+                    sb.Append("Uid=").Append(username?.Trim()).Append(";Pwd=").Append(password?.Trim()).Append(';');
                 }
                 else if (trustedConnection)
                 {

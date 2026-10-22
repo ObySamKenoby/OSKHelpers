@@ -1,4 +1,5 @@
 ﻿using OSKHelpers.Common;
+using System;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -23,7 +24,18 @@ namespace OSKHelpers.ExtensionMethods
         /// <param name="address">String containing the address to validate.</param>
         /// <param name="ipAddress">Resulting IPAddress object.</param>
         /// <returns>True if a valid IP address was found and parsed.</returns>
-        public static bool TryParseMatch(string address, out IPAddress ipAddress) => OSKIPAddress.TryParse(OSKIPAddress.Match(address).Value, out ipAddress);
+        [Obsolete("This is not an extension method: use OSKIPAddress.TryParseMatch or the TryParseMatch extension method on IPAddress.")]
+        public static bool TryParseMatch(string address, out IPAddress ipAddress) => OSKIPAddress.TryParseMatch(address, out ipAddress);
+
+        /// <summary>
+        /// Retrieves, if present, the x.x.x.x quartet within the string and returns the resulting IPAddress object.<br/>
+        /// The instance the method is called on is not used, as in <see cref="Match(IPAddress, string)"/>.
+        /// </summary>
+        /// <param name="ipAddress">Reference to object.</param>
+        /// <param name="address">String containing the address to validate.</param>
+        /// <param name="result">Resulting IPAddress object.</param>
+        /// <returns>True if a valid IP address was found and parsed.</returns>
+        public static bool TryParseMatch(this IPAddress ipAddress, string address, out IPAddress result) => OSKIPAddress.TryParseMatch(address, out result);
 
     }
 }

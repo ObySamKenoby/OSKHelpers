@@ -52,6 +52,11 @@ namespace OSKHelpers.Mail
         /// </summary>
         public static bool SmtpSSL { get; set; }
         /// <summary>
+        /// The SMTP connection must be upgraded to TLS with STARTTLS (e.g. port 587).<br/>
+        /// Used only when <see cref="SmtpSSL"/> is false; default: false (unencrypted connection).
+        /// </summary>
+        public static bool SmtpStartTls { get; set; }
+        /// <summary>
         /// Username for SMTP authentication.
         /// </summary>
         public static string SmtpUsername { get; set; }
@@ -121,11 +126,15 @@ namespace OSKHelpers.Mail
         public static bool SetupSmtp(IniFileHelper iniFile)
         {
             if (iniFile == null)
+            {
                 throw new ArgumentNullException(nameof(iniFile));
+            }
+
             SimpleLog.SetLogLevel(iniFile);
             SmtpServer      = iniFile.GetString(nameof(SmtpServer));
             SmtpPort        = iniFile.GetInt(nameof(SmtpPort));
             SmtpSSL         = iniFile.GetBool(nameof(SmtpSSL));
+            SmtpStartTls    = iniFile.GetBool(nameof(SmtpStartTls));
             SmtpUsername    = iniFile.GetString(nameof(SmtpUsername));
             SmtpPassword    = iniFile.GetString(nameof(SmtpPassword));
             SmtpFrom        = iniFile.GetString(nameof(SmtpFrom));
@@ -142,7 +151,10 @@ namespace OSKHelpers.Mail
         public static bool SetupImap(IniFileHelper iniFile)
         {
             if (iniFile == null)
+            {
                 throw new ArgumentNullException(nameof(iniFile));
+            }
+
             SimpleLog.SetLogLevel(iniFile);
             ImapServer      = iniFile.GetString(nameof(ImapServer));
             ImapPort        = iniFile.GetInt(nameof(ImapPort));
@@ -159,13 +171,19 @@ namespace OSKHelpers.Mail
         /// <summary>
         /// Sets the default parameters for the SMTP connection.
         /// </summary>
-        public static bool SetupSmtp(ISettingsSmtp settings)
+        /// <param name="settings">SMTP settings.</param>
+        /// <param name="startTls">Value for <see cref="SmtpStartTls"/>, not included in <see cref="ISettingsSmtp"/>.</param>
+        public static bool SetupSmtp(ISettingsSmtp settings, bool startTls = false)
         {
             if (settings == null)
+            {
                 throw new ArgumentNullException(nameof(settings));
+            }
+
             SmtpServer      = settings.SmtpServer;
             SmtpPort        = settings.SmtpPort;
             SmtpSSL         = settings.SmtpSSL;
+            SmtpStartTls    = startTls;
             SmtpUsername    = settings.SmtpUsername;
             SmtpPassword    = settings.SmtpPassword;
             SmtpFrom        = settings.SmtpFrom;
@@ -182,7 +200,10 @@ namespace OSKHelpers.Mail
         public static bool SetupImap(ISettingsImap settings)
         {
             if (settings == null)
+            {
                 throw new ArgumentNullException(nameof(settings));
+            }
+
             ImapServer      = settings.ImapServer;
             ImapPort        = settings.ImapPort;
             ImapSSL         = settings.ImapSSL;
@@ -205,11 +226,14 @@ namespace OSKHelpers.Mail
         /// <param name="username">Username for server authentication. If this and the password are null, authentication is disabled.</param>
         /// <param name="password">Password for server authentication. If this and the username are null, authentication is disabled.</param>
         /// <param name="from">Optional; if not specified, allows sending without specifying a sender.</param>
-        public static void SetupSmtp(string server, int port, bool ssl, string username, string password, string from = null)
+        /// <param name="startTls">If true and <paramref name="ssl"/> is false, the connection is upgraded to TLS with STARTTLS
+        /// (e.g. port 587).</param>
+        public static void SetupSmtp(string server, int port, bool ssl, string username, string password, string from = null, bool startTls = false)
         {
             SmtpServer      = server;
             SmtpPort        = port;
             SmtpSSL         = ssl;
+            SmtpStartTls    = startTls;
             SmtpUsername    = username;
             SmtpPassword    = password;
             SmtpFrom        = from;
@@ -218,7 +242,7 @@ namespace OSKHelpers.Mail
         /// <summary>
         /// Sets the default parameters for the IMAP connection.
         /// </summary>
-        /// <inheritdoc cref="SetupSmtp(string, int, bool, string, string, string)"/>
+        /// <inheritdoc cref="SetupSmtp(string, int, bool, string, string, string, bool)"/>
         public static void SetupImap(string server, int port, bool ssl, string username, string password)
         {
             ImapServer      = server;
@@ -241,6 +265,7 @@ namespace OSKHelpers.Mail
                 Console.WriteLine($"{nameof(SmtpServer)}    => {SmtpServer}");
                 Console.WriteLine($"{nameof(SmtpPort)}      => {SmtpPort}");
                 Console.WriteLine($"{nameof(SmtpSSL)}       => {SmtpSSL}");
+                Console.WriteLine($"{nameof(SmtpStartTls)}  => {SmtpStartTls}");
                 Console.WriteLine($"{nameof(SmtpUsername)}  => {SmtpUsername}");
                 Console.WriteLine($"{nameof(SmtpPassword)}  => {(string.IsNullOrWhiteSpace(SmtpPassword) ? string.Empty : "****")}");
                 Console.WriteLine($"{nameof(SmtpFrom)}      => {SmtpFrom}");
@@ -250,6 +275,7 @@ namespace OSKHelpers.Mail
                 SimpleLog.Write($"{nameof(SmtpServer)}      => {SmtpServer}");
                 SimpleLog.Write($"{nameof(SmtpPort)}        => {SmtpPort}");
                 SimpleLog.Write($"{nameof(SmtpSSL)}         => {SmtpSSL}");
+                SimpleLog.Write($"{nameof(SmtpStartTls)}    => {SmtpStartTls}");
                 SimpleLog.Write($"{nameof(SmtpUsername)}    => {SmtpUsername}");
                 SimpleLog.Write($"{nameof(SmtpPassword)}    => {(string.IsNullOrWhiteSpace(SmtpPassword) ? string.Empty : "****")}");
                 SimpleLog.Write($"{nameof(SmtpFrom)}        => {SmtpFrom}");
@@ -310,13 +336,13 @@ namespace OSKHelpers.Mail
             if (logResult)
             {
                 var msg = check
-                    ? $"Dati SMTP corretti. Autenticazione abilitata: {SmtpAuthEnabled }."
-                    : $"Verifica dati server SMTP fallita ({nameof(SmtpServer)}: {SmtpServer} - {nameof(SmtpPort)}: {SmtpPort} - " +
+                    ? $"SMTP data is valid. Authentication enabled: {SmtpAuthEnabled}."
+                    : $"SMTP server data check failed ({nameof(SmtpServer)}: {SmtpServer} - {nameof(SmtpPort)}: {SmtpPort} - " +
                       $"{nameof(SmtpSSL)}: {SmtpSSL} - Auth: {SmtpAuthEnabled} - Auth error: {SmtpAuthConfigError}).";
                 SimpleLog.Write(msg);
                 if (!MailUtils.ContainsSingleEmail(SmtpFrom))
                 {
-                    SimpleLog.Write($"Il mittente per le mail inviate ( {SmtpFrom} ) non è corretto, potrebbero verificarsi problemi in fase di invio.");
+                    SimpleLog.Write($"The sender of the emails ( {SmtpFrom} ) is not valid, problems may occur when sending.");
                 }
             }
 
@@ -326,7 +352,7 @@ namespace OSKHelpers.Mail
         /// <summary>
         /// Verifies that the IMAP server data is present.<br/>
         /// Does not validate the data or check connectivity.<br/>
-        /// For the username/password pair to be valid both must be present (authentication enabled) or absent (authentication disabled).<br/>
+        /// Username and password are both required (see <see cref="ImapAuthConfigError"/>).<br/>
         /// If logResult is true (default), writes the verification result to the log.
         /// </summary>
         /// <returns></returns>
@@ -340,8 +366,8 @@ namespace OSKHelpers.Mail
             if (logResult)
             {
                 var msg = check
-                    ? $"Dati IMAP corretti."
-                    : $"Verifica dati server IMAP fallita ({nameof(ImapServer)}: {ImapServer} - {nameof(ImapPort)}: {ImapPort} - {nameof(ImapSSL)}: {ImapSSL} - Auth error: {ImapAuthConfigError}";
+                    ? $"IMAP data is valid."
+                    : $"IMAP server data check failed ({nameof(ImapServer)}: {ImapServer} - {nameof(ImapPort)}: {ImapPort} - {nameof(ImapSSL)}: {ImapSSL} - Auth error: {ImapAuthConfigError}";
                 SimpleLog.Write(msg);
             }
 
@@ -398,83 +424,83 @@ namespace OSKHelpers.Mail
         public static bool Send(IEnumerable<string> to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
             => SendAsync(to, subject, body, streamAttachments).ConfigureAwait(false).GetAwaiter().GetResult();
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
-        public static bool Send(string server, int port, bool ssl, string username, string password, string from, IEnumerable<string> to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null, IEnumerable<string> replyTo = null)
-            => SendAsync(server, port, ssl, username, password, from, to, subject, body, streamAttachments, replyTo).ConfigureAwait(false).GetAwaiter().GetResult();
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
+        public static bool Send(string server, int port, bool ssl, string username, string password, string from, IEnumerable<string> to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null, IEnumerable<string> replyTo = null, bool startTls = false)
+            => SendAsync(server, port, ssl, username, password, from, to, subject, body, streamAttachments, replyTo, startTls).ConfigureAwait(false).GetAwaiter().GetResult();
 
         #endregion
 
         #region Asynchronous send methods
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendReplyToAsync(string from, string to, string replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
-            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, new List<string>() { to }, subject, body, streamAttachments, new List<string> { replyTo });
+            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, new List<string>() { to }, subject, body, streamAttachments, new List<string> { replyTo }, SmtpStartTls);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendReplyToAsync(string from, string to, IEnumerable<string> replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
-            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, new List<string>() { to }, subject, body, streamAttachments, replyTo);
+            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, new List<string>() { to }, subject, body, streamAttachments, replyTo, SmtpStartTls);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendReplyToAsync(string from, IEnumerable<string> to, string replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
-            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, to, subject, body, streamAttachments, new List<string> { replyTo});
+            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, to, subject, body, streamAttachments, new List<string> { replyTo}, SmtpStartTls);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendReplyToAsync(string from, IEnumerable<string> to, IEnumerable<string> replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
-            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, to, subject, body, streamAttachments, replyTo);
+            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, to, subject, body, streamAttachments, replyTo, SmtpStartTls);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendReplyToAsync(string to, string replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
             => await SendReplyToAsync(new List<string>() { to }, new List<string> { replyTo }, subject, body, streamAttachments);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendReplyToAsync(string to, IEnumerable<string> replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
             => await SendReplyToAsync(new List<string>() { to }, replyTo, subject, body, streamAttachments);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendReplyToAsync(IEnumerable<string> to, string replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
             => await SendReplyToAsync(to, new List<string>() { replyTo }, subject, body, streamAttachments);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendReplyToAsync(IEnumerable<string> to, IEnumerable<string> replyTo, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
         {
             var sent = false;
 
             if (!MailUtils.ContainsValidEmails(SmtpFrom))
             {
-                SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: {nameof(SmtpFrom)} non è un indirizzo mail valido o non è  stato specificato => [ {SmtpFrom} ]");
+                SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: {nameof(SmtpFrom)} is not a valid email address or was not specified => [ {SmtpFrom} ]");
             }
             else
             {
-                sent = await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, SmtpFrom, to, subject, body, streamAttachments, replyTo);
+                sent = await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, SmtpFrom, to, subject, body, streamAttachments, replyTo, SmtpStartTls);
             }
 
             return sent;
         }
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendAsync(string from, string to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
-            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from,  new List<string>() { to }, subject, body, streamAttachments);
+            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from,  new List<string>() { to }, subject, body, streamAttachments, null, SmtpStartTls);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendAsync(string from, IEnumerable<string> to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
-            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, to, subject, body, streamAttachments);
+            => await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, from, to, subject, body, streamAttachments, null, SmtpStartTls);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendAsync(string to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
             => await SendAsync(new List<string>() { to }, subject, body, streamAttachments);
 
-        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string})"/>
+        /// <inheritdoc cref="SendAsync(string, int, bool, string, string, string, IEnumerable{string}, string, string, IEnumerable{ValueTuple{ValueTuple{string, Stream}, string}}, IEnumerable{string}, bool)"/>
         public static async Task<bool> SendAsync(IEnumerable<string> to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null)
         {
             var sent = false;
 
             if (!MailUtils.ContainsValidEmails(SmtpFrom))
             {
-                SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: {nameof(SmtpFrom)} non è un indirizzo mail valido o non è  stato specificato => [ {SmtpFrom} ]");
+                SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}: {nameof(SmtpFrom)} is not a valid email address or was not specified => [ {SmtpFrom} ]");
             }
             else
             {
-                sent = await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, SmtpFrom, to, subject, body, streamAttachments);
+                sent = await SendAsync(SmtpServer, SmtpPort, SmtpSSL, SmtpUsername, SmtpPassword, SmtpFrom, to, subject, body, streamAttachments, null, SmtpStartTls);
             }
 
             return sent;
@@ -495,17 +521,20 @@ namespace OSKHelpers.Mail
         /// <param name="subject">Email subject.</param>
         /// <param name="body">Content (HTML).</param>
         /// <param name="streamAttachments">List of tuples containing the file name and the stream to send as an attachment.<br />
-        /// <param name="replyTo"/>Addresses to which the reply to the email should be sent.</param>
         /// The format is ((Filename, Content) File, Encoding), where:<br />
         /// <b>File.Filename</b> contains the name to assign to the attachment.<br />
         /// <b>File.Content</b> is a readable stream with the file content.<br />
-        /// <b>Encoding</b> is the file encoding type (using a value from MediaTypeNames.Text is recommended).
-        /// <returns>True if the send succeeded.</returns>
-        public static async Task<bool> SendAsync(string server, int port, bool ssl, string username, string password, string from, IEnumerable<string> to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null, IEnumerable<string> replyTo = null)
+        /// <b>Encoding</b> is the file encoding type (using a value from MediaTypeNames.Text is recommended).</param>
+        /// <param name="replyTo">Addresses to which the reply to the email should be sent.</param>
+        /// <param name="startTls">If true and <paramref name="ssl"/> is false, the connection is upgraded to TLS with STARTTLS
+        /// (e.g. port 587); otherwise, with <paramref name="ssl"/> false, the connection is not encrypted.</param>
+        /// <returns>True if the send succeeded; false if the data is not valid (e.g. null or empty sender, recipients, subject or body) or the send failed.</returns>
+        public static async Task<bool> SendAsync(string server, int port, bool ssl, string username, string password, string from, IEnumerable<string> to, string subject, string body, IEnumerable<((string FileName, Stream Content) File, string Encoding)> streamAttachments = null, IEnumerable<string> replyTo = null, bool startTls = false)
         {
-            // Used to log a truncated version of the mail body
-            var debugBody = body.Substring(0, body.Length > 50 ? 50 : body.Length);
-            SimpleLog.Write(LogLevel.Debug, $"{SimpleLog.GetCallerTypeMethodName()}(From: '{from}', To: ['{string.Join("', '", to)}']{(replyTo?.Any() ?? false ? $", Reply-To: ['{string.Join("', '", replyTo)}']" : string.Empty)}, Subject: '{subject}', Body: '{debugBody}')");
+            // Used to log a truncated version of the mail body; null values are logged as empty, the validation follows
+            var debugBody   = body?.Substring(0, body.Length > 50 ? 50 : body.Length) ?? string.Empty;
+            var debugTo     = string.Join("', '", to ?? Enumerable.Empty<string>());
+            SimpleLog.Write(LogLevel.Debug, $"{SimpleLog.GetCallerTypeMethodName()}(From: '{from}', To: ['{debugTo}']{(replyTo?.Any() ?? false ? $", Reply-To: ['{string.Join("', '", replyTo)}']" : string.Empty)}, Subject: '{subject}', Body: '{debugBody}')");
             
             bool sent = false;
 
@@ -533,9 +562,13 @@ namespace OSKHelpers.Mail
                             {
                                 attachment.File.Content.Position = 0;
                                 if (string.IsNullOrWhiteSpace(attachment.Encoding))
+                                {
                                     await mailBody.Attachments.AddAsync(attachment.File.FileName, attachment.File.Content);
+                                }
                                 else
+                                {
                                     await mailBody.Attachments.AddAsync(attachment.File.FileName, attachment.File.Content, ContentType.Parse(attachment.Encoding));
+                                }
                             }
                         }
                     }
@@ -544,7 +577,7 @@ namespace OSKHelpers.Mail
                     // send email
                     using (var smtp = new SmtpClient())
                     {
-                        await smtp.ConnectAsync(server, port, ssl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.None);
+                        await smtp.ConnectAsync(server, port, GetSecureSocketOptions(ssl, startTls));
                         if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
                         {
                             await smtp.AuthenticateAsync(username, password);
@@ -553,21 +586,49 @@ namespace OSKHelpers.Mail
                         await smtp.DisconnectAsync(true);
                     }
                     sent = true;
-                    SimpleLog.Write(LogLevel.Debug, "Mail inviata correttamente");
+                    SimpleLog.Write(LogLevel.Debug, "Mail sent successfully");
                 }
                 catch (Exception ex)
                 {
-                    SimpleLog.Write(LogLevel.Error, $"Errore in {SimpleLog.GetCallerTypeMethodName()}('{from}','{to}','{subject}','{debugBody}'): {SimpleLog.FormattedException(ex)}");
+                    SimpleLog.Write(LogLevel.Error, $"Error in {SimpleLog.GetCallerTypeMethodName()}('{from}','{debugTo}','{subject}','{debugBody}'): {SimpleLog.FormattedException(ex)}");
                     sent = false;
                 }
             }
             else
             {
-                SimpleLog.Write(LogLevel.Warning, $"Dati non validi passati a {SimpleLog.GetCallerTypeMethodName()}('{from}','{to}','{subject}','{debugBody}')");
+                SimpleLog.Write(LogLevel.Warning, $"Invalid data passed to {SimpleLog.GetCallerTypeMethodName()}('{from}','{debugTo}','{subject}','{debugBody}')");
                 sent = false;
             }
 
             return sent;
+        }
+
+        /// <summary>
+        /// Returns the connection security option for the SMTP client:<br/>
+        /// implicit SSL/TLS when <paramref name="ssl"/> is true (takes precedence), STARTTLS when <paramref name="startTls"/> is true,<br/>
+        /// otherwise no encryption.
+        /// </summary>
+        /// <param name="ssl">Implicit SSL/TLS connection (e.g. port 465).</param>
+        /// <param name="startTls">Upgrade of the connection to TLS with STARTTLS (e.g. port 587).</param>
+        /// <returns>The <see cref="SecureSocketOptions"/> value to use.</returns>
+        public static SecureSocketOptions GetSecureSocketOptions(bool ssl, bool startTls)
+        {
+            SecureSocketOptions options;
+
+            if (ssl)
+            {
+                options = SecureSocketOptions.SslOnConnect;
+            }
+            else if (startTls)
+            {
+                options = SecureSocketOptions.StartTls;
+            }
+            else
+            {
+                options = SecureSocketOptions.None;
+            }
+
+            return options;
         }
 
         /// <summary>
@@ -681,7 +742,7 @@ namespace OSKHelpers.Mail
 
                     if (iterations >= MAXITERATIONS)
                     {
-                        SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}('{content}', {JsonSerializer.Serialize(tags)}, {JsonSerializer.Serialize(conditions)}): timeout durante l'elaborazione della stringa.");
+                        SimpleLog.Write($"{SimpleLog.GetCallerTypeMethodName()}('{content}', {JsonSerializer.Serialize(tags)}, {JsonSerializer.Serialize(conditions)}): timeout while processing the string.");
                         output = string.Empty;
                     }
                 }

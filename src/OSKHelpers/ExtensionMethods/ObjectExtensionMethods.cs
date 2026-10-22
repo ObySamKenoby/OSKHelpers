@@ -13,7 +13,7 @@ namespace OSKHelpers.ExtensionMethods
             => ObjectUtils.Dump(obj, objName, log, logLevel);
 
         /// <inheritdoc cref="ObjectUtils.IsNumeric(object)"/>
-        public static void OSKIsNumeric(this object obj)
+        public static bool OSKIsNumeric(this object obj)
             => ObjectUtils.IsNumeric(obj);
     }
 }

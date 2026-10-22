@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using OSKHelpers.Common;
+using OSKHelpers.Docker;
 
 namespace OSKHelpers.Tests.Common
 {
@@ -14,7 +15,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that at least one of the platform properties is true.
         /// </summary>
         [TestMethod]
-        public void PlatformAtLeastOneIsTrue()
+        public void PlatformProperties_CurrentPlatform_AtLeastOneIsTrue()
         {
             var result = OSKEnvironment.IsWindows || OSKEnvironment.IsMacOS || OSKEnvironment.IsLinux;
 
@@ -25,7 +26,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies consistency with RuntimeInformation for Windows.
         /// </summary>
         [TestMethod]
-        public void IsWindowsMatchesRuntimeInformation()
+        public void IsWindows_CurrentPlatform_MatchesRuntimeInformation()
         {
             var expected = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
@@ -36,7 +37,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies consistency with RuntimeInformation for Linux.
         /// </summary>
         [TestMethod]
-        public void IsLinuxMatchesRuntimeInformation()
+        public void IsLinux_CurrentPlatform_MatchesRuntimeInformation()
         {
             var expected = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
@@ -47,7 +48,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies consistency with RuntimeInformation for macOS.
         /// </summary>
         [TestMethod]
-        public void IsMacOSMatchesRuntimeInformation()
+        public void IsMacOS_CurrentPlatform_MatchesRuntimeInformation()
         {
             var expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
@@ -58,9 +59,9 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that IsDockerized is consistent with DockerUtils.
         /// </summary>
         [TestMethod]
-        public void IsDockerizedMatchesDockerUtils()
+        public void IsDockerized_CurrentEnvironment_MatchesDockerUtils()
         {
-            Assert.AreEqual(Docker.DockerUtils.IsDockerized, OSKEnvironment.IsDockerized);
+            Assert.AreEqual(DockerUtils.IsDockerized, OSKEnvironment.IsDockerized);
         }
     }
 }

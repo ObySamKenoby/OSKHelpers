@@ -26,7 +26,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow("",                        false)]
         [DataRow(" ",                       false)]
         [DataRow(null,                      false)]
-        public void IsValidEmailVariousInputsReturnsExpected(string email, bool expected)
+        public void IsValidEmail_VariousInputs_ReturnsExpected(string email, bool expected)
         {
             var result = MailUtils.IsValidEmail(email);
 
@@ -47,7 +47,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow("no email here",                       false)]
         [DataRow("",                                    false)]
         [DataRow(null,                                  false)]
-        public void ContainsValidEmailsVariousInputsReturnsExpected(string text, bool expected)
+        public void ContainsValidEmails_VariousInputs_ReturnsExpected(string text, bool expected)
         {
             var result = MailUtils.ContainsValidEmails(text);
 
@@ -68,7 +68,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow("no email here",                       false)]
         [DataRow("",                                    false)]
         [DataRow(null,                                  false)]
-        public void ContainsSingleEmailVariousInputsReturnsExpected(string text, bool expected)
+        public void ContainsSingleEmail_VariousInputs_ReturnsExpected(string text, bool expected)
         {
             var result = MailUtils.ContainsSingleEmail(text);
 

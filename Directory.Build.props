@@ -1,0 +1,13 @@
+<Project>
+    <!-- Proprietà comuni a tutti i progetti della soluzione -->
+
+    <!-- Applica in compilazione le regole di stile di .editorconfig (es. IDE0011, IDE1006), segnalate come avvisi -->
+    <PropertyGroup>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    </PropertyGroup>
+
+    <!-- Normalizza il percorso dei file nello stack trace: C:\...\NomeProgetto\Classe.cs diventa NomeProgetto:\Classe.cs -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName):\</PathMap>
+    </PropertyGroup>
+</Project>

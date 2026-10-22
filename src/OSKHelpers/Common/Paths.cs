@@ -23,6 +23,11 @@ namespace OSKHelpers.Common
         private const string UPPERCASENUMBERS   = UPPERCASELETTERS + NUMBERS;
         private const string ALPHANUMERIC       = LETTERS + NUMBERS;
 
+        /// <summary>
+        /// Interval, in milliseconds, of the automatic cleanup of the temporary files directory (one minute).
+        /// </summary>
+        private const double TEMPFILESCLEANINTERVAL = 60_000;
+
         #endregion
 
         #region Members
@@ -158,7 +163,7 @@ namespace OSKHelpers.Common
 
             // Timer setup
             _tmpFilesTimer              = new Timer();
-            _tmpFilesTimer.Interval     = TimeSpan.FromMinutes(1).TotalMilliseconds;
+            _tmpFilesTimer.Interval     = TEMPFILESCLEANINTERVAL;
             _tmpFilesTimer.AutoReset    = true;
             _tmpFilesTimer.Elapsed      += OnCleanTempFilesTimerElapsed;
         }
@@ -187,6 +192,14 @@ namespace OSKHelpers.Common
             InitializeDefaultDirectories(false);
         }
 
+        /// <summary>
+        /// For testing only: allows overriding the interval of the temporary files cleanup timer.
+        /// </summary>
+        /// <param name="milliseconds">Interval in milliseconds; null restores the default interval (one minute).</param>
+        public static void OverrideTempFilesCleanInterval(double? milliseconds)
+        {
+            _tmpFilesTimer.Interval = milliseconds ?? TEMPFILESCLEANINTERVAL;
+        }
 
 #endif
 
@@ -312,7 +325,7 @@ namespace OSKHelpers.Common
         /// Checks the existence of the default logs directory.
         /// </summary>
         /// <inheritdoc cref="CheckDirectory(string)"/>
-        public static bool CheckDefaultLogsDirectory() => CheckDirectory(DefaultDatabaseDirectory);
+        public static bool CheckDefaultLogsDirectory() => CheckDirectory(DefaultLogsDirectory);
 
         /// <summary>
         /// Checks the existence of the default output directory.

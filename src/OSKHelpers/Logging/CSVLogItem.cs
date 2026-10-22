@@ -49,7 +49,7 @@ namespace OSKHelpers.Logging
             }
             if (separator == null)
             {
-                throw new ArgumentNullException(separator);
+                throw new ArgumentNullException(nameof(separator));
             }
             Type type = obj.GetType();
 
@@ -61,7 +61,8 @@ namespace OSKHelpers.Logging
         /// Data is formatted as follows:<br/>
         /// <b>strings</b>: enclosed in double quotes ("");<br/>
         /// <b>numbers</b>: no quotes, no thousands separator, dot as decimal separator;<br/>
-        /// <b>dates (or date/time)</b>: no quotes, prefixed with "D", ISO UTC format;<br/>
+        /// <b>dates (DateTime, and DateOnly on .NET 8 or later)</b>: no quotes, ISO 8601 sortable format ("s", yyyy-MM-ddTHH:mm:ss),<br/>
+        /// without conversion to UTC;<br/>
         /// <b>other types</b>: treated as strings, enclosed in double quotes, represented via ToString().
         /// </summary>
         /// <param name="obj">Object for which to create the data row.</param>
@@ -76,7 +77,7 @@ namespace OSKHelpers.Logging
             }
             if (separator == null)
             {
-                throw new ArgumentNullException(separator);
+                throw new ArgumentNullException(nameof(separator));
             }
             Type type = obj.GetType();
 
@@ -107,7 +108,8 @@ namespace OSKHelpers.Logging
                     }
                     else
                     {
-                        fields.Add($"\"{value.ToString()}\"");
+                        // A null value is written as an empty quoted field: it is not a read error
+                        fields.Add($"\"{value?.ToString()}\"");
                     }
                 }
                 catch (Exception ex)

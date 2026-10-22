@@ -77,7 +77,7 @@ namespace OSKHelpers.Diagnostics
                 action();
                 long after = GC.GetTotalMemory(true);
                 usage = after - before;
-                SimpleLog.Write($"{(!string.IsNullOrWhiteSpace(message) ? message : "Utilizzo memoria")} {usage:#,##0} bytes ({usage/1024:#,##0} kb).");
+                SimpleLog.Write($"{(!string.IsNullOrWhiteSpace(message) ? message : "Memory usage")} {usage:#,##0} bytes ({usage/1024:#,##0} kb).");
             }
             else
             {

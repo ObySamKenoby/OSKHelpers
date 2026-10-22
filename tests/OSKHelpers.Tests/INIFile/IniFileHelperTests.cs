@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OSKHelpers.Common;
 using OSKHelpers.INIFile;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace OSKHelpers.Tests.INIFile
@@ -38,15 +40,16 @@ namespace OSKHelpers.Tests.INIFile
         private const string ARR2ELEM1 = "Arr2Elem1";
         private const string ARR2ELEM2 = "Arr2Elem2";
         private const string ARR3ELEM1 = "Arr3Elem1";
-        private readonly string KEYVALUE1 = $"{KEY1} = {VALUE1}";
-        private readonly string KEYVALUE2 = $"{KEY2} = {VALUE2}";
-        private readonly string KEYVALUE3 = $"{KEY3} = {VALUE3}";
-        private readonly string KEYVALUE4 = $"{KEY4} = {VALUE4}";
-        private readonly string KEYVALUE5 = $"{KEY5} = {VALUE5}";
-        private readonly string KEYVALUE6 = $"{KEY6} = {VALUE6}";
-        private readonly string KEYVALUE7 = $"{KEY7} = {VALUE7}";
-        private readonly string KEYVALUE8 = $"{KEY8} = {VALUE8}";
-        private readonly string KEYVALUE9 = $"{KEY9} = {VALUE9}";
+        private const string KEYVALUE1 = $"{KEY1} = {VALUE1}";
+        private const string KEYVALUE2 = $"{KEY2} = {VALUE2}";
+        private const string KEYVALUE3 = $"{KEY3} = {VALUE3}";
+        private const string KEYVALUE4 = $"{KEY4} = {VALUE4}";
+        private const string KEYVALUE5 = $"{KEY5} = {VALUE5}";
+        private const string KEYVALUE6 = $"{KEY6} = {VALUE6}";
+        private const string KEYVALUE7 = $"{KEY7} = {VALUE7}";
+        private const string KEYVALUE8 = $"{KEY8} = {VALUE8}";
+        private const string KEYVALUE9 = $"{KEY9} = {VALUE9}";
+        private const string SHOWKEYVALUE = "!!SHOWKEYVALUE!!";
 
         #endregion
 
@@ -54,7 +57,7 @@ namespace OSKHelpers.Tests.INIFile
 
         #region Helper methods
 
-        private string[] GetLinesCommenti()
+        private string[] GetCommentLines()
         {
             return new string[]
             {
@@ -64,7 +67,7 @@ namespace OSKHelpers.Tests.INIFile
             };
         }
 
-        private string[] GetLinesValide()
+        private string[] GetValidLines()
         {
             return new string[]
             {
@@ -77,7 +80,7 @@ namespace OSKHelpers.Tests.INIFile
             };
         }
 
-        private string[] GetLinesArrValide()
+        private string[] GetValidArrayLines()
         {
             return new string[]
             {
@@ -138,143 +141,143 @@ namespace OSKHelpers.Tests.INIFile
         #endregion
 
         [TestMethod]
-        public void ParseLinesTestLinesNullReturnsFalse()
+        public void Parse_NullLines_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             Assert.IsFalse(helper.Parse(null));
         }
 
         [TestMethod]
-        public void ParseLinesTestNoLinesReturnsFalse()
+        public void Parse_NoLines_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             Assert.IsFalse(helper.Parse(new List<string>()));
         }
 
         [TestMethod]
-        public void ParseLinesCommentsGoodReturnsTrue()
+        public void Parse_CommentsAndValidLines_ReturnsTrue()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
-            lines.AddRange(GetLinesCommenti());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
+            lines.AddRange(GetCommentLines());
             Assert.IsTrue(helper.Parse(lines));
         }
 
         [TestMethod]
-        public void ParseLinesCommentsGoodDuplicatedKeyReturnsFalse()
+        public void Parse_DuplicatedKey_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
             Assert.IsFalse(helper.Parse(lines));
         }
 
         [TestMethod]
-        public void ParseLinesCommentsGoodErr1ReturnsFalse()
+        public void Parse_LineWithoutKey_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
-            lines.AddRange(GetLinesCommenti());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
+            lines.AddRange(GetCommentLines());
             lines.Add(GetLineErr1());
             Assert.IsFalse(helper.Parse(lines));
         }
 
         [TestMethod]
-        public void ParseLinesCommentsGoodErr2ReturnsFalse()
+        public void Parse_LineWithoutValue_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
-            lines.AddRange(GetLinesCommenti());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
+            lines.AddRange(GetCommentLines());
             lines.Add(GetLineErr2());
             Assert.IsFalse(helper.Parse(lines));
         }
 
         [TestMethod]
-        public void ParseLinesCommentsGoodErr3ReturnsFalse()
+        public void Parse_LineWithoutEqualSign_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
-            lines.AddRange(GetLinesCommenti());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
+            lines.AddRange(GetCommentLines());
             lines.Add(GetLineErr3());
             Assert.IsFalse(helper.Parse(lines));
         }
 
         [TestMethod]
-        public void ParseLinesIsFileReadTests()
+        public void Parse_ValidAndInvalidLines_UpdatesIniFileRead()
         {
             var helper = new IniFileHelper();
             Assert.IsFalse(helper.IniFileRead);
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
             Assert.IsTrue(helper.Parse(lines) && helper.IniFileRead);
             lines.Add(GetLineErr1());
             Assert.IsTrue(!helper.Parse(lines) && !helper.IniFileRead);
         }
 
         [TestMethod]
-        public void ParseLinesArrCommentsGoodErr1ReturnsFalse()
+        public void Parse_ArrayLineWithoutName_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
             lines.Add(GetArrayErr1());
             Assert.IsFalse(helper.Parse(lines));
         }
 
         [TestMethod]
-        public void ParseLinesArrCommentsGoodErr2ReturnsFalse()
+        public void Parse_ArrayLineWithoutValue_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
             lines.Add(GetArrayErr2());
             Assert.IsFalse(helper.Parse(lines));
         }
 
         [TestMethod]
-        public void ParseLinesArrCommentsGoodErr3ReturnsFalse()
+        public void Parse_ArrayLineWithoutEqualSign_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
             lines.Add(GetArrayErr3());
             Assert.IsFalse(helper.Parse(lines));
         }
 
         [TestMethod]
-        public void ParseLinesArrCommentsGoodValidReturnsTrue()
+        public void Parse_ValidArrayLines_ReturnsTrue()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
-            lines.AddRange(GetLinesArrValide());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
+            lines.AddRange(GetValidArrayLines());
             Assert.IsTrue(helper.Parse(lines));
         }
 
         [TestMethod]
-        public void LinesArrCommentsGoodValidTests()
+        public void Parse_ValidArrayLines_LoadsArrays()
         {
             var helper = new IniFileHelper();
             List<string> lines = new List<string>();
-            lines.AddRange(GetLinesCommenti());
-            lines.AddRange(GetLinesValide());
-            lines.AddRange(GetLinesArrValide());
+            lines.AddRange(GetCommentLines());
+            lines.AddRange(GetValidLines());
+            lines.AddRange(GetValidArrayLines());
             Assert.IsTrue(helper.Parse(lines));
             Assert.IsFalse(helper.HasKey("Arr1"));
             Assert.AreEqual(2, helper.Arrays.Count);
@@ -294,14 +297,14 @@ namespace OSKHelpers.Tests.INIFile
         /* Tests removed because not verifiable
         
         [TestMethod]
-        public void LoadFileContainsErrorFails()
+        public void Constructor_FileWithErrors_DoesNotReadFile()
         {
             var helper = new IniFileHelper(Path.Combine(Paths.AssemblyPath, "INIFile", "SettingsTestsFail.ini"), false);
             Assert.IsFalse(helper.IniFileRead);
         }
 
         [TestMethod]
-        public void LoadFileGood()
+        public void Constructor_ValidFile_LoadsKeysAndArrays()
         {
             var helper = new IniFileHelper(Path.Combine(Paths.AssemblyPath, "INIFile", "SettingsTestsOk.ini"), false);
             Assert.IsTrue(helper.IniFileRead);
@@ -317,7 +320,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void SaveFileTests()
+        public void Save_ModifiedSettings_WritesReadableFile()
         {
             string outputFile = Path.Combine(Paths.AssemblyPath, "INIFile", "SettingsTestsOutput.ini");
             if (File.Exists(outputFile))
@@ -340,14 +343,105 @@ namespace OSKHelpers.Tests.INIFile
         } */
 
         [TestMethod]
-        public void HasKeyNoKeysReturnsFalse()
+        public void Parse_OnlyPragmas_ReturnsFalseWithoutException()
+        {
+            var helper = new IniFileHelper();
+
+            Assert.IsFalse(helper.Parse(new List<string>() { SHOWKEYVALUE, SHOWKEYVALUE }));
+            Assert.IsFalse(helper.IniFileRead);
+        }
+
+        [TestMethod]
+        public void Parse_PragmaLines_DoesNotModifyCallerList()
+        {
+            var helper  = new IniFileHelper();
+            var lines   = new List<string>() { SHOWKEYVALUE, KEYVALUE1, KEYVALUE2 };
+
+            Assert.IsTrue(helper.Parse(lines));
+            Assert.AreEqual(3, lines.Count);
+            Assert.AreEqual(SHOWKEYVALUE, lines[0]);
+            Assert.IsTrue(helper.HasKeys(new string[] { KEY1, KEY2 }));
+        }
+
+        [TestMethod]
+        public void Parse_PragmaAfterComment_IsParsedAsInvalidLine()
+        {
+            // Pragmas are recognised only on the first physical lines, as documented in SettingsTemplate.ini
+            var helper = new IniFileHelper();
+
+            Assert.IsFalse(helper.Parse(new List<string>() { "# Comment", SHOWKEYVALUE, KEYVALUE1 }));
+        }
+
+        [TestMethod]
+        public void Parse_InlineComment_IsPartOfValue()
+        {
+            var helper = new IniFileHelper();
+
+            Assert.IsTrue(helper.Parse(new List<string>() { $"{KEYVALUE1} # Comment" }));
+            Assert.AreEqual($"{VALUE1} # Comment", helper.GetString(KEY1));
+        }
+
+        [TestMethod]
+        [DoNotParallelize]
+        public void CheckIniFileExists_DefaultPath_CopiesTemplateIntoAssemblyPath()
+        {
+            // Unique names, so the files cannot collide with those of other tests
+            var iniFile             = $"{Guid.NewGuid()}.ini";
+            var templateFile        = $"{Guid.NewGuid()}.ini";
+            var iniFilePath         = Path.Combine(Paths.AssemblyPath, iniFile);
+            var templateFilePath    = Path.Combine(Paths.AssemblyPath, templateFile);
+            try
+            {
+                File.WriteAllText(templateFilePath, KEYVALUE1);
+
+                var firstCheck  = IniFileHelper.CheckIniFileExists(iniFile, templateFile);
+                var secondCheck = IniFileHelper.CheckIniFileExists(iniFile, templateFile);
+
+                Assert.IsFalse(firstCheck.Exists);
+                Assert.IsTrue(File.Exists(iniFilePath));
+                Assert.IsTrue(secondCheck.Exists);
+            }
+            finally
+            {
+                File.Delete(iniFilePath);
+                File.Delete(templateFilePath);
+            }
+        }
+
+        [TestMethod]
+        public void CheckIniFileExists_FullPath_CopiesTemplateIntoGivenPath()
+        {
+            var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            try
+            {
+                Directory.CreateDirectory(directory);
+                var iniFilePath         = Path.Combine(directory, IniFileHelper.DEFAULTINIFILE);
+                var templateFilePath    = Path.Combine(directory, IniFileHelper.INIFILETEMPLATE);
+                File.WriteAllText(templateFilePath, KEYVALUE1);
+
+                var check = IniFileHelper.CheckIniFileExists(iniFilePath, templateFilePath, false);
+
+                Assert.IsFalse(check.Exists);
+                Assert.IsTrue(File.Exists(iniFilePath));
+            }
+            finally
+            {
+                if (Directory.Exists(directory))
+                {
+                    Directory.Delete(directory, true);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void HasKey_NoKeys_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             Assert.IsFalse(helper.HasKey(KEY1));
         }
 
         [TestMethod]
-        public void HasKeyValueNullReturnsFalse()
+        public void HasKey_NullKey_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -355,7 +449,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void HasKeyValueSpacesReturnsFalse()
+        public void HasKey_WhitespaceKey_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -363,7 +457,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void HasKeyNotExistsReturnsFalse()
+        public void HasKey_MissingKey_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -371,7 +465,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void HasKeyExistsReturnsTrue()
+        public void HasKey_ExistingKey_ReturnsTrue()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -379,14 +473,14 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void HasKeysNoKeysMemorizedReturnsFalse()
+        public void HasKeys_NoKeysStored_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             Assert.IsFalse(helper.HasKeys(GetKeys3()));
         }
 
         [TestMethod]
-        public void HasKeysNullParameterReturnsFalse()
+        public void HasKeys_NullParameter_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -394,7 +488,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void HasKeysParameterTooLongReturnsFalse()
+        public void HasKeys_MoreKeysThanStored_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -402,7 +496,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void HasKeysOneKeyNotPresentReturnsFalse()
+        public void HasKeys_OneKeyMissing_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper3Alternate(helper);
@@ -410,7 +504,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void HasKeysParameterSubsetOfKeysReturnsTrue()
+        public void HasKeys_SubsetOfKeys_ReturnsTrue()
         {
             var helper = new IniFileHelper();
             PopulateHelper5(helper);
@@ -418,7 +512,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void HasKeysParameterEqualsKeysReturnsTrue()
+        public void HasKeys_AllKeys_ReturnsTrue()
         {
             var helper = new IniFileHelper();
             PopulateHelper5(helper);
@@ -426,7 +520,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetKeysReturnsKeys()
+        public void GetKeys_StoredKeys_ReturnsKeys()
         {
             var helper = new IniFileHelper();
             PopulateHelper5(helper);
@@ -434,7 +528,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetStringKeyDoesntExistsReturnsEmptyString()
+        public void GetString_MissingKey_ReturnsEmptyString()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -442,7 +536,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetStringKeyExistsReturnsString()
+        public void GetString_ExistingKey_ReturnsValue()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -450,7 +544,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetIntKeyDoesntExistsReturns0()
+        public void GetInt_MissingKey_ReturnsZero()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -458,7 +552,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetIntKeyValueNotIntReturns0()
+        public void GetInt_ValueNotInt_ReturnsZero()
         {
             var helper = new IniFileHelper();
             PopulateHelper5(helper);
@@ -466,7 +560,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetIntKeyExistsReturnsValue()
+        public void GetInt_ExistingKey_ReturnsValue()
         {
             var helper = new IniFileHelper();
             PopulateHelper5(helper);
@@ -474,7 +568,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetBoolKeyDoesntExistsReturnsFalse()
+        public void GetBool_MissingKey_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -482,7 +576,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetBoolKeyValueNotBoolReturnsFalse()
+        public void GetBool_ValueNotBool_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper9(helper);
@@ -490,7 +584,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetBoolKeyTrueReturnsTrue()
+        public void GetBool_ValueTrue_ReturnsTrue()
         {
             var helper = new IniFileHelper();
             PopulateHelper9(helper);
@@ -498,7 +592,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetBoolKeyFalseReturnsFalse()
+        public void GetBool_ValueFalse_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper9(helper);
@@ -506,7 +600,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetBoolKey1ReturnsTrue()
+        public void GetBool_Value1_ReturnsTrue()
         {
             var helper = new IniFileHelper();
             PopulateHelper9(helper);
@@ -514,7 +608,7 @@ namespace OSKHelpers.Tests.INIFile
         }
 
         [TestMethod]
-        public void GetBoolKey0ReturnsFalse()
+        public void GetBool_Value0_ReturnsFalse()
         {
             var helper = new IniFileHelper();
             PopulateHelper9(helper);
@@ -527,7 +621,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that AddKey adds a new key with a string value.
         /// </summary>
         [TestMethod]
-        public void AddKeyNewStringKeyAddsSuccessfully()
+        public void AddKey_NewStringKey_AddsKey()
         {
             var helper  = new IniFileHelper();
             var result  = helper.AddKey("NewKey", "NewValue");
@@ -541,7 +635,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that AddKey updates an existing key.
         /// </summary>
         [TestMethod]
-        public void AddKeyExistingKeyUpdatesValue()
+        public void AddKey_ExistingKey_UpdatesValue()
         {
             var helper = new IniFileHelper();
             helper.AddKey("Key", "Old");
@@ -558,7 +652,7 @@ namespace OSKHelpers.Tests.INIFile
         [DataRow("",    "value")]
         [DataRow("key", null)]
         [DataRow("key", "")]
-        public void AddKeyInvalidParamsReturnsFalse(string key, string value)
+        public void AddKey_InvalidParameters_ReturnsFalse(string key, string value)
         {
             var helper  = new IniFileHelper();
             var result  = helper.AddKey(key, value);
@@ -570,7 +664,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies the AddKey(string, int) overload.
         /// </summary>
         [TestMethod]
-        public void AddKeyIntValueStoresAsString()
+        public void AddKey_IntValue_StoresAsString()
         {
             var helper = new IniFileHelper();
             helper.AddKey("Port", 8080);
@@ -582,7 +676,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies the AddKey(string, bool) overload with true.
         /// </summary>
         [TestMethod]
-        public void AddKeyBoolTrueValueStoresAsUppercaseString()
+        public void AddKey_BoolTrue_StoresAsUppercaseString()
         {
             var helper = new IniFileHelper();
             helper.AddKey("Enabled", true);
@@ -595,7 +689,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies the AddKey(string, bool) overload with false.
         /// </summary>
         [TestMethod]
-        public void AddKeyBoolFalseValueStoresAsUppercaseString()
+        public void AddKey_BoolFalse_StoresAsUppercaseString()
         {
             var helper = new IniFileHelper();
             helper.AddKey("Enabled", false);
@@ -612,7 +706,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that Set updates an existing key.
         /// </summary>
         [TestMethod]
-        public void SetExistingKeyUpdatesValue()
+        public void Set_ExistingKey_UpdatesValue()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -625,7 +719,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that Set does nothing for a non-existing key.
         /// </summary>
         [TestMethod]
-        public void SetNonExistingKeyDoesNothing()
+        public void Set_MissingKey_DoesNothing()
         {
             var helper = new IniFileHelper();
             PopulateHelper3(helper);
@@ -638,7 +732,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies Set with the integer overload.
         /// </summary>
         [TestMethod]
-        public void SetIntValueUpdatesCorrectly()
+        public void Set_IntValue_UpdatesValue()
         {
             var helper = new IniFileHelper();
             PopulateHelper9(helper);
@@ -651,7 +745,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies Set with the boolean overload.
         /// </summary>
         [TestMethod]
-        public void SetBoolValueUpdatesCorrectly()
+        public void Set_BoolValue_UpdatesValue()
         {
             var helper = new IniFileHelper();
             PopulateHelper9(helper);
@@ -668,7 +762,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies AddArray creates an empty array.
         /// </summary>
         [TestMethod]
-        public void AddArrayNewArrayCreatesEmptyArray()
+        public void AddArray_NewArray_CreatesEmptyArray()
         {
             var helper = new IniFileHelper();
             helper.AddArray("Colors");
@@ -681,7 +775,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that AddArray on an already existing array does not overwrite it.
         /// </summary>
         [TestMethod]
-        public void AddArrayExistingArrayDoesNotOverwrite()
+        public void AddArray_ExistingArray_DoesNotOverwrite()
         {
             var helper = new IniFileHelper();
             helper.AddArrayElement("Colors", "Red");
@@ -694,7 +788,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies AddArrayElement.
         /// </summary>
         [TestMethod]
-        public void AddArrayElementValidElementAddsToArray()
+        public void AddArrayElement_ValidElement_AddsToArray()
         {
             var helper = new IniFileHelper();
             helper.AddArrayElement("Colors", "Red");
@@ -708,7 +802,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies ClearArray on an existing array.
         /// </summary>
         [TestMethod]
-        public void ClearArrayExistingArrayRemovesAllElements()
+        public void ClearArray_ExistingArray_RemovesAllElements()
         {
             var helper = new IniFileHelper();
             helper.AddArrayElement("Colors", "Red");
@@ -724,7 +818,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies ClearArray on a non-existing array.
         /// </summary>
         [TestMethod]
-        public void ClearArrayNonExistingArrayReturnsFalse()
+        public void ClearArray_MissingArray_ReturnsFalse()
         {
             var helper  = new IniFileHelper();
             var result  = helper.ClearArray("Missing");
@@ -736,7 +830,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies RemoveArray.
         /// </summary>
         [TestMethod]
-        public void RemoveArrayExistingArrayRemovesIt()
+        public void RemoveArray_ExistingArray_RemovesArray()
         {
             var helper = new IniFileHelper();
             helper.AddArray("Colors");
@@ -749,7 +843,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies AddArray with a typed list.
         /// </summary>
         [TestMethod]
-        public void AddArrayTypedListAddsAllElements()
+        public void AddArray_TypedList_AddsAllElements()
         {
             var helper = new IniFileHelper();
             helper.AddArray("Numbers", new List<int> { 1, 2, 3 });
@@ -761,7 +855,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that Array returns an empty list for a non-existing name.
         /// </summary>
         [TestMethod]
-        public void ArrayNonExistingNameReturnsEmptyList()
+        public void Array_MissingName_ReturnsEmptyList()
         {
             var helper  = new IniFileHelper();
             var result  = helper.Array("Missing");
@@ -773,7 +867,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that HasArray is case-insensitive.
         /// </summary>
         [TestMethod]
-        public void HasArrayCaseInsensitiveReturnsTrue()
+        public void HasArray_DifferentCase_ReturnsTrue()
         {
             var helper = new IniFileHelper();
             helper.AddArray("Colors");
@@ -790,7 +884,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies GetDaysOfWeek with a valid value.
         /// </summary>
         [TestMethod]
-        public void GetDaysOfWeekValidValueReturnsParsedDays()
+        public void GetDaysOfWeek_ValidValue_ReturnsParsedDays()
         {
             var helper = new IniFileHelper();
             helper.Parse(new List<string> { "Days=1 3 5" });
@@ -807,13 +901,183 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies GetDaysOfWeek with a missing key.
         /// </summary>
         [TestMethod]
-        public void GetDaysOfWeekMissingKeyReturnsEmptyDays()
+        public void GetDaysOfWeek_MissingKey_ReturnsEmptyDays()
         {
             var helper  = new IniFileHelper();
             var result  = helper.GetDaysOfWeek("Missing");
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.DaysOfWeek.Count);
+        }
+
+        /// <summary>
+        /// Verifies GetDaysOfWeek with an invalid value: an empty instance is returned.
+        /// </summary>
+        [TestMethod]
+        public void GetDaysOfWeek_InvalidValue_ReturnsEmptyDays()
+        {
+            var helper = new IniFileHelper();
+            helper.Parse(new List<string> { "Days=1 9" });
+
+            var result = helper.GetDaysOfWeek("Days");
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.DaysOfWeek.Count);
+        }
+
+        #endregion
+
+        #region Default values
+
+        /// <summary>
+        /// Verifies that the Get methods return the default value passed for a missing key.
+        /// </summary>
+        [TestMethod]
+        public void GetMethods_MissingKeyWithDefault_ReturnDefaultValue()
+        {
+            var helper = new IniFileHelper();
+
+            Assert.AreEqual("Default", helper.GetString("Missing", "Default"));
+            Assert.AreEqual(42, helper.GetInt("Missing", 42));
+            Assert.IsTrue(helper.GetBool("Missing", true));
+        }
+
+        /// <summary>
+        /// Verifies that GetInt and GetBool return the default value passed for an invalid value.
+        /// </summary>
+        [TestMethod]
+        public void GetMethods_InvalidValueWithDefault_ReturnDefaultValue()
+        {
+            var helper = new IniFileHelper();
+            helper.Parse(new List<string> { "Number = abc", "Flag = maybe" });
+
+            Assert.AreEqual(42, helper.GetInt("Number", 42));
+            Assert.IsTrue(helper.GetBool("Flag", true));
+        }
+
+        #endregion
+
+        #region Keys / Arrays / Set
+
+        /// <summary>
+        /// Verifies that Keys and Arrays expose the parsed keys (uppercase) and arrays.
+        /// </summary>
+        [TestMethod]
+        public void KeysAndArrays_ParsedLines_ExposeKeysAndArrays()
+        {
+            var helper = new IniFileHelper();
+            helper.Parse(new List<string>(GetValidLines().Concat(GetValidArrayLines())));
+
+            Assert.HasCount(4, helper.Keys);
+            Assert.AreEqual(VALUE1, helper.Keys[KEY1.ToUpper()]);
+            Assert.HasCount(2, helper.Arrays);
+            Assert.HasCount(3, helper.Arrays[ARR1.ToUpper()]);
+        }
+
+        /// <summary>
+        /// Verifies that Set(DaysOfWeekParameter) updates an existing key with the string representation of the days.
+        /// </summary>
+        [TestMethod]
+        public void Set_DaysOfWeekExistingKey_UpdatesValue()
+        {
+            var helper = new IniFileHelper();
+            helper.AddKey("Days", "1");
+
+            helper.Set("Days", new DaysOfWeekParameter("5 1"));
+
+            Assert.AreEqual("1 5", helper.GetString("Days"));
+        }
+
+        /// <summary>
+        /// Verifies that Set(DaysOfWeekParameter) does nothing for a missing key.
+        /// </summary>
+        [TestMethod]
+        public void Set_DaysOfWeekMissingKey_DoesNothing()
+        {
+            var helper = new IniFileHelper();
+
+            helper.Set("Days", new DaysOfWeekParameter("1"));
+
+            Assert.IsFalse(helper.HasKey("Days"));
+        }
+
+        /// <summary>
+        /// Verifies that AddArray&lt;T&gt; does not add values already present, also among the values passed.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Intervento-032")]
+        public void AddArray_TypedListWithDuplicates_AddsEachValueOnce()
+        {
+            var helper = new IniFileHelper();
+            helper.AddArray(ARR1, new List<int> { 1 });
+
+            helper.AddArray(ARR1, new List<int> { 1, 2, 2, 3 });
+
+            CollectionAssert.AreEqual(new[] { "1", "2", "3" }, helper.Array(ARR1).ToArray());
+        }
+
+        /// <summary>
+        /// Verifies that AddArrayElement creates the missing array and trims the element (null becomes empty).
+        /// </summary>
+        [TestMethod]
+        public void AddArrayElement_MissingArray_CreatesArrayWithElement()
+        {
+            var helper = new IniFileHelper();
+
+            helper.AddArrayElement(ARR3, "  Elem  ");
+            helper.AddArrayElement(ARR3, null);
+
+            Assert.IsTrue(helper.HasArray(ARR3));
+            CollectionAssert.AreEqual(new[] { "Elem", string.Empty }, helper.Array(ARR3).ToArray());
+        }
+
+        /// <summary>
+        /// Verifies that the array methods ignore an empty array name.
+        /// </summary>
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        public void ArrayMethods_EmptyName_DoNothing(string arrayName)
+        {
+            var helper = new IniFileHelper();
+
+            helper.AddArray(arrayName);
+            helper.AddArrayElement(arrayName, "Elem");
+            helper.RemoveArray(arrayName);
+
+            Assert.IsFalse(helper.ClearArray(arrayName));
+            Assert.HasCount(0, helper.Array(arrayName));
+            Assert.HasCount(0, helper.Arrays);
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Verifies that the default constructor creates an empty helper not read from file.
+        /// </summary>
+        [TestMethod]
+        public void Constructor_Default_CreatesEmptyHelper()
+        {
+            var helper = new IniFileHelper(false);
+
+            Assert.IsFalse(helper.IniFileRead);
+            Assert.HasCount(0, helper.Keys);
+            Assert.HasCount(0, helper.Arrays);
+        }
+
+        /// <summary>
+        /// Verifies that the constructor with a missing file does not read anything.
+        /// </summary>
+        [TestMethod]
+        public void Constructor_MissingFile_DoesNotReadFile()
+        {
+            var helper = new IniFileHelper(Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.ini"), false);
+
+            Assert.IsFalse(helper.IniFileRead);
+            Assert.HasCount(0, helper.Keys);
         }
 
         #endregion

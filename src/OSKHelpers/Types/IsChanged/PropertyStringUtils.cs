@@ -23,8 +23,9 @@ namespace OSKHelpers.Types.IsChanged
         public static string ThousandsSeparator { get; set; }
 
         /// <summary>
-        /// CultureInfo used internally for conversions;<br/>
-        /// defaults to Italian culture.
+        /// CultureInfo used internally for conversions and formatting;<br/>
+        /// defaults to <see cref="CultureInfo.CurrentCulture"/> at the time the class is first used.<br/>
+        /// Set it explicitly when the result must not depend on the system settings (e.g. on a web server).
         /// </summary>
         public static CultureInfo CultureInfo { get; set; }
 
@@ -34,7 +35,7 @@ namespace OSKHelpers.Types.IsChanged
 
         static PropertyStringUtils()
         {
-            CultureInfo         = new CultureInfo("it-IT");
+            CultureInfo         = CultureInfo.CurrentCulture;
             DecimalSeparator    = ",";
             ThousandsSeparator  = ".";
         }
@@ -50,21 +51,27 @@ namespace OSKHelpers.Types.IsChanged
         private static void CheckProperties()
         {
             if (string.IsNullOrEmpty(DecimalSeparator))
+            {
                 throw new ArgumentNullException(nameof(DecimalSeparator));
+            }
 
             if (string.IsNullOrEmpty(ThousandsSeparator))
+            {
                 throw new ArgumentNullException(nameof(ThousandsSeparator));
+            }
 
             if (CultureInfo == null)
+            {
                 throw new ArgumentNullException(nameof(CultureInfo));
+            }
         }
 
         #region Display
 
         /// <summary>
-        /// Returns the currency-formatted representation of the value passed as parameter.
+        /// Returns the currency-formatted representation of the value passed as parameter, using <see cref="CultureInfo"/>.
         /// </summary>
-        public static string DisplayAsCurrency(decimal? value) => value != null ? $"{value:#,##0.00}" : null;
+        public static string DisplayAsCurrency(decimal? value) => value?.ToString("#,##0.00", CultureInfo);
 
         #endregion
 
@@ -90,20 +97,22 @@ namespace OSKHelpers.Types.IsChanged
         /// Sets the value of <paramref name="field"/> by parsing <paramref name="newValue"/> as a nullable decimal.
         /// </summary>
         /// <param name="field">Field to update.</param>
-        /// <param name="newValue">String representation of the new decimal value, or null/empty to set the field to null.</param>
+        /// <param name="newValue">String representation of the new decimal value, or null/empty to set the field to null;<br/>
+        /// an invalid string leaves the field unchanged.</param>
         /// <returns>True if the field value changed.</returns>
         public static bool SetProperty(ref decimal? field, string newValue)
         {
             bool changed = false;
 
-            if (string.IsNullOrWhiteSpace(newValue) && field != null)
+            if (string.IsNullOrWhiteSpace(newValue))
             {
-                field = null;
-                changed = true;
+                // Only a null or empty string resets the field
+                changed = field != null;
+                field   = null;
             }
-            else
+            else if (TryParse(newValue, out decimal? value))
             {
-                TryParse(newValue, out decimal? value);
+                // An invalid string leaves the field unchanged
                 changed = field != value;
                 if (changed)
                 {
@@ -134,20 +143,22 @@ namespace OSKHelpers.Types.IsChanged
         /// Sets the value of <paramref name="field"/> by parsing <paramref name="newValue"/> as a nullable DateTime.
         /// </summary>
         /// <param name="field">Field to update.</param>
-        /// <param name="newValue">String representation of the new DateTime value, or null/empty to set the field to null.</param>
+        /// <param name="newValue">String representation of the new DateTime value, or null/empty to set the field to null;<br/>
+        /// an invalid string leaves the field unchanged.</param>
         /// <returns>True if the field value changed.</returns>
         public static bool SetProperty(ref DateTime? field, string newValue)
         {
             bool changed = false;
 
-            if (string.IsNullOrWhiteSpace(newValue) && field != null)
+            if (string.IsNullOrWhiteSpace(newValue))
             {
-                field = null;
-                changed = true;
+                // Only a null or empty string resets the field
+                changed = field != null;
+                field   = null;
             }
-            else
+            else if (TryParse(newValue, out DateTime? value))
             {
-                TryParse(newValue, out DateTime? value);
+                // An invalid string leaves the field unchanged
                 changed = !field.Equals(value);
                 if (changed)
                 {
@@ -189,10 +200,13 @@ namespace OSKHelpers.Types.IsChanged
                     // ... detect the last separator, adding 2 to account for the leading zero and the decimal separator character...
                     var p = (lastTpos > lastDpos ? lastTpos : lastDpos) + 2;
                     // ... and finally build the sanitised string
-                    s = $"{s.Substring(0, p).Trim().Replace(ThousandsSeparator, string.Empty).Replace(DecimalSeparator, string.Empty)},{s.Substring(p)}";
+                    // with the decimal separator of CultureInfo, used for the conversion below
+                    s = $"{s.Substring(0, p).Trim().Replace(ThousandsSeparator, string.Empty).Replace(DecimalSeparator, string.Empty)}" +
+                        $"{CultureInfo.NumberFormat.NumberDecimalSeparator}{s.Substring(p)}";
                 }
                 // ... finally, if the resulting string is a valid number, update the property to the new value.
-                parsed = decimal.TryParse(s, out result);
+                // CultureInfo is used instead of the culture of the thread, so the result does not depend on the system settings.
+                parsed = decimal.TryParse(s, NumberStyles.Number, CultureInfo, out result);
             }
 
             return parsed;

@@ -13,7 +13,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that the seed is always a positive value.
         /// </summary>
         [TestMethod]
-        public void SeedAlwaysReturnsPositiveValue()
+        public void Seed_AnyTime_ReturnsPositiveValue()
         {
             var seed = OSKRandom.Seed;
 
@@ -24,7 +24,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that the default constructor creates a working instance.
         /// </summary>
         [TestMethod]
-        public void ConstructorDefaultCreatesWorkingInstance()
+        public void Constructor_Default_CreatesWorkingInstance()
         {
             var rnd     = new OSKRandom();
             var value   = rnd.Next(0, 100);
@@ -36,11 +36,11 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that the same seed produces reproducible sequences.
         /// </summary>
         [TestMethod]
-        public void ConstructorSameSeedProducesSameSequence()
+        public void Constructor_SameSeed_ProducesSameSequence()
         {
-            const int seed = 42;
-            var rnd1 = new OSKRandom(seed);
-            var rnd2 = new OSKRandom(seed);
+            const int SEED = 42;
+            var rnd1 = new OSKRandom(SEED);
+            var rnd2 = new OSKRandom(SEED);
 
             for (int i = 0; i < 100; i++)
             {
@@ -52,7 +52,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that Shared returns a non-null instance.
         /// </summary>
         [TestMethod]
-        public void SharedAlwaysReturnsNonNullInstance()
+        public void Shared_AnyAccess_ReturnsNonNullInstance()
         {
             Assert.IsNotNull(OSKRandom.Shared);
         }
@@ -61,7 +61,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that Shared generates values in the expected range.
         /// </summary>
         [TestMethod]
-        public void SharedNextReturnsValueInRange()
+        public void SharedNext_Range_ReturnsValueInRange()
         {
             for (int i = 0; i < 100; i++)
             {

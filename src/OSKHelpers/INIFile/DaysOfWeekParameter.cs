@@ -45,7 +45,8 @@ namespace OSKHelpers.INIFile
         /// Throws an exception if the parameter is null, empty, or contains invalid values.
         /// </summary>
         /// <param name="daysOfWeek">String containing the days represented as space-separated integers.</param>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentNullException">The string is null or empty.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The string contains an invalid value.</exception>
         public DaysOfWeekParameter(string daysOfWeek) : this() 
         { 
             if (string.IsNullOrWhiteSpace(daysOfWeek))
@@ -58,7 +59,7 @@ namespace OSKHelpers.INIFile
             {
                 if (!int.TryParse(day, out int d) || !Enum.IsDefined(typeof(DayOfWeek), d))
                 {
-                    throw new ArgumentOutOfRangeException($"{SimpleLog.GetCallerTypeMethodName()}: the days list contains an invalid value: {day}");
+                    throw new ArgumentOutOfRangeException(nameof(daysOfWeek), day, $"{SimpleLog.GetCallerTypeMethodName()}: the days list contains an invalid value: {day}");
                 }
                 Add(d);
             }
@@ -72,12 +73,12 @@ namespace OSKHelpers.INIFile
         /// Adds the given day by its integer code.
         /// </summary>
         /// <param name="day">Integer code of the day (0 = Sunday … 6 = Saturday).</param>
-        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
         public void Add(int day)
         {
             if (!Enum.IsDefined(typeof(DayOfWeek), day))
             {
-                throw new ArgumentNullException($"{SimpleLog.GetCallerTypeMethodName()}: the value {day} is not valid.");
+                throw new ArgumentOutOfRangeException(nameof(day), day, $"{SimpleLog.GetCallerTypeMethodName()}: the value {day} is not valid.");
             }
             Add((DayOfWeek)day);
         }
@@ -98,12 +99,12 @@ namespace OSKHelpers.INIFile
         /// Removes the given day by its integer code.
         /// </summary>
         /// <param name="day">Integer code of the day (0 = Sunday … 6 = Saturday).</param>
-        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
         public void Remove(int day)
         {
             if (!Enum.IsDefined(typeof(DayOfWeek), day))
             {
-                throw new ArgumentNullException($"{SimpleLog.GetCallerTypeMethodName()}: the value {day} is not valid.");
+                throw new ArgumentOutOfRangeException(nameof(day), day, $"{SimpleLog.GetCallerTypeMethodName()}: the value {day} is not valid.");
             }
             Remove((DayOfWeek)day);
         }

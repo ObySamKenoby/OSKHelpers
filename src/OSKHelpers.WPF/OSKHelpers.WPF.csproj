@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Title>OSK Helpers - WPF utils</Title>
+		<VersionPrefix>0.5.0</VersionPrefix>
+		<Description>Support library for use in WPF applications.</Description>
+		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
+	</PropertyGroup>
+
+ <PropertyGroup>
+   <PackageId>OSKHelpers.WPF</PackageId>
+   <Company>OSK Soft</Company>
+   <PackageIcon>logo_128px.jpg</PackageIcon>
+   <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+   <PackageLicenseFile>License.txt</PackageLicenseFile>
+   <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+   <PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
+   <PackageReleaseNotes>Added ISettingsBase interface.</PackageReleaseNotes>
+   <GenerateDocumentationFile>True</GenerateDocumentationFile>
+   <PackageProjectUrl>https://github.com/ObySamKenoby/OSKHelpers</PackageProjectUrl>
+   <RepositoryUrl>https://github.com/ObySamKenoby/OSKHelpers</RepositoryUrl>
+ </PropertyGroup>	
+
+	<ItemGroup>
+    <None Include="..\..\docs\images\logo_128px.jpg" Link="logo_128px.jpg">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+
+</Project>

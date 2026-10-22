@@ -9,7 +9,7 @@ namespace OSKHelpers.Tests.Security;
 public class PasswordObfuscatorTests
 {
     [TestMethod]
-    public void TestPasswordObfuscator()
+    public void EncodePasswordAndDecodePassword_RandomPasswordsAndReSeed_RoundTrip()
     {
         var rnd = new Random();
 
@@ -28,7 +28,7 @@ public class PasswordObfuscatorTests
     }
 
     [TestMethod]
-    public void EncodePasswordTests()
+    public void EncodePassword_NullEmptyAndSingleChar_BehavesAsExpected()
     {
         Assert.Throws<ArgumentException>(() => PasswordObfuscator.EncodePassword(null));
         Assert.Throws<ArgumentException>(() => PasswordObfuscator.EncodePassword(string.Empty));
@@ -38,7 +38,7 @@ public class PasswordObfuscatorTests
     }
 
     [TestMethod]
-    public void DecodePasswordTTests()
+    public void DecodePassword_InvalidAndMinimumLength_BehavesAsExpected()
     {
         Assert.Throws<ArgumentException>(() => PasswordObfuscator.DecodePassword(null));
         Assert.Throws<ArgumentException>(() => PasswordObfuscator.DecodePassword(string.Empty));
@@ -50,7 +50,7 @@ public class PasswordObfuscatorTests
     }
 
     [TestMethod]
-    public void EncodeDecodeIndexTests()
+    public void TestEncodeIndexAndTestDecodeIndex_PositiveAndNegative_RoundTrip()
     {
         var strIndex = PasswordObfuscator.TestEncodeIndex(1234);
         Assert.AreEqual(4, strIndex.Length);
@@ -58,5 +58,62 @@ public class PasswordObfuscatorTests
         strIndex = PasswordObfuscator.TestEncodeIndex(-1234);
         Assert.AreEqual(4, strIndex.Length);
         Assert.AreEqual(-1234, PasswordObfuscator.TestDecodeIndex(strIndex));
+    }
+
+    /// <summary>
+    /// Verifies that a password of only spaces throws ArgumentException.
+    /// </summary>
+    [TestMethod]
+    public void EncodePassword_WhitespacePassword_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => PasswordObfuscator.EncodePassword("   "));
+    }
+
+    /// <summary>
+    /// Verifies that the obfuscated string does not contain the password and that non ASCII characters round trip.
+    /// </summary>
+    [TestMethod]
+    public void EncodePassword_UnicodePassword_RoundTripWithoutPlainText()
+    {
+        const string PASSWORD = "Pàssw0rd€ñ";
+
+        var obfuscated = PasswordObfuscator.EncodePassword(PASSWORD);
+
+        Assert.DoesNotContain(PASSWORD, obfuscated);
+        Assert.AreEqual(PASSWORD, PasswordObfuscator.DecodePassword(obfuscated));
+    }
+
+    /// <summary>
+    /// Verifies that ReSeed invalidates the passwords obfuscated before the call.
+    /// </summary>
+    [TestMethod]
+    public void ReSeed_AfterEncoding_InvalidatesObfuscatedPasswords()
+    {
+        const string PASSWORD = "MyPassword123";
+        var obfuscated = PasswordObfuscator.EncodePassword(PASSWORD);
+
+        PasswordObfuscator.ReSeed();
+
+        Assert.AreNotEqual(PASSWORD, PasswordObfuscator.DecodePassword(obfuscated));
+    }
+
+    /// <summary>
+    /// Verifies that concurrent calls of EncodePassword and DecodePassword always round trip.
+    /// </summary>
+    [TestMethod]
+    public void EncodePassword_ConcurrentCalls_AllRoundTrip()
+    {
+        var failures = 0;
+
+        System.Threading.Tasks.Parallel.For(0, 2000, i =>
+        {
+            var password = $"Password{i}";
+            if (PasswordObfuscator.DecodePassword(PasswordObfuscator.EncodePassword(password)) != password)
+            {
+                System.Threading.Interlocked.Increment(ref failures);
+            }
+        });
+
+        Assert.AreEqual(0, failures);
     }
 }

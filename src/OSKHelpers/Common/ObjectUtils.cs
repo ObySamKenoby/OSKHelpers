@@ -39,7 +39,7 @@ namespace OSKHelpers.Common
                         else
                         {
                             Type type = obj.GetType();
-                            sb.AppendLine($"{(string.IsNullOrWhiteSpace(objName) ? "Tipo" : objName.Trim())}: {typeName}");
+                            sb.AppendLine($"{(string.IsNullOrWhiteSpace(objName) ? "Type" : objName.Trim())}: {typeName}");
 
                             foreach (PropertyInfo property in type.GetProperties())
                             {

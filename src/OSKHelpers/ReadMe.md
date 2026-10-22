@@ -58,7 +58,7 @@ Utilities for container-aware applications.
 
 | Class | Description |
 |---|---|
-| `DockerUtils` | Detects at startup whether the process is running inside a Docker container by checking for the `/.dockerenv` sentinel file (`IsDockerized`). |
+| `DockerUtils` | Detects at startup whether the process is running inside a Docker container by checking for the `/.dockerenv` sentinel file (`IsDockerized`); `CheckIsDockerized()` repeats the check on demand. |
 
 ---
 
@@ -88,7 +88,7 @@ JSON configuration and serialisation helpers.
 
 | Class | Description |
 |---|---|
-| `JsonSettings<T>` | Abstract base class for JSON-backed configuration files. Supports versioning with automatic migration to newer property sets, camelCase serialisation, and a configurable `LASTVERSION` guard. |
+| `JsonSettings<T>` | Abstract base class for JSON-backed configuration files. Supports versioning with automatic migration to newer property sets, configurable serialisation options (`DefaultSerializerOptions`, distinct for each derived type), timestamped backups on save, and a configurable `LASTVERSION` guard. |
 | `JsonUtils` | Serialises any object using its runtime type (instead of the declared compile-time type), with configurable `JsonSerializerOptions`. |
 
 ---
@@ -99,7 +99,7 @@ Lightweight, file-based application logging.
 | Class / Interface / Enum | Description |
 |---|---|
 | `LogLevel` | Enum with six levels: `None`, `Error`, `Warning`, `Info`, `Debug`, `Protocol`. |
-| `SimpleLogger` | Core logger: writes timestamped messages to a daily rotating log file. Supports console output, prefix-based file naming, forced debug/protocol modes, and configurable `LogLevel`. |
+| `SimpleLogger` | Core logger: writes timestamped messages to a daily rotating log file in `LogPath` (by default `Paths.DefaultLogsDirectory`, following its changes). Supports console output, prefix-based file naming, forced debug/protocol modes, and configurable `LogLevel`. |
 | `SimpleLog` | Static façade over a shared `SimpleLogger` instance. Use this for zero-configuration, application-wide logging. |
 | `ICSVLogItem` | Interface that objects must implement to be logged via `CSVLogger<T>`: `GetCSVHeader()` and `GetCSVData()`. |
 | `CSVLogItem` | Base implementation of `ICSVLogItem` that auto-generates header and data rows from all public properties (sorted alphabetically) via reflection. |
@@ -132,8 +132,8 @@ Password hashing and obfuscation.
 | Class | Description |
 |---|---|
 | `Hash` | Static helper to compute SHA-256 or SHA-512 hashes of a string, not safe for use with passwords (`ComputeSha256Hash`, `ComputeSha512Hash`). |
-| `PasswordHelper`| Static helper to create and check hashes safe to store passwords. |
-| `PasswordHash` | PBKDF2/RFC-2898 password hasher with a random 16-byte salt and 10 000 iterations, suitable for storing credentials in a database. |
+| `PasswordHelper`| Static helper to create and check hashes safe to store passwords, and to detect legacy hashes to regenerate (`RequiresRehash`). |
+| `PasswordHash` | PBKDF2/RFC-2898 password hasher (HMAC-SHA256, 600 000 iterations, random 16-byte salt; 49-byte versioned output), suitable for storing credentials in a database. Legacy 36-byte hashes (HMAC-SHA1, 10 000 iterations) are still verified and flagged by `RequiresRehash`. |
 | `PasswordObfuscator` | Obfuscates a password in memory using a randomly seeded byte array, to reduce plaintext exposure during the process lifetime (`EncodePassword` / `DecodePassword`). |
 
 ---

@@ -37,7 +37,7 @@ namespace OSKHelpers.Common
         /// <summary>
         /// String containing digits (typically used for random string generation).
         /// </summary>
-        public const string SNUMBERS            = "01234567890";
+        public const string SNUMBERS            = "0123456789";
         /// <summary>
         /// String containing special characters (typically used for random string generation).
         /// </summary>
@@ -383,7 +383,7 @@ namespace OSKHelpers.Common
         /// Generates a string of the given length using lowercase, uppercase characters, digits, and special characters.
         /// </summary>
         /// <inheritdoc cref="GenerateString(string, int)"/>
-        public static string GenerateAlphaNumSpecialsString(int length)    => GenerateString(SCHARSNUMS, length);
+        public static string GenerateAlphaNumSpecialsString(int length)    => GenerateString(SCHARSNUMSSPECIALS, length);
 
 
     }

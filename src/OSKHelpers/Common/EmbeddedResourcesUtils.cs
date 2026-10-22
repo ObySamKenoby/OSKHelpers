@@ -16,16 +16,18 @@ namespace OSKHelpers.Common
         /// <param name="fileName">Name of the file to retrieve from the embedded resources.</param>
         /// <param name="outputPath">Full output path (including file name).</param>
         /// <param name="caseSensitive">When true, the resource name search is case-sensitive.</param>
-        /// <exception cref="InvalidOperationException" />
+        /// <exception cref="ArgumentNullException">The file name or the output path is null or empty.</exception>
+        /// <exception cref="DirectoryNotFoundException">The output directory does not exist.</exception>
+        /// <exception cref="InvalidOperationException">No embedded resource matches <paramref name="fileName"/>.</exception>
         public static void ExtractEmbeddedFile(string fileName, string outputPath, bool caseSensitive = false)
         {
             if (string.IsNullOrWhiteSpace(fileName))
             {
-                throw new ArgumentNullException(fileName);
+                throw new ArgumentNullException(nameof(fileName));
             }
             if (string.IsNullOrWhiteSpace(outputPath))
             {
-                throw new ArgumentNullException(outputPath);
+                throw new ArgumentNullException(nameof(outputPath));
             }
             if (!Directory.Exists(Path.GetDirectoryName(outputPath)))
             {
@@ -37,19 +39,21 @@ namespace OSKHelpers.Common
                 .GetManifestResourceNames()
                 .FirstOrDefault(n => n.EndsWith(fileName, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrWhiteSpace(resourceName))
+            if (string.IsNullOrWhiteSpace(resourceName))
             {
-                using (var stream = asm.GetManifestResourceStream(resourceName))
-                {
-                    if (stream == null)
-                    {
-                        throw new InvalidOperationException($"Resource not found: {resourceName}");
-                    }
+                throw new InvalidOperationException($"Resource not found: {fileName}");
+            }
 
-                    using (var file = File.Create(outputPath))
-                    {
-                        stream.CopyTo(file);
-                    }
+            using (var stream = asm.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                {
+                    throw new InvalidOperationException($"Resource not found: {resourceName}");
+                }
+
+                using (var file = File.Create(outputPath))
+                {
+                    stream.CopyTo(file);
                 }
             }
         }

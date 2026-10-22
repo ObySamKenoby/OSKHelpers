@@ -32,6 +32,10 @@ namespace OSKHelpers.Security
         private static int _startIndexSeed;
 
         private static Random _rnd;
+        /// <summary>
+        /// Serialises the access to <see cref="_rnd"/>, which is not thread-safe.
+        /// </summary>
+        private static readonly object _rndLock = new object();
 
         #endregion
 
@@ -60,7 +64,11 @@ namespace OSKHelpers.Security
             }
 
             // choose a random start position
-            int startIndex = _rnd.Next(int.MaxValue);
+            int startIndex;
+            lock (_rndLock)
+            {
+                startIndex = _rnd.Next(int.MaxValue);
+            }
 
             byte[] pwdBytes = Encoding.UTF8.GetBytes(password);
 
@@ -68,8 +76,8 @@ namespace OSKHelpers.Security
 
             for (int i = 0; i < pwdBytes.Length; i++)
             {
-                // XOR with the seed, starting from startIndex
-                encoded[i] = (byte)(pwdBytes[i] ^ _seed[(startIndex + i) % SEEDLENGTH]);
+                // XOR with the seed, starting from startIndex (sum computed as long to avoid the overflow near int.MaxValue)
+                encoded[i] = (byte)(pwdBytes[i] ^ _seed[(int)(((long)startIndex + i) % SEEDLENGTH)]);
             }
 
             // Convert to Base64 for a readable representation
@@ -122,9 +130,12 @@ namespace OSKHelpers.Security
             _seed = StringUtils.GenerateAlphaNumericString(SEEDLENGTH).Select(c => (byte)c).ToArray();
 
             var oldIndexSeed = _startIndexSeed;
-            while (oldIndexSeed == _startIndexSeed)
+            lock (_rndLock)
             {
-                _startIndexSeed = _rnd.Next(int.MaxValue);
+                while (oldIndexSeed == _startIndexSeed)
+                {
+                    _startIndexSeed = _rnd.Next(int.MaxValue);
+                }
             }
         }
 

@@ -59,11 +59,11 @@ namespace OSKHelpers.Types.IsChanged
 
         /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Action)"/>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Func<T, bool> onValueChanging, Action onValueChanged)
-            => obj.SetProperty(ref field, newValue, onValueChanging, new Action<T, T>((v1, v2) => { onValueChanged(); }));
+            => obj.SetProperty(ref field, newValue, onValueChanging, ToChangedAction<T>(onValueChanged));
 
         /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Action)"/>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Func<T, bool> onValueChanging, Action<T> onValueChanged)
-            => obj.SetProperty(ref field, newValue, onValueChanging, new Action<T, T>((oldVal, newVal) => { onValueChanged(newValue); }));
+            => obj.SetProperty(ref field, newValue, onValueChanging, ToChangedAction(onValueChanged));
 
         /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Func{T, bool}, Action{T, T})"/>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Action<T, T> onValueChanged)
@@ -71,11 +71,11 @@ namespace OSKHelpers.Types.IsChanged
 
         /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Action{T})"/>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Action onValueChanged)
-            => obj.SetProperty(ref field, newValue, null, new Action<T, T>((v1, v2) => { onValueChanged(); }));
+            => obj.SetProperty(ref field, newValue, null, ToChangedAction<T>(onValueChanged));
 
         /// <inheritdoc cref="SetProperty{T}(IIsChanged, ref T, T, Func{T, bool}, Action{T, T})"/>
         public static bool SetProperty<T>(this IIsChanged obj, ref T field, T newValue, Action<T> onValueChanged)
-            => obj.SetProperty(ref field, newValue, null, new Action<T, T>((oldVal, newVal) => { onValueChanged(newValue); }));
+            => obj.SetProperty(ref field, newValue, null, ToChangedAction(onValueChanged));
 
         // Methods for special use cases
 
@@ -130,6 +130,29 @@ namespace OSKHelpers.Types.IsChanged
             obj.ResetIsChangedExecute();
             obj.IsChanged = false;
         }
+
+        #region Utility methods
+
+        /// <summary>
+        /// Adapts an <see cref="Action"/> callback to the <c>Action&lt;T, T&gt;</c> signature of the main SetProperty overload.<br/>
+        /// A null callback returns null, so it is ignored as in the main overload.
+        /// </summary>
+        /// <param name="onValueChanged">Callback to adapt.</param>
+        /// <returns>The adapted callback, or null.</returns>
+        private static Action<T, T> ToChangedAction<T>(Action onValueChanged)
+            => onValueChanged == null ? null : new Action<T, T>((oldValue, newValue) => onValueChanged());
+
+        /// <summary>
+        /// Adapts an <c>Action&lt;T&gt;</c> callback, which receives the new value, to the <c>Action&lt;T, T&gt;</c> signature
+        /// of the main SetProperty overload.<br/>
+        /// A null callback returns null, so it is ignored as in the main overload.
+        /// </summary>
+        /// <param name="onValueChanged">Callback to adapt.</param>
+        /// <returns>The adapted callback, or null.</returns>
+        private static Action<T, T> ToChangedAction<T>(Action<T> onValueChanged)
+            => onValueChanged == null ? null : new Action<T, T>((oldValue, newValue) => onValueChanged(newValue));
+
+        #endregion
 
         #endregion
 

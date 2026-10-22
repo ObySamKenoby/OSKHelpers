@@ -11,6 +11,9 @@ namespace OSKHelpers.Common
     {
         #region Constants
 
+        // Nomi in PascalCase non conformi alla convenzione UPPERCASE: le costanti fanno parte dell'API pubblica del pacchetto
+        // e rinominarle sarebbe una modifica incompatibile, quindi l'avviso di nomenclatura viene soppresso.
+#pragma warning disable IDE1006
         /// <summary>Integer representation of true.</summary>
         public const int    TrueInt     = 1;
         /// <summary>Integer representation of false.</summary>
@@ -23,6 +26,7 @@ namespace OSKHelpers.Common
         public const char   TrueChar    = '1';
         /// <summary>Char representation of false.</summary>
         public const char   FalseChar   = '0';
+#pragma warning restore IDE1006
 
         #endregion
 

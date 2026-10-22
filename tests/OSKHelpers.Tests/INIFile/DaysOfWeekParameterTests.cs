@@ -17,7 +17,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that the default constructor creates an empty instance.
         /// </summary>
         [TestMethod]
-        public void ConstructorDefaultCreatesEmptyList()
+        public void Constructor_Default_CreatesEmptyList()
         {
             var dow = new DaysOfWeekParameter();
 
@@ -28,7 +28,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies the constructor with a valid string.
         /// </summary>
         [TestMethod]
-        public void ConstructorValidStringParsesDays()
+        public void Constructor_ValidString_ParsesDays()
         {
             var dow = new DaysOfWeekParameter("1 3 5");
 
@@ -42,7 +42,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that all days of the week are parsed correctly (0-6).
         /// </summary>
         [TestMethod]
-        public void ConstructorAllDaysParsesAllSeven()
+        public void Constructor_AllDays_ParsesAllSeven()
         {
             var dow = new DaysOfWeekParameter("0 1 2 3 4 5 6");
 
@@ -53,7 +53,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that the constructor with a null string throws an exception.
         /// </summary>
         [TestMethod]
-        public void ConstructorNullStringThrowsArgumentNullException()
+        public void Constructor_NullString_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new DaysOfWeekParameter(null));
         }
@@ -62,7 +62,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that the constructor with an empty string throws an exception.
         /// </summary>
         [TestMethod]
-        public void ConstructorEmptyStringThrowsArgumentNullException()
+        public void Constructor_EmptyString_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new DaysOfWeekParameter(""));
         }
@@ -71,7 +71,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that the constructor with an invalid value throws an exception.
         /// </summary>
         [TestMethod]
-        public void ConstructorInvalidDayThrowsArgumentOutOfRangeException()
+        public void Constructor_InvalidDay_ThrowsArgumentOutOfRangeException()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new DaysOfWeekParameter("7"));
         }
@@ -80,7 +80,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that the constructor with a non-numeric value throws an exception.
         /// </summary>
         [TestMethod]
-        public void ConstructorNonNumericDayThrowsArgumentOutOfRangeException()
+        public void Constructor_NonNumericDay_ThrowsArgumentOutOfRangeException()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new DaysOfWeekParameter("abc"));
         }
@@ -89,7 +89,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that multiple spaces in the string are handled correctly.
         /// </summary>
         [TestMethod]
-        public void ConstructorExtraSpacesParsesCorrectly()
+        public void Constructor_ExtraSpaces_ParsesCorrectly()
         {
             var dow = new DaysOfWeekParameter("  1   3   5  ");
 
@@ -104,7 +104,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that Add(int) adds a valid day.
         /// </summary>
         [TestMethod]
-        public void AddValidIntDayAddsDayToList()
+        public void Add_ValidIntDay_AddsDayToList()
         {
             var dow = new DaysOfWeekParameter();
             dow.Add(0);
@@ -117,7 +117,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that Add(DayOfWeek) adds the day to the list.
         /// </summary>
         [TestMethod]
-        public void AddDayOfWeekEnumAddsDayToList()
+        public void Add_DayOfWeekEnum_AddsDayToList()
         {
             var dow = new DaysOfWeekParameter();
             dow.Add(DayOfWeek.Monday);
@@ -129,7 +129,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that duplicates are not added.
         /// </summary>
         [TestMethod]
-        public void AddDuplicateDayDoesNotAddTwice()
+        public void Add_DuplicateDay_DoesNotAddTwice()
         {
             var dow = new DaysOfWeekParameter();
             dow.Add(DayOfWeek.Monday);
@@ -142,12 +142,12 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that Add(int) with an invalid value throws an exception.
         /// </summary>
         [TestMethod]
-        public void AddInvalidIntDayThrowsException()
+        public void Add_InvalidIntDay_ThrowsArgumentOutOfRangeException()
         {
             var dow = new DaysOfWeekParameter();
 
-            Assert.Throws<ArgumentNullException>(() => dow.Add(7));
-            Assert.Throws<ArgumentNullException>(() => dow.Add(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => dow.Add(7));
+            Assert.Throws<ArgumentOutOfRangeException>(() => dow.Add(-1));
         }
 
         #endregion
@@ -158,7 +158,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that Remove(int) removes a present day.
         /// </summary>
         [TestMethod]
-        public void RemoveExistingDayRemovesDayFromList()
+        public void Remove_ExistingDay_RemovesDayFromList()
         {
             var dow = new DaysOfWeekParameter("0 1 2");
             dow.Remove(1);
@@ -171,7 +171,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that Remove(DayOfWeek) removes a present day.
         /// </summary>
         [TestMethod]
-        public void RemoveDayOfWeekEnumRemovesDayFromList()
+        public void Remove_DayOfWeekEnum_RemovesDayFromList()
         {
             var dow = new DaysOfWeekParameter("0 1");
             dow.Remove(DayOfWeek.Sunday);
@@ -184,7 +184,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that removing an absent day causes no errors.
         /// </summary>
         [TestMethod]
-        public void RemoveNonExistingDayDoesNothing()
+        public void Remove_NonExistingDay_DoesNothing()
         {
             var dow = new DaysOfWeekParameter("1");
             dow.Remove(DayOfWeek.Sunday);
@@ -196,11 +196,11 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that Remove(int) with an invalid value throws an exception.
         /// </summary>
         [TestMethod]
-        public void RemoveInvalidIntDayThrowsException()
+        public void Remove_InvalidIntDay_ThrowsArgumentOutOfRangeException()
         {
             var dow = new DaysOfWeekParameter();
 
-            Assert.Throws<ArgumentNullException>(() => dow.Remove(7));
+            Assert.Throws<ArgumentOutOfRangeException>(() => dow.Remove(7));
         }
 
         #endregion
@@ -211,7 +211,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies Contains(int) with a present and an absent day.
         /// </summary>
         [TestMethod]
-        public void ContainsIntReturnsCorrectResult()
+        public void Contains_IntDay_ReturnsCorrectResult()
         {
             var dow = new DaysOfWeekParameter("1 3");
 
@@ -223,7 +223,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies Contains(int) with an out-of-range value.
         /// </summary>
         [TestMethod]
-        public void ContainsInvalidIntReturnsFalse()
+        public void Contains_InvalidIntDay_ReturnsFalse()
         {
             var dow = new DaysOfWeekParameter("1");
 
@@ -235,7 +235,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies Contains(DayOfWeek).
         /// </summary>
         [TestMethod]
-        public void ContainsDayOfWeekEnumReturnsCorrectResult()
+        public void Contains_DayOfWeekEnum_ReturnsCorrectResult()
         {
             var dow = new DaysOfWeekParameter("1");
 
@@ -251,7 +251,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies ContainsToday with a list containing today.
         /// </summary>
         [TestMethod]
-        public void ContainsTodayTodayInListReturnsTrue()
+        public void ContainsToday_TodayInList_ReturnsTrue()
         {
             var today   = (int)DateTime.Now.DayOfWeek;
             var dow     = new DaysOfWeekParameter(today.ToString());
@@ -263,7 +263,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies ContainsToday with an empty list.
         /// </summary>
         [TestMethod]
-        public void ContainsTodayEmptyListReturnsFalse()
+        public void ContainsToday_EmptyList_ReturnsFalse()
         {
             var dow = new DaysOfWeekParameter();
 
@@ -278,7 +278,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that ToString returns the day codes sorted and separated by spaces.
         /// </summary>
         [TestMethod]
-        public void ToStringMultipleDaysReturnsSortedSpaceSeparated()
+        public void ToString_MultipleDays_ReturnsSortedSpaceSeparated()
         {
             var dow = new DaysOfWeekParameter("5 1 3");
 
@@ -289,7 +289,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies that ToString with an empty list returns an empty string.
         /// </summary>
         [TestMethod]
-        public void ToStringEmptyListReturnsEmptyString()
+        public void ToString_EmptyList_ReturnsEmptyString()
         {
             var dow = new DaysOfWeekParameter();
 
@@ -300,7 +300,7 @@ namespace OSKHelpers.Tests.INIFile
         /// Verifies symmetry: parsing the result of ToString must produce the same object.
         /// </summary>
         [TestMethod]
-        public void ToStringRoundTripProducesSameResult()
+        public void ToString_RoundTrip_ProducesSameResult()
         {
             var original    = new DaysOfWeekParameter("6 0 3 1");
             var asString    = original.ToString();

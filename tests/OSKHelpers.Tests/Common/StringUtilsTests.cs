@@ -24,7 +24,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow("D",   "ABC",  false,  1, false)]
         [DataRow("A",   null,   false,  0, false)]
         [DataRow("A",   "",     false,  0, false)]
-        public void CheckCharsTests(string text, string validChars, bool notEmpty, int maxLength, bool expected)
+        public void CheckChars_MaxLength_ReturnsExpected(string text, string validChars, bool notEmpty, int maxLength, bool expected)
         {
             Assert.AreEqual(expected, StringUtils.CheckChars(text, validChars, notEmpty, maxLength));
         }
@@ -50,7 +50,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow("D",   "ABC",  false,  0, 1, false)]
         [DataRow("A",   null,   false,  0, 0, false)]
         [DataRow("A",   "",     false,  0, 0, false)]
-        public void CheckCharsTestsMinLength(string text, string validChars, bool notEmpty, int minLength, int maxLength, bool expected)
+        public void CheckChars_MinAndMaxLength_ReturnsExpected(string text, string validChars, bool notEmpty, int minLength, int maxLength, bool expected)
         {
             Assert.AreEqual(expected, StringUtils.CheckChars(text, validChars, notEmpty, minLength, maxLength));
         }
@@ -70,7 +70,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow("D",   @"^[A-C]*$",    false,  1, false)]
         [DataRow("A",   null,           false,  0, false)]
         [DataRow("A",   "",             false,  0, false)]
-        public void CheckRegexTests(string text, string regex, bool notEmpty, int maxLength, bool expected)
+        public void CheckRegex_MaxLength_ReturnsExpected(string text, string regex, bool notEmpty, int maxLength, bool expected)
         {
             Assert.AreEqual(expected, StringUtils.CheckRegex(text, regex, notEmpty, maxLength));
         }
@@ -96,7 +96,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow("D",   @"^[A-C]*$",    false,  0, 1, false)]
         [DataRow("A",   null,           false,  0, 0, false)]
         [DataRow("A",   "",             false,  0, 0, false)]
-        public void CheckRegexTestsMinLength(string text, string regex, bool notEmpty, int minLength, int maxLength, bool expected)
+        public void CheckRegex_MinAndMaxLength_ReturnsExpected(string text, string regex, bool notEmpty, int minLength, int maxLength, bool expected)
         {
             Assert.AreEqual(expected, StringUtils.CheckRegex(text, regex, notEmpty, minLength, maxLength));
         }
@@ -107,12 +107,12 @@ namespace OSKHelpers.Tests.Common
         /// Fail can be used to force the returned result; when False all checks will return false.
         /// </summary>
         /// <param name="text">Testo da verificare.</param>
-        /// <param name="isLowerCase">La stringa contiene caratteri minuscoli.</param>
-        /// <param name="isUpperCase">La stringa contiene caratteri maiuscoli.</param>
-        /// <param name="isNumbers">La stringa contiene numeri.</param>
-        /// <param name="space">La stringa contiene spazi</param>
+        /// <param name="isLowerCase">The string contains lowercase characters.</param>
+        /// <param name="isUpperCase">The string contains uppercase characters.</param>
+        /// <param name="isNumbers">The string contains digits.</param>
+        /// <param name="space">The string contains spaces.</param>
         [TestMethod]
-        public void StandardCheckTests()
+        public void StandardChecks_VariousStrings_ReturnExpected()
         {
             const string UPPER  = "AGZ";
             const string LOWER  = "agz";
@@ -210,7 +210,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow("héllo",       false, false, "hllo")]
         [DataRow("café",        false, false, "caf")]
         [DataRow(null,          false, false, "")]
-        public void AsASCIIVariousInputsReturnsExpected(string text, bool toUpper, bool trim, string expected)
+        public void AsASCII_VariousInputs_ReturnsExpected(string text, bool toUpper, bool trim, string expected)
         {
             var result = StringUtils.AsASCII(text, toUpper, trim);
 
@@ -221,7 +221,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies the toUpper parameter.
         /// </summary>
         [TestMethod]
-        public void AsASCIIToUpperReturnsUppercase()
+        public void AsASCII_ToUpper_ReturnsUppercase()
         {
             var result = StringUtils.AsASCII("hello", toUpper: true);
 
@@ -232,7 +232,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies the trim parameter.
         /// </summary>
         [TestMethod]
-        public void AsASCIITrimRemovesWhitespace()
+        public void AsASCII_Trim_RemovesWhitespace()
         {
             var result = StringUtils.AsASCII("  hello  ", trim: true);
 
@@ -243,7 +243,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies the length parameter for truncation.
         /// </summary>
         [TestMethod]
-        public void AsASCIIWithMaxLengthTruncatesString()
+        public void AsASCII_MaxLength_TruncatesString()
         {
             var result = StringUtils.AsASCII("hello world", length: 5);
 
@@ -254,7 +254,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that padRight pads the string with spaces.
         /// </summary>
         [TestMethod]
-        public void AsASCIIWithPadRightPadsWithSpaces()
+        public void AsASCII_PadRight_PadsWithSpaces()
         {
             var result = StringUtils.AsASCII("hi", length: 5, padRight: true);
 
@@ -273,7 +273,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow(10)]
         [DataRow(100)]
         [DataRow(1000)]
-        public void GenerateStringValidLengthReturnsCorrectLength(int length)
+        public void GenerateString_ValidLength_ReturnsCorrectLength(int length)
         {
             var result = StringUtils.GenerateString(StringUtils.SCHARSNUMS, length);
 
@@ -284,7 +284,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that GenerateString contains only the specified characters.
         /// </summary>
         [TestMethod]
-        public void GenerateStringSpecificCharsContainsOnlyThoseChars()
+        public void GenerateString_SpecificChars_ContainsOnlyThoseChars()
         {
             var chars   = "AB";
             var result  = StringUtils.GenerateString(chars, 100);
@@ -296,7 +296,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that a zero length throws an exception.
         /// </summary>
         [TestMethod]
-        public void GenerateStringZeroLengthThrowsArgumentOutOfRangeException()
+        public void GenerateString_ZeroLength_ThrowsArgumentOutOfRangeException()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => StringUtils.GenerateString("abc", 0));
         }
@@ -305,7 +305,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies that a negative length throws an exception.
         /// </summary>
         [TestMethod]
-        public void GenerateStringNegativeLengthThrowsArgumentOutOfRangeException()
+        public void GenerateString_NegativeLength_ThrowsArgumentOutOfRangeException()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => StringUtils.GenerateString("abc", -1));
         }
@@ -317,7 +317,7 @@ namespace OSKHelpers.Tests.Common
         [DataRow(null)]
         [DataRow("")]
         [DataRow(" ")]
-        public void GenerateStringInvalidCharsThrowsArgumentException(string chars)
+        public void GenerateString_InvalidChars_ThrowsArgumentException(string chars)
         {
             Assert.Throws<ArgumentException>(() => StringUtils.GenerateString(chars, 10));
         }
@@ -326,7 +326,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies GenerateLowerCharsString.
         /// </summary>
         [TestMethod]
-        public void GenerateLowerCharsStringValidLengthReturnsOnlyLowercase()
+        public void GenerateLowerCharsString_ValidLength_ReturnsOnlyLowercase()
         {
             var result = StringUtils.GenerateLowerCharsString(50);
 
@@ -338,7 +338,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies GenerateUpperCharsString.
         /// </summary>
         [TestMethod]
-        public void GenerateUpperCharsStringValidLengthReturnsOnlyUppercase()
+        public void GenerateUpperCharsString_ValidLength_ReturnsOnlyUppercase()
         {
             var result = StringUtils.GenerateUpperCharsString(50);
 
@@ -350,7 +350,7 @@ namespace OSKHelpers.Tests.Common
         /// Verifies GenerateAlphaString.
         /// </summary>
         [TestMethod]
-        public void GenerateAlphaStringValidLengthReturnsOnlyAlpha()
+        public void GenerateAlphaString_ValidLength_ReturnsOnlyAlpha()
         {
             var result = StringUtils.GenerateAlphaString(50);
 
@@ -362,12 +362,36 @@ namespace OSKHelpers.Tests.Common
         /// Verifies GenerateAlphaNumericString.
         /// </summary>
         [TestMethod]
-        public void GenerateAlphaNumericStringValidLengthReturnsAlphaNumeric()
+        public void GenerateAlphaNumericString_ValidLength_ReturnsAlphaNumeric()
         {
             var result = StringUtils.GenerateAlphaNumericString(50);
 
             Assert.AreEqual(50, result.Length);
             Assert.IsTrue(Regex.IsMatch(result, @"^[A-Za-z0-9]+$"));
+        }
+
+        /// <summary>
+        /// Verifies that GenerateAlphaNumSpecialsString also uses special characters.
+        /// </summary>
+        [TestMethod]
+        public void GenerateAlphaNumSpecialsString_LongLength_ContainsSpecialChars()
+        {
+            // With 1000 characters the probability of not drawing any special character is negligible
+            var result = StringUtils.GenerateAlphaNumSpecialsString(1000);
+
+            Assert.AreEqual(1000, result.Length);
+            Assert.IsTrue(result.All(c => StringUtils.SCHARSNUMSSPECIALS.Contains(c)));
+            Assert.IsTrue(result.Any(c => StringUtils.SSPECIALCHARS.Contains(c)));
+        }
+
+        /// <summary>
+        /// Verifies that SNUMBERS contains each digit exactly once.
+        /// </summary>
+        [TestMethod]
+        public void SNUMBERS_Digits_AreDistinct()
+        {
+            Assert.AreEqual("0123456789", new string(StringUtils.SNUMBERS.Distinct().OrderBy(c => c).ToArray()));
+            Assert.AreEqual(10, StringUtils.SNUMBERS.Length);
         }
 
         #endregion

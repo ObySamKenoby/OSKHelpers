@@ -17,13 +17,22 @@ namespace OSKHelpers.Logging
     /// </summary>
     public class SimpleLogger
     {
+        #region Constants
+
+        /// <summary>
+        /// Name of the fallback log file, created in the assembly folder when writing a log fails.
+        /// </summary>
+        private const string ERRORSLOGFILENAME = "ERRORSLOG.txt";
+
+        #endregion
+
         #region Members
 
         private DateTime? _lastDate;
 
-        private static readonly string _defaultLogPath;
         private string _logPath;
         private string _logFilename;
+        private string _logFileDirectory;
 
         private LogLevel _logLevel;
         private bool _forceDebug;
@@ -38,9 +47,11 @@ namespace OSKHelpers.Logging
         #region Properties
 
         /// <summary>
-        /// Default log folder.
+        /// Default log folder.<br/>
+        /// Always reflects the current value of <see cref="Paths.DefaultLogsDirectory"/>, so it follows
+        /// <see cref="Paths.UseLocalAppdataDirectory"/> and changes of <see cref="Paths.AppdataDirectory"/>.
         /// </summary>
-        public static string DefaultLogPath { get => _defaultLogPath; }
+        public static string DefaultLogPath => Paths.DefaultLogsDirectory;
 
         /// <summary>
         /// Used to display messages
@@ -64,25 +75,32 @@ namespace OSKHelpers.Logging
             set
             {
                 if (_forceProtocol || value == LogLevel.Protocol)
+                {
                     _logLevel = LogLevel.Protocol;
+                }
                 else if (_forceDebug || value == LogLevel.Debug)
+                {
                     _logLevel = LogLevel.Debug;
+                }
                 else
+                {
                     _logLevel = value;
+                }
             }
         }
 
         /// <summary>
         /// Path of the log file.<br/>
         /// The folder is checked at write time; if it does not exist, a creation attempt is made.<br/>
-        /// By default the "Log" folder inside the application path is used.
+        /// Until a value is assigned, <see cref="DefaultLogPath"/> is used and its changes are followed;<br/>
+        /// assigning null or an empty string restores this behaviour.
         /// </summary>
         public string LogPath
         {
-            get => _logPath;
+            get => _logPath ?? DefaultLogPath;
             set
             {
-                _logPath = value;
+                _logPath = string.IsNullOrWhiteSpace(value) ? null : value;
                 // _lastDate is set to null to force file name regeneration
                 _lastDate = null;
             }
@@ -122,16 +140,19 @@ namespace OSKHelpers.Logging
 
         /// <summary>
         /// Log file name.<br/>
-        /// The name follows the pattern
+        /// The name follows the pattern PREFIXLogYYYYMMDD.txt (PREFIX.txt with <see cref="UsePrefixAsLogFile"/>) and is regenerated
+        /// when the date or the log folder changes.
         /// </summary>
         public string LogFile
         {
             get
             {
-                if (DateTime.Now.Date != (_lastDate?.Date ?? DateTime.MinValue))
+                var logPath = LogPath;
+                if (DateTime.Now.Date != (_lastDate?.Date ?? DateTime.MinValue) || logPath != _logFileDirectory)
                 {
-                    _logFilename    = Path.Combine(_logPath, _usePrefixAsLogFile ? $"{_prefix}.txt" : $"{_prefix}Log{DateTime.Now:yyyyMMdd}.txt");
-                    _lastDate       = DateTime.Now.Date;
+                    _logFilename        = Path.Combine(logPath, _usePrefixAsLogFile ? $"{_prefix}.txt" : $"{_prefix}Log{DateTime.Now:yyyyMMdd}.txt");
+                    _logFileDirectory   = logPath;
+                    _lastDate           = DateTime.Now.Date;
                 }
 
                 return _logFilename;
@@ -188,11 +209,6 @@ namespace OSKHelpers.Logging
 
         #region Constructor
 
-        static SimpleLogger()
-        {
-            _defaultLogPath = Paths.DefaultLogsDirectory;
-        }
-
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -202,13 +218,14 @@ namespace OSKHelpers.Logging
             DisableDebugLog     = true;
             _usePrefixAsLogFile = false;
             _lastDate           = null;
-            LogPath             = _defaultLogPath;
+            _logPath            = null;
             _logFilename        = null;
+            _logFileDirectory   = null;
             _forceDebug         = false;
             _forceProtocol      = false;
 
             LogLevel            = LogLevel.Error;
-#if !RELEASE
+#if DEBUG
             LogLevel            = LogLevel.Debug;
             DisableDebugLog     = false;
 #endif
@@ -245,21 +262,16 @@ namespace OSKHelpers.Logging
                     {
                         DebugConsoleLog(line);
                         ConsoleLog(line, logLevel);
-                        if (!Directory.Exists(_logPath))
+                        if (!Directory.Exists(LogPath))
                         {
-                            Directory.CreateDirectory(_logPath);
+                            Directory.CreateDirectory(LogPath);
                         }
                         File.AppendAllText(LogFile, $"{prefix} {line}\r\n");
                     }
                     catch (Exception ex)
                     {
-                        try
-                        {
-                            // If an error occurs during writing, a fallback log is created in the application folder, if possible.
-                            line = $"Error writing log.\r\n  Log file name: {LogFile}\r\n  Error: {FormattedException(ex, true)}\r\n  Original message: {line}";
-                            File.AppendAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ERRORSLOG.txt"), $"{prefix} {line}\r\n");
-                        }
-                        catch { }
+                        line = $"Error writing log.\r\n  Log file name: {LogFile}\r\n  Error: {FormattedException(ex, true)}\r\n  Original message: {line}";
+                        WriteErrorsLog($"{prefix} {line}");
                     }
                 }
             }
@@ -280,12 +292,14 @@ namespace OSKHelpers.Logging
                 {
                     if (obj != null && inline)
                     {
-                        line = $"{line} {JsonSerializer.Serialize(obj)}";
+                        // Without text (e.g. Write(LogLevel, object)) the line is the serialised object only
+                        line = string.IsNullOrEmpty(line) ? JsonSerializer.Serialize(obj) : $"{line} {JsonSerializer.Serialize(obj)}";
                     }
-                    Write(line);
+                    // The level is passed on so that the prefix contains the DEBUG/PROTOCOL label
+                    Write(line, logLevel);
                     if (obj != null && !inline)
                     {
-                        Write(JsonSerializer.Serialize(obj));
+                        Write(JsonSerializer.Serialize(obj), logLevel);
                     }
                 }
                 catch (Exception ex)
@@ -318,7 +332,10 @@ namespace OSKHelpers.Logging
         public void ErrorWrite(string line, object obj = null, bool inline = false)
             => Write(LogLevel.Error, line, obj, inline);
 
-        ///<inheritdoc cref="DebugWrite(string, object, bool)"/>
+        /// <summary>
+        /// Logs the serialisation of the given object at Error level.
+        /// </summary>
+        /// <param name="obj">Object to serialise.</param>
         public void ErrorWrite(object obj)
             => ErrorWrite(string.Empty, obj, true);
 
@@ -369,9 +386,9 @@ namespace OSKHelpers.Logging
 
                     lock (_lock)
                     {
-                        if (!Directory.Exists(_logPath))
+                        if (!Directory.Exists(LogPath))
                         {
-                            Directory.CreateDirectory(_logPath);
+                            Directory.CreateDirectory(LogPath);
                         }
                         File.AppendAllLines(LogFile, lines.Select(l => $"{prefix} {l}"));
                     }
@@ -379,7 +396,7 @@ namespace OSKHelpers.Logging
             }
             catch (Exception ex)
             {
-                Write($"Error in {nameof(SimpleLogger)}.{nameof(LogArray)}: {FormattedException(ex)}");
+                Write($"Error in {nameof(SimpleLogger)}.{nameof(LogLines)}: {FormattedException(ex)}");
             }
         }
 
@@ -424,9 +441,9 @@ namespace OSKHelpers.Logging
                     }
                     lock (_lock)
                     {
-                        if (!Directory.Exists(_logPath))
+                        if (!Directory.Exists(LogPath))
                         {
-                            Directory.CreateDirectory(_logPath);
+                            Directory.CreateDirectory(LogPath);
                         }
                         File.AppendAllLines(LogFile, lines);
                     }
@@ -568,18 +585,18 @@ namespace OSKHelpers.Logging
 
                     if (consoleLog)
                     {
-                        if (obj != null && inline)
-                        {
-                            line = $"{line} {JsonSerializer.Serialize(obj)}";
-                        }
-                        Console.WriteLine(line);
+                        // A separate variable keeps the original line for the file, where Write appends the object itself
+                        var consoleLine = obj != null && inline ? $"{line} {JsonSerializer.Serialize(obj)}" : line;
+                        Console.WriteLine(consoleLine);
                         if (obj != null && !inline)
                         {
                             Console.WriteLine(JsonSerializer.Serialize(obj));
                         }
                     }
-                    Write(fileLogLevel, line, obj, inline);
                 }
+
+                // File output, independent of the console threshold
+                Write(fileLogLevel, line, obj, inline);
             }
             catch (Exception ex)
             {
@@ -654,10 +671,34 @@ namespace OSKHelpers.Logging
         {
             string prefix = $"{DateTime.Now:dd/MM/yyyy HH:mm:ss}";
             if (logLevel == LogLevel.Debug)
+            {
                 prefix = $"{prefix} DEBUG";
+            }
             else if (logLevel == LogLevel.Protocol)
+            {
                 prefix = $"{prefix} PROTOCOL";
+            }
+
             return prefix;
+        }
+
+        /// <summary>
+        /// Appends the specified text to the fallback log <c>ERRORSLOG.txt</c> in the assembly folder.<br/>
+        /// Used by the loggers when writing their own log file fails; any error is ignored, since there is no further
+        /// place where it could be recorded.
+        /// </summary>
+        /// <param name="text">Text to append; a line terminator is added at the end.</param>
+        internal static void WriteErrorsLog(string text)
+        {
+            try
+            {
+                var errorsLogFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), ERRORSLOGFILENAME);
+                File.AppendAllText(errorsLogFile, $"{text}\r\n");
+            }
+            catch
+            {
+                // The fallback log is the last resort: a failure here cannot be logged anywhere.
+            }
         }
 
 #endregion

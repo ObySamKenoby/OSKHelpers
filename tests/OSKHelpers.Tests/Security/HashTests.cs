@@ -16,7 +16,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that the same input always produces the same SHA-256 hash.
         /// </summary>
         [TestMethod]
-        public void ComputeSha256HashSameInputReturnsSameHash()
+        public void ComputeSha256Hash_SameInput_ReturnsSameHash()
         {
             var hash1 = Hash.ComputeSha256Hash("test");
             var hash2 = Hash.ComputeSha256Hash("test");
@@ -28,7 +28,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies the expected SHA-256 hash value for the string "test" (known test vector).
         /// </summary>
         [TestMethod]
-        public void ComputeSha256HashKnownInputReturnsExpectedHash()
+        public void ComputeSha256Hash_KnownInput_ReturnsExpectedHash()
         {
             var expected = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08";
 
@@ -41,7 +41,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that different inputs produce different SHA-256 hashes.
         /// </summary>
         [TestMethod]
-        public void ComputeSha256HashDifferentInputsReturnsDifferentHashes()
+        public void ComputeSha256Hash_DifferentInputs_ReturnsDifferentHashes()
         {
             var hash1 = Hash.ComputeSha256Hash("test1");
             var hash2 = Hash.ComputeSha256Hash("test2");
@@ -53,7 +53,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that a null input throws <see cref="ArgumentNullException"/>.
         /// </summary>
         [TestMethod]
-        public void ComputeSha256HashNullInputThrowsArgumentNullException()
+        public void ComputeSha256Hash_NullInput_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => Hash.ComputeSha256Hash(null));
         }
@@ -62,7 +62,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that the SHA-256 hash consists of 64 lowercase hexadecimal characters.
         /// </summary>
         [TestMethod]
-        public void ComputeSha256HashValidInputReturns64LowercaseHexChars()
+        public void ComputeSha256Hash_ValidInput_Returns64LowercaseHexChars()
         {
             var hash = Hash.ComputeSha256Hash("test");
 
@@ -74,7 +74,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that an empty string produces a valid hash.
         /// </summary>
         [TestMethod]
-        public void ComputeSha256HashEmptyStringReturnsValidHash()
+        public void ComputeSha256Hash_EmptyString_ReturnsValidHash()
         {
             var hash = Hash.ComputeSha256Hash(string.Empty);
 
@@ -89,7 +89,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that the same input always produces the same SHA-512 hash.
         /// </summary>
         [TestMethod]
-        public void ComputeSha512HashSameInputReturnsSameHash()
+        public void ComputeSha512Hash_SameInput_ReturnsSameHash()
         {
             var hash1 = Hash.ComputeSha512Hash("test");
             var hash2 = Hash.ComputeSha512Hash("test");
@@ -101,7 +101,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies the expected SHA-512 hash value for the string "test" (known test vector).
         /// </summary>
         [TestMethod]
-        public void ComputeSha512HashKnownInputReturnsExpectedHash()
+        public void ComputeSha512Hash_KnownInput_ReturnsExpectedHash()
         {
             var expected = "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db2"
                          + "7ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff";
@@ -115,7 +115,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that different inputs produce different SHA-512 hashes.
         /// </summary>
         [TestMethod]
-        public void ComputeSha512HashDifferentInputsReturnsDifferentHashes()
+        public void ComputeSha512Hash_DifferentInputs_ReturnsDifferentHashes()
         {
             var hash1 = Hash.ComputeSha512Hash("test1");
             var hash2 = Hash.ComputeSha512Hash("test2");
@@ -127,7 +127,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that a null input throws <see cref="ArgumentNullException"/>.
         /// </summary>
         [TestMethod]
-        public void ComputeSha512HashNullInputThrowsArgumentNullException()
+        public void ComputeSha512Hash_NullInput_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => Hash.ComputeSha512Hash(null));
         }
@@ -136,7 +136,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that the SHA-512 hash consists of 128 lowercase hexadecimal characters.
         /// </summary>
         [TestMethod]
-        public void ComputeSha512HashValidInputReturns128LowercaseHexChars()
+        public void ComputeSha512Hash_ValidInput_Returns128LowercaseHexChars()
         {
             var hash = Hash.ComputeSha512Hash("test");
 
@@ -152,7 +152,7 @@ namespace OSKHelpers.Tests.Security
         /// Verifies that SHA-256 and SHA-512 produce different results for the same input.
         /// </summary>
         [TestMethod]
-        public void ComputeHashSha256VsSha512ReturnsDifferentResults()
+        public void ComputeHash_Sha256VsSha512_ReturnsDifferentResults()
         {
             var sha256 = Hash.ComputeSha256Hash("test");
             var sha512 = Hash.ComputeSha512Hash("test");

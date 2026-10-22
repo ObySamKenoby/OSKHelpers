@@ -1,0 +1,126 @@
+# Configurazione dell'editor e dello stile del codice
+# Generato dalla skill genera-editorconfig secondo le convenzioni di CLAUDE.md
+
+root = true
+
+#### Tutti i file ####
+
+[*]
+indent_style             = space
+indent_size              = 4
+charset                  = utf-8-bom
+trim_trailing_whitespace = true
+insert_final_newline     = true
+end_of_line              = crlf
+
+# Markdown: gli spazi finali possono indicare un a capo
+[*.md]
+trim_trailing_whitespace = false
+
+# YAML: rientro a 2 spazi per convenzione del formato
+[*.{yml,yaml}]
+indent_size = 2
+
+#### C# ####
+
+[*.cs]
+# Lunghezza riga di riferimento (130 caratteri, tollerati fino a 150; 200 nei blocchi allineati).
+# Solo informativa: Visual Studio non la applica, la usano alcuni editor ed estensioni.
+max_line_length = 130
+
+# Parentesi graffe sempre presenti e su una riga propria
+csharp_prefer_braces                                  = true:warning
+csharp_new_line_before_open_brace                     = all
+csharp_new_line_before_else                           = true
+csharp_new_line_before_catch                          = true
+csharp_new_line_before_finally                        = true
+
+# Allineamento verticale: il formattatore non deve rimuovere gli spazi che allineano i segni =
+# - dichiarazioni (const, var, campi): csharp_space_around_declaration_statements
+# - assegnazioni (es. nei costruttori): csharp_space_around_binary_operators; effetto collaterale: il formattatore non
+#   normalizza più gli spazi attorno agli operatori binari (a+b resta invariato)
+# Non esprimibile: l'allineamento degli argomenti di chiamate consecutive (dopo la virgola) viene sempre ridotto a uno spazio.
+csharp_space_around_declaration_statements            = ignore
+csharp_space_around_binary_operators                  = ignore
+
+# Rientri
+csharp_indent_case_contents                           = true
+csharp_indent_switch_labels                           = true
+csharp_indent_block_contents                          = true
+csharp_indent_braces                                  = false
+
+# Istanziazione dei membri solo nei costruttori: nessun suggerimento verso i costruttori primari
+csharp_style_prefer_primary_constructors              = false:none
+
+#### Nomenclatura ####
+
+# Simboli
+dotnet_naming_symbols.costanti.applicable_kinds                         = field, local
+dotnet_naming_symbols.costanti.required_modifiers                       = const
+
+dotnet_naming_symbols.campi_privati.applicable_kinds                    = field
+dotnet_naming_symbols.campi_privati.applicable_accessibilities          = private
+
+dotnet_naming_symbols.metodi_async_esposti.applicable_kinds             = method
+dotnet_naming_symbols.metodi_async_esposti.applicable_accessibilities   = public, protected, protected_internal
+dotnet_naming_symbols.metodi_async_esposti.required_modifiers           = async
+
+dotnet_naming_symbols.tipi_e_membri.applicable_kinds                    = namespace, class, struct, interface, enum, delegate, method, property, event
+dotnet_naming_symbols.parametri_e_locali.applicable_kinds               = parameter, local, local_function
+
+# Stili
+dotnet_naming_style.maiuscolo.capitalization                            = all_upper
+
+dotnet_naming_style.underscore_camel.capitalization                     = camel_case
+dotnet_naming_style.underscore_camel.required_prefix                    = _
+
+dotnet_naming_style.pascal_async.capitalization                         = pascal_case
+dotnet_naming_style.pascal_async.required_suffix                        = Async
+
+dotnet_naming_style.pascal.capitalization                               = pascal_case
+dotnet_naming_style.camel.capitalization                                = camel_case
+
+# Regole, dalla più specifica alla più generica
+dotnet_naming_rule.costanti_maiuscole.symbols                           = costanti
+dotnet_naming_rule.costanti_maiuscole.style                             = maiuscolo
+dotnet_naming_rule.costanti_maiuscole.severity                          = warning
+
+dotnet_naming_rule.campi_privati_underscore.symbols                     = campi_privati
+dotnet_naming_rule.campi_privati_underscore.style                       = underscore_camel
+dotnet_naming_rule.campi_privati_underscore.severity                    = warning
+
+dotnet_naming_rule.metodi_async_suffisso.symbols                        = metodi_async_esposti
+dotnet_naming_rule.metodi_async_suffisso.style                          = pascal_async
+dotnet_naming_rule.metodi_async_suffisso.severity                       = warning
+
+dotnet_naming_rule.tipi_e_membri_pascal.symbols                         = tipi_e_membri
+dotnet_naming_rule.tipi_e_membri_pascal.style                           = pascal
+dotnet_naming_rule.tipi_e_membri_pascal.severity                        = warning
+
+dotnet_naming_rule.parametri_e_locali_camel.symbols                     = parametri_e_locali
+dotnet_naming_rule.parametri_e_locali_camel.style                       = camel
+dotnet_naming_rule.parametri_e_locali_camel.severity                    = warning
+
+#### Gravità in compilazione ####
+
+# dotnet build ignora il suffisso ":warning" delle opzioni e la severity delle regole di nomenclatura: senza queste righe
+# graffe e nomenclatura non vengono segnalate in compilazione (anche con EnforceCodeStyleInBuild).
+dotnet_diagnostic.IDE0011.severity                                      = warning
+dotnet_diagnostic.IDE1006.severity                                      = warning
+
+#### Test ####
+
+# I metodi di test seguono MetodoTestato_Condizione_RisultatoAtteso: quelli asincroni non hanno il suffisso Async.
+# Le altre regole di nomenclatura restano attive.
+[tests/**.cs]
+dotnet_naming_rule.metodi_async_suffisso.severity                       = none
+
+#### File di progetto e configurazione ####
+
+# File di progetto MSBuild e XML: rientro a 4 spazi
+[*.{csproj,props,targets,xml,config}]
+indent_size = 4
+
+# Soluzioni .slnx e JSON: rientro a 2 spazi, come la formattazione standard di Visual Studio e dotnet
+[*.{slnx,json}]
+indent_size = 2

@@ -4,11 +4,9 @@
 		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
 		<Nullable>disable</Nullable>
 		<Platforms>AnyCPU;x86</Platforms>
-		<Configurations>Debug;Release;G2DataExport_Debug;G2DataExport_Release</Configurations>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>OSK Helpers</Title>
-		<VersionPrefix>1.7.5</VersionPrefix>
-		<UserSecretsId>4af1c825-22b9-438f-9703-901735ed504c</UserSecretsId>
+		<VersionPrefix>2.0.0</VersionPrefix>
 		<Authors>Samuele Gaggioli</Authors>
 		<Description>General purpose utilities, including Logging and settings (.ini / json) files.</Description>
 		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
@@ -59,7 +57,14 @@
 		<PackageLicenseFile>License.txt</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
-		<PackageReleaseNotes>Added ISettingsBase interface.</PackageReleaseNotes>
+		<PackageReleaseNotes>2.0.0 - Breaking changes, see README for details and migration notes.
+- PasswordHash/PasswordHelper: PBKDF2-HMAC-SHA256 with 600,000 iterations, 49-byte versioned hashes and constant-time comparison; 1.x hashes (36 bytes) are still verified and flagged by RequiresRehash.
+- Logging: until LogPath is assigned, SimpleLogger, SimpleLog and CSVLogger follow Paths.DefaultLogsDirectory; DEBUG/PROTOCOL labels in DebugWrite/ProtocolWrite lines; ConditionalLog with independent console and file thresholds.
+- PropertyStringUtils uses its CultureInfo (default CurrentCulture) instead of the thread culture; an invalid string leaves nullable fields unchanged.
+- JsonSettings.Load uses DefaultSerializerOptions; backup names without double dot.
+- NetUtils.CheckDNS returns Reachable false for unknown hosts; EmbeddedResourcesUtils throws InvalidOperationException for a missing resource; DaysOfWeekParameter throws ArgumentOutOfRangeException; CSVLogItem writes null values as "".
+- OSKIsNumeric returns bool, SimpleLog.ConsoleLog is static, IPAddressExtensionMethods.TryParseMatch(string, out IPAddress) is obsolete.
+- Bug fixes in ODBC connection string, GCUtils, Paths, PagingCollection, StringUtils, IniFileHelper and WebDownloader; thread-safe PasswordObfuscator and OSKRandom.Shared.</PackageReleaseNotes>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<PackageProjectUrl>https://github.com/ObySamKenoby/OSKHelpers</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/ObySamKenoby/OSKHelpers</RepositoryUrl>
@@ -74,10 +79,6 @@
 	<PropertyGroup Label="Prevents reflection using classes (EmbeddedResourcesUtils) from being removed during package publishing.">
 		<EnableTrimAnalyzer>false</EnableTrimAnalyzer>
 		<PublishTrimmed>false</PublishTrimmed>
-	</PropertyGroup>
-
-	<PropertyGroup Label="Normalize stack trace path." Condition="'$(Configuration)'=='Release'">
-		<PathMap>$([System.IO.Path]::GetDirectoryName($(MSBuildThisFileDirectory)))=$(AssemblyName):\</PathMap>
 	</PropertyGroup>
 
 	<ItemGroup>

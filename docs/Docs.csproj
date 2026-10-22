@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.Build.NoTargets/3.7.0">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <EnableDefaultItems>false</EnableDefaultItems>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="..\*.*" Exclude="bin\**;obj\**;*.csproj" LinkBase="0 Root" />
+        <None Include="**\*.*" Exclude="bin\**;obj\**;*.csproj" />
+    </ItemGroup>
+</Project>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Timers;
 
 namespace OSKHelpers.Common
@@ -26,7 +25,7 @@ namespace OSKHelpers.Common
             {
                 throw new ArgumentOutOfRangeException(nameof(maxHeapSize), $"The value of {nameof(maxHeapSize)} must be greater than zero.");
             }
-            AppContext.SetData("GCHeapHardLimit", (ulong)500 << 20);
+            AppContext.SetData("GCHeapHardLimit", (ulong)maxHeapSize << 20);
             GC.RefreshMemoryLimit();
         }
 
@@ -90,14 +89,14 @@ namespace OSKHelpers.Common
             }
 
             var gcTimer = new Timer();
-            long size = triggerSize << 10; // triggerSize is converted to bytes.
+            long size = (long)triggerSize << 20; // triggerSize is converted from MB to bytes.
 
             gcTimer.Interval = interval;
             gcTimer.AutoReset = true;
             gcTimer.Elapsed += (s, e) =>
             {
-                var usedMemory = Process.GetCurrentProcess().PagedMemorySize64;
-                if (usedMemory > size)
+                var heapSize = GC.GetTotalMemory(false);
+                if (heapSize > size)
                 {
                     GC.Collect();
                 }

@@ -66,12 +66,9 @@ namespace OSKHelpers.Logging
 
         static SimpleLog()
         {
-            _logger         = new SimpleLogger();
-            _logger.LogPath = DefaultLogPath;
-            LogLevel        = LogLevel.Error;
-#if DEBUG
-            LogLevel        = LogLevel.Debug;
-#endif
+            // The instance keeps the defaults of SimpleLogger: LogPath is not assigned, so the log folder
+            // follows Paths.DefaultLogsDirectory exactly as for any other SimpleLogger instance
+            _logger = new SimpleLogger();
         }
 
         #endregion
@@ -166,7 +163,7 @@ namespace OSKHelpers.Logging
         public static void LogCallerTypeMethodName(LogLevel logLevel = LogLevel.Debug, [CallerMemberName] string callerMethodName = "") => Write(logLevel, $"{new StackFrame(1).GetMethod().DeclaringType.Name}.{callerMethodName}");
 
         /// <inheritdoc cref="SimpleLogger.ConsoleLog(string, LogLevel)"/>
-        public void ConsoleLog(string text, LogLevel logLevel = LogLevel.None)
+        public static void ConsoleLog(string text, LogLevel logLevel = LogLevel.None)
             => _logger.ConsoleLog(text, logLevel);
         
         ///<inheritdoc cref="SimpleLogger.DebugConsoleLog(string)"/>
