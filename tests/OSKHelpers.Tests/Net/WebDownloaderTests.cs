@@ -154,6 +154,115 @@ namespace OSKHelpers.Tests.Net
             Assert.IsFalse(File.Exists(outputFile));
         }
 
+        #region Cancellation and inactivity timeout
+
+        /// <summary>
+        /// Verifies that an inactivity timeout not greater than zero throws ArgumentOutOfRangeException, without requests.
+        /// </summary>
+        [TestMethod]
+        [DataRow(0)]
+        [DataRow(-1)]
+        public async Task DownloadAsync_InactivityTimeoutNotPositive_ThrowsArgumentOutOfRangeException(int milliseconds)
+        {
+            var handler = new FakeHttpMessageHandler(HttpStatusCode.OK, CONTENT);
+            using var httpClient = new HttpClient(handler);
+
+            var exception = await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(() => WebDownloader.DownloadAsync(
+                httpClient, URL, Path.Combine(_outputDirectory, "file.txt"), inactivityTimeout: TimeSpan.FromMilliseconds(milliseconds)));
+
+            Assert.AreEqual("inactivityTimeout", exception.ParamName);
+            Assert.AreEqual(0, handler.RequestsCount);
+        }
+
+        /// <summary>
+        /// Verifies that an already canceled token throws OperationCanceledException without creating the file.
+        /// </summary>
+        [TestMethod]
+        public async Task DownloadAsync_CanceledToken_ThrowsOperationCanceledExceptionWithoutFile()
+        {
+            var outputFile = Path.Combine(_outputDirectory, "file.txt");
+            using var httpClient = new HttpClient(new FakeHttpMessageHandler(HttpStatusCode.OK, CONTENT));
+            using var cancellationSource = new CancellationTokenSource();
+            cancellationSource.Cancel();
+
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => WebDownloader.DownloadAsync(httpClient, URL, outputFile, cancellationSource.Token));
+
+            Assert.IsFalse(File.Exists(outputFile));
+        }
+
+        /// <summary>
+        /// Verifies that canceling the token during a stalled transfer interrupts the download and deletes the partial file.
+        /// </summary>
+        [TestMethod]
+        [Timeout(10000, CooperativeCancellation = true)]
+        public async Task DownloadAsync_CanceledDuringStalledTransfer_ThrowsOperationCanceledExceptionAndDeletesFile()
+        {
+            var outputFile = Path.Combine(_outputDirectory, "file.txt");
+            using var httpClient = new HttpClient(new StreamHttpMessageHandler(() => new SlowStream(1, TimeSpan.Zero, true)));
+            using var cancellationSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(300));
+
+            await Assert.ThrowsAsync<OperationCanceledException>(
+                () => WebDownloader.DownloadAsync(httpClient, URL, outputFile, cancellationSource.Token));
+
+            Assert.IsFalse(File.Exists(outputFile));
+        }
+
+        /// <summary>
+        /// Verifies that a transfer stalled for longer than the inactivity timeout throws TimeoutException and deletes the
+        /// partial file.
+        /// </summary>
+        [TestMethod]
+        [Timeout(10000, CooperativeCancellation = true)]
+        public async Task DownloadAsync_StalledTransfer_ThrowsTimeoutExceptionAndDeletesFile()
+        {
+            var outputFile = Path.Combine(_outputDirectory, "file.txt");
+            using var httpClient = new HttpClient(new StreamHttpMessageHandler(() => new SlowStream(1, TimeSpan.Zero, true)));
+
+            await Assert.ThrowsExactlyAsync<TimeoutException>(
+                () => WebDownloader.DownloadAsync(httpClient, URL, outputFile, inactivityTimeout: TimeSpan.FromMilliseconds(300)));
+
+            Assert.IsFalse(File.Exists(outputFile));
+        }
+
+        /// <summary>
+        /// Verifies that the synchronous Download also throws TimeoutException for a stalled transfer.
+        /// </summary>
+        [TestMethod]
+        [Timeout(10000, CooperativeCancellation = true)]
+        public void Download_StalledTransfer_ThrowsTimeoutException()
+        {
+            var outputFile = Path.Combine(_outputDirectory, "file.txt");
+            using var httpClient = new HttpClient(new StreamHttpMessageHandler(() => new SlowStream(1, TimeSpan.Zero, true)));
+
+            Assert.ThrowsExactly<TimeoutException>(
+                () => WebDownloader.Download(httpClient, URL, outputFile, inactivityTimeout: TimeSpan.FromMilliseconds(300)));
+            Assert.IsFalse(File.Exists(outputFile));
+        }
+
+        /// <summary>
+        /// Verifies that a slow but active transfer, whose total duration exceeds the inactivity timeout, is completed: the timer
+        /// restarts at every block received.
+        /// </summary>
+        [TestMethod]
+        [Timeout(10000, CooperativeCancellation = true)]
+        public async Task DownloadAsync_SlowActiveTransfer_SavesFile()
+        {
+            const int BLOCKS = 6;
+
+            var outputFile = Path.Combine(_outputDirectory, "file.txt");
+            using var httpClient = new HttpClient(
+                new StreamHttpMessageHandler(() => new SlowStream(BLOCKS, TimeSpan.FromMilliseconds(200), false)));
+
+            var downloaded = await WebDownloader.DownloadAsync(
+                httpClient, URL, outputFile, inactivityTimeout: TimeSpan.FromMilliseconds(800));
+
+            Assert.IsTrue(downloaded);
+            Assert.AreEqual(BLOCKS * SlowStream.BLOCK.Length, new FileInfo(outputFile).Length);
+        }
+
+        #endregion
+
         #region Integration (local HTTP server)
 
         /// <summary>
@@ -254,6 +363,86 @@ namespace OSKHelpers.Tests.Net
 
                 return Task.FromResult(response);
             }
+        }
+
+        /// <summary>
+        /// Handler that answers every request with status OK and a content read from the stream created by the factory.
+        /// </summary>
+        private class StreamHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly Func<Stream> _streamFactory;
+
+            public StreamHttpMessageHandler(Func<Stream> streamFactory)
+            {
+                _streamFactory = streamFactory;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StreamContent(_streamFactory())
+                };
+
+                return Task.FromResult(response);
+            }
+        }
+
+        /// <summary>
+        /// Read-only stream that returns a fixed number of blocks, each one after a delay; when stalled, after the last block
+        /// the read waits until the token is canceled instead of signaling the end of the stream.
+        /// </summary>
+        private class SlowStream : Stream
+        {
+            public static readonly byte[] BLOCK = Encoding.UTF8.GetBytes(CONTENT);
+
+            private readonly TimeSpan _delay;
+            private readonly bool _stalled;
+            private int _remainingBlocks;
+
+            public SlowStream(int blocks, TimeSpan delay, bool stalled)
+            {
+                _remainingBlocks    = blocks;
+                _delay              = delay;
+                _stalled            = stalled;
+            }
+
+            public override bool CanRead => true;
+            public override bool CanSeek => false;
+            public override bool CanWrite => false;
+            public override long Length => throw new NotSupportedException();
+            public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+
+            public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                int read;
+
+                if (_remainingBlocks > 0)
+                {
+                    await Task.Delay(_delay, cancellationToken);
+                    _remainingBlocks--;
+                    Array.Copy(BLOCK, 0, buffer, offset, BLOCK.Length);
+                    read = BLOCK.Length;
+                }
+                else
+                {
+                    if (_stalled)
+                    {
+                        await Task.Delay(Timeout.Infinite, cancellationToken);
+                    }
+                    read = 0;
+                }
+
+                return read;
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+                => ReadAsync(buffer, offset, count, CancellationToken.None).GetAwaiter().GetResult();
+
+            public override void Flush() { }
+            public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+            public override void SetLength(long value) => throw new NotSupportedException();
+            public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
         }
 
         #endregion

@@ -13,7 +13,7 @@ namespace OSKHelpers.Net {
     
     
     /// <summary>
-    ///   Classe di risorse fortemente tipizzata per la ricerca di stringhe localizzate e così via.
+    ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
     // Questa classe è stata generata automaticamente dalla classe StronglyTypedResourceBuilder.
     // tramite uno strumento quale ResGen o Visual Studio.
@@ -33,7 +33,7 @@ namespace OSKHelpers.Net {
         }
         
         /// <summary>
-        ///   Restituisce l'istanza di ResourceManager nella cache utilizzata da questa classe.
+        ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Resources.ResourceManager ResourceManager {
@@ -47,8 +47,8 @@ namespace OSKHelpers.Net {
         }
         
         /// <summary>
-        ///   Esegue l'override della proprietà CurrentUICulture del thread corrente per tutte le
-        ///   ricerche di risorse eseguite utilizzando questa classe di risorse fortemente tipizzata.
+        ///   Overrides the current thread's CurrentUICulture property for all
+        ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Globalization.CultureInfo Culture {
@@ -61,7 +61,7 @@ namespace OSKHelpers.Net {
         }
         
         /// <summary>
-        ///   Cerca una stringa localizzata simile a Non è possibile modificare il valore della proprietà AcceptInsecureConnections quando Instance non è nullo, richiamare Dispose per annullare l&apos;istanza e ripetere l&apos;operazione..
+        ///   Looks up a localized string similar to The value of AcceptInsecureConnections cannot be changed while Instance is not null: call Dispose to release the instance and retry the operation..
         /// </summary>
         internal static string AcceptInsecureConnectionsException {
             get {
@@ -70,7 +70,16 @@ namespace OSKHelpers.Net {
         }
         
         /// <summary>
-        ///   Cerca una stringa localizzata simile a Il metodo SetInstance può essere utilizzato esclusivamente quanto Instance è null..
+        ///   Looks up a localized string similar to The download was interrupted: no data was received for {0}..
+        /// </summary>
+        internal static string DownloadInactivityTimeoutException {
+            get {
+                return ResourceManager.GetString("DownloadInactivityTimeoutException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SetInstance can be used only while Instance is null..
         /// </summary>
         internal static string SetInstanceException {
             get {

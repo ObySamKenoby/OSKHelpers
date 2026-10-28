@@ -14,7 +14,7 @@ as little setup as possible. Suggestions are welcome.
 
 | Package | Version | Target | Content | Documentation |
 | --- | --- | --- | --- | --- |
-| [OSKHelpers](https://www.nuget.org/packages/OSKHelpers) | **2.0.0** | .NET Standard 2.0, .NET 8 | Logging, INI/JSON settings, paths, security, collections, network and generic helpers | [ReadMe](src/OSKHelpers/ReadMe.md) |
+| [OSKHelpers](https://www.nuget.org/packages/OSKHelpers) | **2.0.1** | .NET Standard 2.0, .NET 8 | Logging, INI/JSON settings, paths, security, collections, network and generic helpers | [ReadMe](src/OSKHelpers/ReadMe.md) |
 | [OSKHelpers.Mail](https://www.nuget.org/packages/OSKHelpers.Mail) | 1.2.5 | .NET Standard 2.0 | E-mail sending (MailKit) with template support | [ReadMe](src/OSKHelpers.Mail/ReadMe.md) |
 | OSKHelpers.WPF | 0.5.0 | — | Placeholder for WPF helpers: not usable yet | — |
 
@@ -166,6 +166,17 @@ See the [OSKHelpers.Mail ReadMe](src/OSKHelpers.Mail/ReadMe.md) for templates, a
   without an explicit `LogPath` follow the change.
 - **Synchronous counterparts**: every public asynchronous method has a synchronous version with the same name without
   `Async`.
+
+---
+
+## Changes in OSKHelpers 2.0.1
+
+- `WebDownloader.Download` and `DownloadAsync` accept an optional `CancellationToken` and an optional inactivity timeout
+  (maximum time without receiving data, restarted at every block received): cancellation throws
+  `OperationCanceledException`, an expired timeout throws `TimeoutException`. An interrupted download deletes the partial
+  output file.
+- Source compatible with 2.0.0; assemblies compiled against 2.0.0 that call `WebDownloader` must be recompiled, because the
+  method signatures changed.
 
 ---
 

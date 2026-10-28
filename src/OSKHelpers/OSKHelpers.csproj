@@ -6,7 +6,7 @@
 		<Platforms>AnyCPU;x86</Platforms>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>OSK Helpers</Title>
-		<VersionPrefix>2.0.0</VersionPrefix>
+		<VersionPrefix>2.0.1</VersionPrefix>
 		<Authors>Samuele Gaggioli</Authors>
 		<Description>General purpose utilities, including Logging and settings (.ini / json) files.</Description>
 		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
@@ -57,7 +57,9 @@
 		<PackageLicenseFile>License.txt</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
-		<PackageReleaseNotes>2.0.0 - Breaking changes, see README for details and migration notes.
+		<PackageReleaseNotes>2.0.1 - WebDownloader: optional CancellationToken and inactivity timeout on Download and DownloadAsync; an interrupted download deletes the partial file. Assemblies compiled against 2.0.0 that call WebDownloader must be recompiled.
+
+2.0.0 - Breaking changes, see README for details and migration notes.
 - PasswordHash/PasswordHelper: PBKDF2-HMAC-SHA256 with 600,000 iterations, 49-byte versioned hashes and constant-time comparison; 1.x hashes (36 bytes) are still verified and flagged by RequiresRehash.
 - Logging: until LogPath is assigned, SimpleLogger, SimpleLog and CSVLogger follow Paths.DefaultLogsDirectory; DEBUG/PROTOCOL labels in DebugWrite/ProtocolWrite lines; ConditionalLog with independent console and file thresholds.
 - PropertyStringUtils uses its CultureInfo (default CurrentCulture) instead of the thread culture; an invalid string leaves nullable fields unchanged.

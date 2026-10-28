@@ -118,9 +118,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AcceptInsecureConnectionsException" xml:space="preserve">
-    <value>Non è possibile modificare il valore della proprietà AcceptInsecureConnections quando Instance non è nullo, richiamare Dispose per annullare l'istanza e ripetere l'operazione.</value>
+    <value>The value of AcceptInsecureConnections cannot be changed while Instance is not null: call Dispose to release the instance and retry the operation.</value>
   </data>
   <data name="SetInstanceException" xml:space="preserve">
-    <value>Il metodo SetInstance può essere utilizzato esclusivamente quanto Instance è null.</value>
+    <value>SetInstance can be used only while Instance is null.</value>
+  </data>
+  <data name="DownloadInactivityTimeoutException" xml:space="preserve">
+    <value>The download was interrupted: no data was received for {0}.</value>
   </data>
 </root>

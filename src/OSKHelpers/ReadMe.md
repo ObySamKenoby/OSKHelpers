@@ -113,7 +113,7 @@ HTTP client helpers.
 | Class | Description |
 |---|---|
 | `OSKHttpClient` | Thread-safe lazy singleton wrapping `HttpClient`. Supports optional acceptance of insecure (self-signed) connections via `AcceptInsecureConnections` and exposes `GetInsecureHttpHandler()`. |
-| `WebDownloader` | Downloads a remote file to disk, either synchronously (`Download`) or asynchronously (`DownloadAsync`), using a provided `HttpClient` instance. |
+| `WebDownloader` | Downloads a remote file to disk, either synchronously (`Download`) or asynchronously (`DownloadAsync`), using a provided `HttpClient` instance. Optional `CancellationToken` and inactivity timeout (maximum time without receiving data, `TimeoutException` when exceeded); an interrupted download deletes the partial file. |
 
 ---
 
