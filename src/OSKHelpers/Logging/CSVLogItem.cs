@@ -11,6 +11,27 @@ namespace OSKHelpers.Logging
     /// </summary>
     public class CSVLogItem : ICSVLogItem
     {
+        #region Constants
+
+        /// <summary>
+        /// Full name of the System.DateOnly type, recognized by name so that the netstandard2.0 build, which does not know
+        /// the type, formats it like the .NET 8 build.
+        /// </summary>
+        private const string DATEONLYTYPENAME = "System.DateOnly";
+
+        /// <summary>
+        /// Custom format of the date part of a DateOnly value: together with DATEONLYTIME it produces the same result as the
+        /// sortable format "s" of a DateTime at midnight.
+        /// </summary>
+        private const string DATEONLYFORMAT = "yyyy-MM-dd";
+
+        /// <summary>
+        /// Time part appended to a DateOnly value, which has no time (DateOnly rejects the time specifiers in the format).
+        /// </summary>
+        private const string DATEONLYTIME = "T00:00:00";
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -61,8 +82,8 @@ namespace OSKHelpers.Logging
         /// Data is formatted as follows:<br/>
         /// <b>strings</b>: enclosed in double quotes ("");<br/>
         /// <b>numbers</b>: no quotes, no thousands separator, dot as decimal separator;<br/>
-        /// <b>dates (DateTime, and DateOnly on .NET 8 or later)</b>: no quotes, ISO 8601 sortable format ("s", yyyy-MM-ddTHH:mm:ss),<br/>
-        /// without conversion to UTC;<br/>
+        /// <b>dates (DateTime and DateOnly)</b>: no quotes, ISO 8601 sortable format ("s", yyyy-MM-ddTHH:mm:ss),<br/>
+        /// without conversion to UTC; DateOnly is written at midnight, with every target framework of the library;<br/>
         /// <b>other types</b>: treated as strings, enclosed in double quotes, represented via ToString().
         /// </summary>
         /// <param name="obj">Object for which to create the data row.</param>
@@ -91,13 +112,10 @@ namespace OSKHelpers.Logging
                     {
                         fields.Add(Convert.ToString(value, CultureInfo.InvariantCulture));
                     }
-#if NET8_0_OR_GREATER
-                else if (value is DateOnly)
-                {
-                    var v = (DateOnly)value;
-                    fields.Add(new DateTime(v.Year, v.Month, v.Day).ToString("s"));
-                }
-#endif
+                    else if (IsDateOnly(value))
+                    {
+                        fields.Add(((IFormattable)value).ToString(DATEONLYFORMAT, CultureInfo.InvariantCulture) + DATEONLYTIME);
+                    }
                     else if (value is DateTime)
                     {
                         fields.Add(((DateTime)value).ToString("s"));
@@ -122,6 +140,20 @@ namespace OSKHelpers.Logging
             return string.Join(separator, fields);
         }
 
-#endregion
+        /// <summary>
+        /// Checks whether the value is a System.DateOnly.
+        /// </summary>
+        /// <remarks>
+        /// The type is recognized by its full name instead of with "is DateOnly" because the netstandard2.0 build does not
+        /// know it, while an application running on .NET 6 or later can still pass it (intervento 045).
+        /// </remarks>
+        /// <param name="value">Value to check; it can be null.</param>
+        /// <returns><c>true</c> if the value is a DateOnly that can be formatted through IFormattable.</returns>
+        private static bool IsDateOnly(object value)
+        {
+            return value is IFormattable && value.GetType().FullName == DATEONLYTYPENAME;
+        }
+
+        #endregion
     }
 }

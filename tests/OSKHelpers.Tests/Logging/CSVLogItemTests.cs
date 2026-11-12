@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using OSKHelpers.Logging;
 
@@ -135,6 +135,28 @@ namespace OSKHelpers.Tests.Logging
                 var data = new SampleItem { Amount = 1234.5m }.GetCSVData();
 
                 Assert.StartsWith("1234.5;", data);
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+            }
+        }
+
+        /// <summary>
+        /// Verifies that DateOnly is written in ISO format regardless of the current culture and of the build of the library.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Intervento-045")]
+        public void GetCSVData_DateOnlyWithItalianCulture_UsesIsoFormat()
+        {
+            var originalCulture = CultureInfo.CurrentCulture;
+            try
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("it-IT");
+
+                var data = new SampleItem { Day = new DateOnly(2026, 1, 5) }.GetCSVData();
+
+                Assert.Contains(";2026-01-05T00:00:00;", data);
             }
             finally
             {

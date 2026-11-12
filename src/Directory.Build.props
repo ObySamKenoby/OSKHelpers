@@ -1,0 +1,38 @@
+<Project>
+    <!-- Proprietà comuni ai progetti in src (pacchetti NuGet); la versione e le note di rilascio restano nei singoli .csproj -->
+
+    <!-- Importa le proprietà comuni a tutti i progetti della soluzione -->
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+    <PropertyGroup>
+        <Authors>Samuele Gaggioli</Authors>
+        <Company>OSK Soft</Company>
+        <Copyright>OSK Soft di Samuele Gaggioli</Copyright>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <PackageIcon>logo_128px.jpg</PackageIcon>
+        <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+        <PackageLicenseFile>License.txt</PackageLicenseFile>
+        <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+        <PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
+        <PackageProjectUrl>https://github.com/ObySamKenoby/OSKHelpers</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/ObySamKenoby/OSKHelpers</RepositoryUrl>
+    </PropertyGroup>
+
+    <!-- File inclusi in ogni pacchetto: logo comune, licenza e ReadMe della cartella del progetto -->
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)..\docs\images\logo_128px.jpg" Link="logo_128px.jpg">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+        <None Include="License.txt">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="ReadMe.md">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+</Project>

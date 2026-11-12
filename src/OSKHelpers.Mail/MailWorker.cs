@@ -1,4 +1,5 @@
-﻿using MailKit.Security;
+﻿using MailKit;
+using MailKit.Security;
 using MimeKit;
 using MailKit.Net.Smtp;
 using System;
@@ -9,17 +10,21 @@ using System.Threading.Tasks;
 using System.IO;
 using OSKHelpers.INIFile;
 using OSKHelpers.Common;
+using OSKHelpers.Json;
 using System.Text.Json;
 using OSKHelpers.Mail.Interfaces;
+using OSKHelpers.Security;
 
 namespace OSKHelpers.Mail
 {
     /// <summary>
     /// Helper class for simplifying email sending.
     /// </summary>
-    public class MailWorker
+    public partial class MailWorker
     {
-        #region File parsing properties
+        #region Constants
+
+        #region File parsing
 
         /// <summary>
         /// File parsing: a '#' in the first position identifies a comment.
@@ -34,6 +39,8 @@ namespace OSKHelpers.Mail
         /// File parsing: maximum available iterations for tag substitution and condition evaluation before timeout.
         /// </summary>
         public const int MAXITERATIONS = 1000;
+
+        #endregion
 
         #endregion
 
@@ -61,18 +68,35 @@ namespace OSKHelpers.Mail
         /// </summary>
         public static string SmtpUsername { get; set; }
         /// <summary>
-        /// Password for SMTP authentication.
+        /// Password for SMTP authentication, in plain text.
         /// </summary>
-        public static string SmtpPassword { get; set; }
+        /// <remarks>
+        /// The value is kept in memory as read from the configuration (encrypted, when the setup received an encrypted
+        /// password), obfuscated with <see cref="PasswordObfuscator"/>; each read decodes it and, if encrypted, decrypts it with
+        /// the <see cref="CredentialProtector"/> received by the setup or, if none, with the default one (see
+        /// <see cref="DEFAULTENTROPYFILENAME"/>). A call to <see cref="PasswordObfuscator.ReSeed"/> makes
+        /// the stored password no longer readable, so it must be set again.<br/>
+        /// The setter accepts only plain-text passwords.
+        /// </remarks>
+        public static string SmtpPassword
+        {
+            get => RevealStoredPassword(_smtpPassword, _smtpProtector, nameof(SmtpPassword));
+            set
+            {
+                _smtpPassword   = ObfuscatePassword(value);
+                _smtpProtector  = null;
+            }
+        }
 
         /// <summary>
         /// True if SMTP authentication is enabled.
         /// </summary>
-        public static bool SmtpAuthEnabled => !string.IsNullOrWhiteSpace(SmtpUsername) && !string.IsNullOrWhiteSpace(SmtpPassword);
+        /// <remarks>The obfuscated value is empty only when the password is empty, so it is checked without decoding it.</remarks>
+        public static bool SmtpAuthEnabled => !string.IsNullOrWhiteSpace(SmtpUsername) && !string.IsNullOrWhiteSpace(_smtpPassword);
         /// <summary>
         /// True if the SMTP authentication configuration contains errors (missing username or password).
         /// </summary>
-        public static bool SmtpAuthConfigError => string.IsNullOrWhiteSpace(SmtpUsername) ^ string.IsNullOrWhiteSpace(SmtpPassword);
+        public static bool SmtpAuthConfigError => string.IsNullOrWhiteSpace(SmtpUsername) ^ string.IsNullOrWhiteSpace(_smtpPassword);
 
         /// <summary>
         /// If set, allows sending mail without specifying a sender; in that case it will be used as the default sender.
@@ -98,14 +122,26 @@ namespace OSKHelpers.Mail
         /// </summary>
         public static string ImapUsername { get; set; }
         /// <summary>
-        /// Password for IMAP authentication.
+        /// Password for IMAP authentication, in plain text.
         /// </summary>
-        public static string ImapPassword { get; set; }
+        /// <remarks>
+        /// The value is kept in memory as described for <see cref="SmtpPassword"/>.<br/>
+        /// The setter accepts only plain-text passwords.
+        /// </remarks>
+        public static string ImapPassword
+        {
+            get => RevealStoredPassword(_imapPassword, _imapProtector, nameof(ImapPassword));
+            set
+            {
+                _imapPassword   = ObfuscatePassword(value);
+                _imapProtector  = null;
+            }
+        }
 
         /// <summary>
         /// True if the IMAP authentication configuration contains errors (missing username or password).
         /// </summary>
-        public static bool ImapAuthConfigError => string.IsNullOrWhiteSpace(ImapUsername) || string.IsNullOrWhiteSpace(ImapPassword);
+        public static bool ImapAuthConfigError => string.IsNullOrWhiteSpace(ImapUsername) || string.IsNullOrWhiteSpace(_imapPassword);
 
         #endregion
 
@@ -121,9 +157,17 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Sets the default parameters for the SMTP connection.
+        /// Sets the default parameters for the SMTP connection from the keys of an INI file.
         /// </summary>
-        public static bool SetupSmtp(IniFileHelper iniFile)
+        /// <param name="iniFile">INI file containing the <c>Smtp*</c> keys.</param>
+        /// <param name="protector">Protector used to decrypt <c>SmtpPassword</c> when it is encrypted (prefix
+        /// <see cref="CredentialProtector.DPAPIPREFIX"/>, <see cref="CredentialProtector.AESPREFIX"/> or
+        /// <see cref="CredentialProtector.AESCBCPREFIX"/>); it must use the same entropy used to encrypt it. If null, the
+        /// default protector is used (entropy read from <see cref="DEFAULTENTROPYFILENAME"/>). Not needed for a plain-text
+        /// password.</param>
+        /// <returns>The result of <see cref="CheckSmtpParameters(bool)"/>: false also when the password is encrypted but cannot be
+        /// decrypted.</returns>
+        public static bool SetupSmtp(IniFileHelper iniFile, CredentialProtector protector = null)
         {
             if (iniFile == null)
             {
@@ -136,7 +180,7 @@ namespace OSKHelpers.Mail
             SmtpSSL         = iniFile.GetBool(nameof(SmtpSSL));
             SmtpStartTls    = iniFile.GetBool(nameof(SmtpStartTls));
             SmtpUsername    = iniFile.GetString(nameof(SmtpUsername));
-            SmtpPassword    = iniFile.GetString(nameof(SmtpPassword));
+            SetStoredSmtpPassword(iniFile.GetString(nameof(SmtpPassword)), protector);
             SmtpFrom        = iniFile.GetString(nameof(SmtpFrom));
             if (SimpleLog.LogLevelDebug)
             {
@@ -146,9 +190,14 @@ namespace OSKHelpers.Mail
         }
 
         /// <summary>
-        /// Sets the default parameters for the IMAP connection.
+        /// Sets the default parameters for the IMAP connection from the keys of an INI file.
         /// </summary>
-        public static bool SetupImap(IniFileHelper iniFile)
+        /// <param name="iniFile">INI file containing the <c>Imap*</c> keys.</param>
+        /// <param name="protector">Protector used to decrypt <c>ImapPassword</c> when it is encrypted (see
+        /// <see cref="SetupSmtp(IniFileHelper, CredentialProtector)"/>).</param>
+        /// <returns>The result of <see cref="CheckImapParameters(bool)"/>: false also when the password is encrypted but cannot be
+        /// decrypted.</returns>
+        public static bool SetupImap(IniFileHelper iniFile, CredentialProtector protector = null)
         {
             if (iniFile == null)
             {
@@ -160,7 +209,7 @@ namespace OSKHelpers.Mail
             ImapPort        = iniFile.GetInt(nameof(ImapPort));
             ImapSSL         = iniFile.GetBool(nameof(ImapSSL));
             ImapUsername    = iniFile.GetString(nameof(ImapUsername));
-            ImapPassword    = iniFile.GetString(nameof(ImapPassword));
+            SetStoredImapPassword(iniFile.GetString(nameof(ImapPassword)), protector);
             if (SimpleLog.LogLevelDebug)
             {
                 DumpImapParameters();
@@ -173,7 +222,11 @@ namespace OSKHelpers.Mail
         /// </summary>
         /// <param name="settings">SMTP settings.</param>
         /// <param name="startTls">Value for <see cref="SmtpStartTls"/>, not included in <see cref="ISettingsSmtp"/>.</param>
-        public static bool SetupSmtp(ISettingsSmtp settings, bool startTls = false)
+        /// <param name="protector">Protector used to decrypt <see cref="ISettingsSmtp.SmtpPassword"/> when it is encrypted (see
+        /// <see cref="SetupSmtp(IniFileHelper, CredentialProtector)"/>).</param>
+        /// <returns>The result of <see cref="CheckSmtpParameters(bool)"/>: false also when the password is encrypted but cannot be
+        /// decrypted.</returns>
+        public static bool SetupSmtp(ISettingsSmtp settings, bool startTls = false, CredentialProtector protector = null)
         {
             if (settings == null)
             {
@@ -185,7 +238,7 @@ namespace OSKHelpers.Mail
             SmtpSSL         = settings.SmtpSSL;
             SmtpStartTls    = startTls;
             SmtpUsername    = settings.SmtpUsername;
-            SmtpPassword    = settings.SmtpPassword;
+            SetStoredSmtpPassword(settings.SmtpPassword, protector);
             SmtpFrom        = settings.SmtpFrom;
             if (SimpleLog.LogLevelDebug)
             {
@@ -197,7 +250,12 @@ namespace OSKHelpers.Mail
         /// <summary>
         /// Sets the default parameters for the IMAP connection.
         /// </summary>
-        public static bool SetupImap(ISettingsImap settings)
+        /// <param name="settings">IMAP settings.</param>
+        /// <param name="protector">Protector used to decrypt <see cref="ISettingsImap.ImapPassword"/> when it is encrypted (see
+        /// <see cref="SetupSmtp(IniFileHelper, CredentialProtector)"/>).</param>
+        /// <returns>The result of <see cref="CheckImapParameters(bool)"/>: false also when the password is encrypted but cannot be
+        /// decrypted.</returns>
+        public static bool SetupImap(ISettingsImap settings, CredentialProtector protector = null)
         {
             if (settings == null)
             {
@@ -208,12 +266,107 @@ namespace OSKHelpers.Mail
             ImapPort        = settings.ImapPort;
             ImapSSL         = settings.ImapSSL;
             ImapUsername    = settings.ImapUsername;
-            ImapPassword    = settings.ImapPassword;
+            SetStoredImapPassword(settings.ImapPassword, protector);
             if (SimpleLog.LogLevelDebug)
             {
                 DumpImapParameters();
             }
             return CheckImapParameters();
+        }
+
+        /// <summary>
+        /// Sets the default parameters for the SMTP and IMAP connections from JSON settings implementing
+        /// <see cref="ISettingsSmtp"/>, <see cref="ISettingsImap"/> or both, making sure that the passwords are stored encrypted.
+        /// <br/>
+        /// A password in plain text (<see cref="CredentialProtector.RequiresProtection(string)"/>) is encrypted with
+        /// <paramref name="protector"/> and written back to <paramref name="settings"/>; then, unless
+        /// <paramref name="saveProtectedPasswords"/> is false, the settings are saved to <paramref name="filename"/> without a
+        /// backup copy, which would keep the password in plain text. The encrypted passwords are kept in memory (see
+        /// <see cref="SmtpPassword"/>), so a later <see cref="JsonSettings{T}.Save(string, JsonSerializerOptions, bool)"/> of
+        /// the same object always writes them encrypted.
+        /// </summary>
+        /// <typeparam name="T">Type of the settings; should implement <see cref="ISettingsSmtp"/> and/or
+        /// <see cref="ISettingsImap"/>.</typeparam>
+        /// <param name="settings">Settings read with <see cref="JsonSettings{T}.Load(string, bool, JsonSerializerOptions)"/>.
+        /// </param>
+        /// <param name="filename">File the settings were read from, used to save them; relative paths refer to
+        /// <see cref="Paths.DefaultConfigsDirectory"/>. The file is saved with
+        /// <see cref="JsonSettings{T}.DefaultSerializerOptions"/>.</param>
+        /// <param name="protector">Protector used to encrypt and decrypt the passwords; if null, the default protector is used,
+        /// whose entropy is read from <see cref="DEFAULTENTROPYFILENAME"/> (created if missing). It must use the same entropy
+        /// used to encrypt the passwords already encrypted.</param>
+        /// <param name="smtpStartTls">Value for <see cref="SmtpStartTls"/>, not included in <see cref="ISettingsSmtp"/>.</param>
+        /// <param name="saveProtectedPasswords">If false, the file is never saved: the passwords found in plain text are
+        /// encrypted only in <paramref name="settings"/> and are written to the file at its next save.</param>
+        /// <returns>
+        /// A tuple made of:<br/>
+        /// <b>SmtpIsValid</b>: result of <see cref="CheckSmtpParameters(bool)"/>; false if <typeparamref name="T"/> does not
+        /// implement <see cref="ISettingsSmtp"/>;<br/>
+        /// <b>ImapIsValid</b>: result of <see cref="CheckImapParameters(bool)"/>; false if <typeparamref name="T"/> does not
+        /// implement <see cref="ISettingsImap"/>;<br/>
+        /// <b>PlainTextPasswords</b>: true if the file still contains at least one password in plain text, because
+        /// <paramref name="saveProtectedPasswords"/> is false or because the encryption or the save failed (errors are logged).
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="settings"/> is null.</exception>
+        public static (bool SmtpIsValid, bool ImapIsValid, bool PlainTextPasswords) Setup<T>(T settings,
+            string filename = JsonSettings<T>.DEFAULTFILENAME, CredentialProtector protector = null, bool smtpStartTls = false,
+            bool saveProtectedPasswords = true)
+            where T : JsonSettings<T>, new()
+        {
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            var smtpSettings            = settings as ISettingsSmtp;
+            var imapSettings            = settings as ISettingsImap;
+            var smtpRequiresProtection  = smtpSettings != null && CredentialProtector.RequiresProtection(smtpSettings.SmtpPassword);
+            var imapRequiresProtection  = imapSettings != null && CredentialProtector.RequiresProtection(imapSettings.ImapPassword);
+            var credentialProtector     = protector;
+            var passwordsProtected      = false;
+
+            // The default protector is created only when needed, so that its entropy stays in plain text in memory as briefly
+            // as possible; if it cannot be created the passwords stay in plain text (error logged)
+            if (credentialProtector == null && (smtpRequiresProtection || imapRequiresProtection))
+            {
+                credentialProtector = CreateDefaultProtector();
+            }
+
+            // Encrypts the passwords found in plain text directly in the settings, so that every save writes them encrypted
+            if (smtpRequiresProtection)
+            {
+                smtpSettings.SmtpPassword   = ProtectSettingsPassword(smtpSettings.SmtpPassword, credentialProtector, nameof(SmtpPassword));
+                passwordsProtected          |= CredentialProtector.IsProtected(smtpSettings.SmtpPassword);
+            }
+            if (imapRequiresProtection)
+            {
+                imapSettings.ImapPassword   = ProtectSettingsPassword(imapSettings.ImapPassword, credentialProtector, nameof(ImapPassword));
+                passwordsProtected          |= CredentialProtector.IsProtected(imapSettings.ImapPassword);
+            }
+
+            // Passwords whose encryption failed stay in plain text in the settings, and therefore in the file
+            var plainTextPasswords =
+                (smtpSettings != null && CredentialProtector.RequiresProtection(smtpSettings.SmtpPassword)) ||
+                (imapSettings != null && CredentialProtector.RequiresProtection(imapSettings.ImapPassword));
+
+            if (passwordsProtected)
+            {
+                if (saveProtectedPasswords)
+                {
+                    plainTextPasswords |= !SaveProtectedSettings(settings, filename);
+                }
+                else
+                {
+                    plainTextPasswords = true;
+                }
+            }
+
+            // The protector received is passed as it is: when null, MailWorker does not keep the default protector, which
+            // contains the entropy in plain text, and recreates it from the obfuscated entropy at each decryption
+            var smtpIsValid = smtpSettings != null && SetupSmtp(smtpSettings, smtpStartTls, protector);
+            var imapIsValid = imapSettings != null && SetupImap(imapSettings, protector);
+
+            return (smtpIsValid, imapIsValid, plainTextPasswords);
         }
 
         /// <summary>
@@ -267,7 +420,7 @@ namespace OSKHelpers.Mail
                 Console.WriteLine($"{nameof(SmtpSSL)}       => {SmtpSSL}");
                 Console.WriteLine($"{nameof(SmtpStartTls)}  => {SmtpStartTls}");
                 Console.WriteLine($"{nameof(SmtpUsername)}  => {SmtpUsername}");
-                Console.WriteLine($"{nameof(SmtpPassword)}  => {(string.IsNullOrWhiteSpace(SmtpPassword) ? string.Empty : "****")}");
+                Console.WriteLine($"{nameof(SmtpPassword)}  => {(string.IsNullOrWhiteSpace(_smtpPassword) ? string.Empty : "****")}");
                 Console.WriteLine($"{nameof(SmtpFrom)}      => {SmtpFrom}");
             }
             if (log)
@@ -277,7 +430,7 @@ namespace OSKHelpers.Mail
                 SimpleLog.Write($"{nameof(SmtpSSL)}         => {SmtpSSL}");
                 SimpleLog.Write($"{nameof(SmtpStartTls)}    => {SmtpStartTls}");
                 SimpleLog.Write($"{nameof(SmtpUsername)}    => {SmtpUsername}");
-                SimpleLog.Write($"{nameof(SmtpPassword)}    => {(string.IsNullOrWhiteSpace(SmtpPassword) ? string.Empty : "****")}");
+                SimpleLog.Write($"{nameof(SmtpPassword)}    => {(string.IsNullOrWhiteSpace(_smtpPassword) ? string.Empty : "****")}");
                 SimpleLog.Write($"{nameof(SmtpFrom)}        => {SmtpFrom}");
             }
         }
@@ -296,7 +449,7 @@ namespace OSKHelpers.Mail
                 Console.WriteLine($"{nameof(ImapPort)}      => {ImapPort}");
                 Console.WriteLine($"{nameof(ImapSSL)}       => {ImapSSL}");
                 Console.WriteLine($"{nameof(ImapUsername)}  => {ImapUsername}");
-                Console.WriteLine($"{nameof(ImapPassword)}  => {(string.IsNullOrWhiteSpace(ImapPassword) ? string.Empty : "****")}");
+                Console.WriteLine($"{nameof(ImapPassword)}  => {(string.IsNullOrWhiteSpace(_imapPassword) ? string.Empty : "****")}");
             }
             if (log)
             {
@@ -304,7 +457,7 @@ namespace OSKHelpers.Mail
                 SimpleLog.Write($"{nameof(ImapPort)}      => {ImapPort}");
                 SimpleLog.Write($"{nameof(ImapSSL)}       => {ImapSSL}");
                 SimpleLog.Write($"{nameof(ImapUsername)}  => {ImapUsername}");
-                SimpleLog.Write($"{nameof(ImapPassword)}  => {(string.IsNullOrWhiteSpace(ImapPassword) ? string.Empty : "****")}");
+                SimpleLog.Write($"{nameof(ImapPassword)}  => {(string.IsNullOrWhiteSpace(_imapPassword) ? string.Empty : "****")}");
             }
         }
         /// <summary>

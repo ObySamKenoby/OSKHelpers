@@ -60,6 +60,12 @@ namespace OSKHelpers.Logging
         /// <inheritdoc cref="SimpleLogger.LogLevelProtocol"/>
         public static bool LogLevelProtocol => _logger.LogLevelProtocol;
 
+        /// <inheritdoc cref="SimpleLogger.EnableArchiving"/>
+        public static bool EnableArchiving { get => _logger.EnableArchiving; set => _logger.EnableArchiving = value; }
+
+        /// <inheritdoc cref="SimpleLogger.ArchiveRetentionMonths"/>
+        public static int ArchiveRetentionMonths { get => _logger.ArchiveRetentionMonths; set => _logger.ArchiveRetentionMonths = value; }
+
         #endregion
 
         #region Constructor
@@ -193,6 +199,10 @@ namespace OSKHelpers.Logging
         /// <inheritdoc cref="SimpleLogger.SetLogLevel(IniFileHelper)"/>
         public static void SetLogLevel(IniFileHelper iniFile)
             => _logger?.SetLogLevel(iniFile);
+
+        /// <inheritdoc cref="SimpleLogger.ArchiveLogs"/>
+        public static bool ArchiveLogs()
+            => _logger.ArchiveLogs();
 
         #endregion
 

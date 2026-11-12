@@ -13,9 +13,10 @@ using System.Text.Json;
 namespace OSKHelpers.Logging
 {
     /// <summary>
-    /// Simple class used to generate application logs.
+    /// Simple class used to generate application logs.<br/>
+    /// The archiving of the old log files is implemented in SimpleLogger.Archive.cs.
     /// </summary>
-    public class SimpleLogger
+    public partial class SimpleLogger
     {
         #region Constants
 
@@ -101,7 +102,7 @@ namespace OSKHelpers.Logging
             set
             {
                 _logPath = string.IsNullOrWhiteSpace(value) ? null : value;
-                // _lastDate is set to null to force file name regeneration
+                // _lastDate is set to null to force file name regeneration (and the archiving check)
                 _lastDate = null;
             }
         }
@@ -116,7 +117,7 @@ namespace OSKHelpers.Logging
             set
             {
                 _prefix = value;
-                // _lastDate is set to null to force file name regeneration
+                // _lastDate is set to null to force file name regeneration (and the archiving check)
                 _lastDate = null;
             }
         }
@@ -141,7 +142,8 @@ namespace OSKHelpers.Logging
         /// <summary>
         /// Log file name.<br/>
         /// The name follows the pattern PREFIXLogYYYYMMDD.txt (PREFIX.txt with <see cref="UsePrefixAsLogFile"/>) and is regenerated
-        /// when the date or the log folder changes.
+        /// when the date or the log folder changes.<br/>
+        /// Each regeneration starts, when <see cref="EnableArchiving"/> is true, the archiving check of the old log files.
         /// </summary>
         public string LogFile
         {
@@ -150,9 +152,10 @@ namespace OSKHelpers.Logging
                 var logPath = LogPath;
                 if (DateTime.Now.Date != (_lastDate?.Date ?? DateTime.MinValue) || logPath != _logFileDirectory)
                 {
-                    _logFilename        = Path.Combine(logPath, _usePrefixAsLogFile ? $"{_prefix}.txt" : $"{_prefix}Log{DateTime.Now:yyyyMMdd}.txt");
+                    _logFilename        = Path.Combine(logPath, _usePrefixAsLogFile ? $"{_prefix}.txt" : $"{_prefix}Log{DateTime.Now.ToString(LOGFILEDATEFORMAT)}.txt");
                     _logFileDirectory   = logPath;
                     _lastDate           = DateTime.Now.Date;
+                    OnLogFileChanged();
                 }
 
                 return _logFilename;
@@ -229,6 +232,7 @@ namespace OSKHelpers.Logging
             LogLevel            = LogLevel.Debug;
             DisableDebugLog     = false;
 #endif
+            InitializeArchiving();
         }
 
         #endregion

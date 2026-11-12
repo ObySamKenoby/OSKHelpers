@@ -134,30 +134,49 @@ namespace OSKHelpers.Tests.Common
         [DataRow(nameof(Paths.DefaultLogsDirectory),        "Logs")]
         [DataRow(nameof(Paths.DefaultOutputDirectory),      "Output")]
         [DataRow(nameof(Paths.TempDirectory),               "Temp")]
+        [DoNotParallelize]
         public void DefaultDirectories_AfterInitialization_AreUnderAppdata(string propertyName, string expectedSubdir)
         {
-            // Verify the directory is created if not existing
-            var appDir = Paths.GetDataDirectoryPath(expectedSubdir);
-            Assert.IsFalse(Directory.Exists(appDir));
+#if DEBUG
+            // Dedicated sandbox for each run, outside the parallel phase: Paths is shared by the whole process, so while the
+            // shared sandbox is active the tests that write the default log create its Logs directory
+            var appDataPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            try
+            {
+                Paths.OverrideAppdataDirectory(appDataPath);
 
-            Paths.CheckDirectory(appDir);
-            Assert.IsTrue(Directory.Exists(appDir));
+                // Verify the directory is created if not existing
+                var appDir = Paths.GetDataDirectoryPath(expectedSubdir);
+                Assert.IsFalse(Directory.Exists(appDir));
 
-            // Use reflection to read the static property
-            var prop = typeof(Paths).GetProperty(propertyName);
-            Assert.IsNotNull(prop, $"Property {propertyName} not found");
+                Paths.CheckDirectory(appDir);
+                Assert.IsTrue(Directory.Exists(appDir));
 
-            var value = prop.GetValue(null) as string;
-            Assert.IsNotNull(value, $"{propertyName} should not be null");
+                // Use reflection to read the static property
+                var prop = typeof(Paths).GetProperty(propertyName);
+                Assert.IsNotNull(prop, $"Property {propertyName} not found");
 
-            // Must start with the sandbox
-            Assert.StartsWith(_appDataPath, value);
+                var value = prop.GetValue(null) as string;
+                Assert.IsNotNull(value, $"{propertyName} should not be null");
 
-            // Must contain the expected subdirectory
-            Assert.Contains(expectedSubdir, value);
+                // Must start with the sandbox
+                Assert.StartsWith(appDataPath, value);
 
-            // Must exist on the filesystem
-            Assert.IsTrue(Directory.Exists(value), $"{propertyName} directory should exist");
+                // Must contain the expected subdirectory
+                Assert.Contains(expectedSubdir, value);
+
+                // Must exist on the filesystem
+                Assert.IsTrue(Directory.Exists(value), $"{propertyName} directory should exist");
+            }
+            finally
+            {
+                Paths.OverrideAppdataDirectory(_appDataPath);
+                if (Directory.Exists(appDataPath))
+                {
+                    Directory.Delete(appDataPath, true);
+                }
+            }
+#endif
         }
 
         [TestMethod]

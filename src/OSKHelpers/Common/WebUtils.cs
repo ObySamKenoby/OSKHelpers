@@ -16,6 +16,11 @@ namespace OSKHelpers.Common
         /// <param name="address">Address to validate.</param>
         /// <param name="onlyHttp">The address must use the http:// scheme.</param>
         /// <param name="onlyHttps">The address must use the https:// scheme.</param>
+        /// <remarks>
+        /// The result depends on the platform, because it follows <see cref="Uri.TryCreate(string, UriKind, out Uri)"/>:
+        /// on Unix systems a rooted path such as "/relative/path" is a valid absolute URI ("file:///relative/path"),
+        /// while on Windows it is not.
+        /// </remarks>
         public static bool IsWellFormedAddress(string address, bool onlyHttps, bool onlyHttp = false)
         {
             var uri = GetUri(address);

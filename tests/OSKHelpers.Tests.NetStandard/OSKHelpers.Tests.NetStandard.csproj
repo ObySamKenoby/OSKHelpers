@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Runs the OSKHelpers.Tests suite against the netstandard2.0 build of OSKHelpers instead of the net8.0 one.
+    A net8.0 application always uses the net8.0 asset, so the code under #if !NET8_0_OR_GREATER (e.g. AES-CBC credentials,
+    chmod of the key file) would otherwise never be tested. The test sources are linked from OSKHelpers.Tests, not copied;
+    the constant OSKHELPERS_NETSTANDARD lets the tests adapt the expectations that depend on the build.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>OSKHelpers.Tests</RootNamespace>
+    <DefineConstants>$(DefineConstants);OSKHELPERS_NETSTANDARD</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="MSTest" Version="4.5.1" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Test sources of OSKHelpers.Tests, linked with the same folder structure -->
+    <Compile Include="..\OSKHelpers.Tests\**\*.cs"
+             Exclude="..\OSKHelpers.Tests\bin\**;..\OSKHelpers.Tests\obj\**"
+             Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    <!-- GCUtils is available only in the net8.0 build -->
+    <Compile Remove="..\OSKHelpers.Tests\Common\GCUtilsTests.cs" />
+    <!-- Resource used by the EmbeddedResourcesUtils tests -->
+    <EmbeddedResource Include="..\OSKHelpers.Tests\Common\EmbeddedResource.txt" Link="Common\EmbeddedResource.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- SetTargetFramework forces the netstandard2.0 build of OSKHelpers -->
+    <ProjectReference Include="..\..\src\OSKHelpers\OSKHelpers.csproj" SetTargetFramework="TargetFramework=netstandard2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+</Project>

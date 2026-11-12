@@ -22,7 +22,9 @@
         /// </summary>
         string SmtpUsername { get; set; }
         /// <summary>
-        /// SMTP password,
+        /// SMTP password, in plain text or encrypted with <see cref="OSKHelpers.Security.CredentialProtector"/>.<br/>
+        /// <see cref="MailWorker.Setup{T}(T, string, OSKHelpers.Security.CredentialProtector, bool, bool)"/> replaces a
+        /// plain-text password with the encrypted one.
         /// </summary>
         string SmtpPassword { get; set; }
         /// <summary>

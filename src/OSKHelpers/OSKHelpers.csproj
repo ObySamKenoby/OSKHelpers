@@ -6,10 +6,8 @@
 		<Platforms>AnyCPU;x86</Platforms>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>OSK Helpers</Title>
-		<VersionPrefix>2.0.1</VersionPrefix>
-		<Authors>Samuele Gaggioli</Authors>
+		<VersionPrefix>2.1.0</VersionPrefix>
 		<Description>General purpose utilities, including Logging and settings (.ini / json) files.</Description>
-		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(Configuration)'!='Debug'">
@@ -18,10 +16,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\..\docs\images\logo_128px.jpg">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
 		<!-- Include Settings.cs into NuGet package-->
 		<None Include="INIFile\Settings.cs">
 			<Pack>true</Pack>
@@ -37,27 +31,17 @@
 			<Pack>true</Pack>
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/Json/Settings.cs</PackagePath>
 		</None>
-		<None Include="License.txt">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="ReadMe.md">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 	</ItemGroup>
 
+	<!-- Common package properties and files (icon, license, ReadMe) are defined in src/Directory.Build.props -->
 	<PropertyGroup>
 		<PackageId>OSKHelpers</PackageId>
-		<Company>OSK Soft</Company>
-		<PackageIcon>logo_128px.jpg</PackageIcon>
-		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
-		<PackageLicenseFile>License.txt</PackageLicenseFile>
-		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
-		<PackageReleaseNotes>2.0.1 - WebDownloader: optional CancellationToken and inactivity timeout on Download and DownloadAsync; an interrupted download deletes the partial file. Assemblies compiled against 2.0.0 that call WebDownloader must be recompiled.
+		<PackageReleaseNotes>2.1.0 - New Security.CredentialProtector: encryption of stored credentials with DPAPI (Windows) or AES and a key file (other systems; AES-GCM on .NET 8, AES-CBC + HMAC-SHA256 on .NET Standard 2.0), also for credentials embedded in a string between configurable tags (default [PWD] / [/PWD]). New dependency System.Security.Cryptography.ProtectedData 8.0.0.
+- Logging: SimpleLogger and SimpleLog can archive the log files of the months before the current one and the previous ArchiveRetentionMonths months (default 1, minimum 1) into a monthly PREFIXLog_YYYY_MM.zip in the log folder; no log or zip file is ever deleted. The check runs on a background thread whenever the log file name changes (first write, change of date, folder or prefix). New EnableArchiving (default false), ArchiveRetentionMonths and ArchiveLogs().
+- JsonSettings.Save: new optional parameter ignoreBackup (default false) to overwrite the file without saving a backup copy. Assemblies compiled against 2.0.x that call Save must be recompiled.
+- CSVLogItem: the netstandard2.0 build writes DateOnly properties in ISO format (yyyy-MM-ddT00:00:00) like the .NET 8 build, instead of a quoted string in the current culture.
+
+2.0.1 -WebDownloader: optional CancellationToken and inactivity timeout on Download and DownloadAsync; an interrupted download deletes the partial file. Assemblies compiled against 2.0.0 that call WebDownloader must be recompiled.
 
 2.0.0 - Breaking changes, see README for details and migration notes.
 - PasswordHash/PasswordHelper: PBKDF2-HMAC-SHA256 with 600,000 iterations, 49-byte versioned hashes and constant-time comparison; 1.x hashes (36 bytes) are still verified and flagged by RequiresRehash.
@@ -67,9 +51,6 @@
 - NetUtils.CheckDNS returns Reachable false for unknown hosts; EmbeddedResourcesUtils throws InvalidOperationException for a missing resource; DaysOfWeekParameter throws ArgumentOutOfRangeException; CSVLogItem writes null values as "".
 - OSKIsNumeric returns bool, SimpleLog.ConsoleLog is static, IPAddressExtensionMethods.TryParseMatch(string, out IPAddress) is obsolete.
 - Bug fixes in ODBC connection string, GCUtils, Paths, PagingCollection, StringUtils, IniFileHelper and WebDownloader; thread-safe PasswordObfuscator and OSKRandom.Shared.</PackageReleaseNotes>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<PackageProjectUrl>https://github.com/ObySamKenoby/OSKHelpers</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/ObySamKenoby/OSKHelpers</RepositoryUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -85,6 +66,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+		<PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
 		<PackageReference Include="System.Text.Json" Version="8.0.6" />
 	</ItemGroup>
 

@@ -17,13 +17,25 @@ namespace OSKHelpers.Tests.Common
         [DataRow("https://www.example.com", true)]
         [DataRow("http://example.com/path?query=1", true)]
         [DataRow("ftp://example.com/file.txt", true)]
-        [DataRow("/relative/path", false)]
+        [DataRow("relative/path", false)]
         [DataRow("not an address", false)]
         [DataRow("", false)]
         [DataRow(null, false)]
         public void IsWellFormedAddress_VariousAddresses_ReturnsExpected(string address, bool expected)
         {
             Assert.AreEqual(expected, WebUtils.IsWellFormedAddress(address));
+        }
+
+        /// <summary>
+        /// Verifies that a rooted path is valid only on the platforms where Uri interprets it as an absolute URI:
+        /// on Unix systems "/relative/path" becomes "file:///relative/path", on Windows it is not an absolute URI.
+        /// </summary>
+        [TestMethod]
+        public void IsWellFormedAddress_RootedPath_ReturnsTrueOnlyWhereValidOnPlatform()
+        {
+            var expected = !System.OperatingSystem.IsWindows();
+
+            Assert.AreEqual(expected, WebUtils.IsWellFormedAddress("/relative/path"));
         }
 
         /// <summary>

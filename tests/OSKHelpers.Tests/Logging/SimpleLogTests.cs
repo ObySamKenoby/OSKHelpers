@@ -106,6 +106,40 @@ namespace OSKHelpers.Tests.Logging
             Assert.IsTrue(SimpleLog.ToLog(LogLevel.Protocol));
         }
 
+        /// <summary>
+        /// Verifies that the archiving properties and ArchiveLogs are delegated to Instance.
+        /// </summary>
+        [TestMethod]
+        public void ArchiveProperties_SetValues_DelegatedToInstance()
+        {
+            var originalEnable      = SimpleLog.EnableArchiving;
+            var originalMonths      = SimpleLog.ArchiveRetentionMonths;
+            try
+            {
+                SimpleLog.EnableArchiving           = false;
+                SimpleLog.ArchiveRetentionMonths    = 5;
+                Directory.CreateDirectory(_tempLogPath);
+                var firstDayOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                var keptFile        = Path.Combine(_tempLogPath, $"Log{firstDayOfMonth.AddMonths(-5):yyyyMMdd}.txt");
+                var oldFile         = Path.Combine(_tempLogPath, $"Log{firstDayOfMonth.AddMonths(-5).AddDays(-1):yyyyMMdd}.txt");
+                File.WriteAllText(keptFile, "kept");
+                File.WriteAllText(oldFile, "old");
+
+                var result = SimpleLog.ArchiveLogs();
+
+                Assert.IsFalse(SimpleLog.Instance.EnableArchiving);
+                Assert.AreEqual(5, SimpleLog.Instance.ArchiveRetentionMonths);
+                Assert.IsTrue(result);
+                Assert.IsTrue(File.Exists(keptFile));
+                Assert.IsFalse(File.Exists(oldFile));
+            }
+            finally
+            {
+                SimpleLog.ArchiveRetentionMonths    = originalMonths;
+                SimpleLog.EnableArchiving           = originalEnable;
+            }
+        }
+
         #endregion
 
         #region Write methods

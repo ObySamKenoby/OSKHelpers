@@ -1,25 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
 		<Title>OSK Helpers - Mail utils</Title>
-		<VersionPrefix>1.2.5</VersionPrefix>
+		<VersionPrefix>2.0.0</VersionPrefix>
 		<Description>Support library to simplify sending mail.</Description>
-		<Copyright>OSK Soft di Samuele Gaggioli</Copyright>
 	</PropertyGroup>
 
+	<!-- Common package properties and files (icon, license, ReadMe) are defined in src/Directory.Build.props -->
 	<PropertyGroup>
 		<PackageId>OSKHelpers.Mail</PackageId>
-		<Company>OSK Soft</Company>
-		<PackageIcon>logo_128px.jpg</PackageIcon>
-		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
-		<PackageLicenseFile>License.txt</PackageLicenseFile>
-		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-		<PackageOutputPath>C:\TestFolder\NuGet</PackageOutputPath>
-		<PackageReleaseNotes>Added ISettingsSmtp and ISettingsImap interfaces.</PackageReleaseNotes>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<PackageProjectUrl>https://github.com/ObySamKenoby/OSKHelpers</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/ObySamKenoby/OSKHelpers</RepositoryUrl>
+		<PackageReleaseNotes>2.0.0 - Requires OSKHelpers 2.1.0. New net8.0 target built against MailKit 5; the netstandard2.0 target is built against MailKit 4.16 and accepts MailKit [4.16.0, 5.0.0). SetupSmtp and SetupImap accept an optional CredentialProtector to read passwords encrypted with DPAPI or AES; SmtpPassword and ImapPassword are kept obfuscated in memory with PasswordObfuscator, still encrypted when read encrypted, and decrypted at each read. New Setup&lt;T&gt; for JsonSettings&lt;T&gt; classes implementing ISettingsSmtp/ISettingsImap: encrypts the plain-text passwords and saves the file without a backup copy. Without a protector, the entropy is read from __mail.entropy in Paths.DefaultConfigsDirectory (created on first use). New CheckIniPasswordsProtection and ProtectPassword, to check and encrypt the passwords of an INI file (also with the default protector).
+1.2.5 - Added ISettingsSmtp and ISettingsImap interfaces.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -27,41 +19,39 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MailKit" Version="4.16.0" />
-		<PackageReference Include="OSKHelpers" Version="1.7.5" />
+		<PackageReference Include="OSKHelpers" Version="2.1.0" />
+	</ItemGroup>
+
+	<!--
+		MailKit 5 turned SmtpClient.SendAsync(MimeMessage) into an extension method: the source compiles with both versions,
+		but an assembly built against MailKit 4 fails at runtime with MailKit 5 (MissingMethodException), and vice versa.
+		Each target is therefore built against one major version and its range excludes the other one.
+	-->
+	<ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+		<PackageReference Include="MailKit" Version="[4.16.0, 5.0.0)" />
+		<!-- Overrides the version required by MimeKit 4 -->
 		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.2" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
+		<PackageReference Include="MailKit" Version="5.0.0" />
+	</ItemGroup>
+
 	<ItemGroup>
-		<None Include="..\..\docs\images\logo_128px.jpg">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-		<None Include="License.txt">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 		<!-- Include SettingsTemplate.Mail.ini into NuGet package-->
-		<None Update="SettingsTemplate.Mail.ini">
+		<None Include="SettingsTemplate.Mail.ini">
 			<Pack>true</Pack>
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/SettingsTemplate.Mail.ini</PackagePath>
 		</None>
 		<!-- Include MailTemplates/0Index.txt into NuGet package-->
-		<None Update="MailTemplates\0Index.txt">
+		<None Include="MailTemplates\0Index.txt">
 			<Pack>true</Pack>
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/MailTemplates/0Index.txt</PackagePath>
 		</None>
 		<!-- Include MailTemplates/Credentials.txt into NuGet package-->
-		<None Update="MailTemplates\Credentials.txt">
+		<None Include="MailTemplates\Credentials.txt">
 			<Pack>true</Pack>
 			<PackagePath>contentFiles/any/any/.OSKHelpers.content/MailTemplates/Credentials.txt</PackagePath>
-		</None>
-		<!-- Include ReadMe.md into NuGet package-->
-		<None Include="ReadMe.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 

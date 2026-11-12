@@ -169,6 +169,33 @@ namespace OSKHelpers.Tests.Json
             }
         }
 
+        /// <summary>
+        /// Verifies that with ignoreBackup the existing file is overwritten without saving a backup copy.
+        /// </summary>
+        [TestMethod]
+        public void Save_IgnoreBackup_OverwritesWithoutBackup()
+        {
+            var baseName    = $"Settings_{Guid.NewGuid():N}";
+            var fileName    = Path.Combine(_tempDirectory, $"{baseName}.json");
+            var settings    = new TestSettings();
+            settings.Save(fileName);
+            settings.DisplayName = "Updated";
+            settings.Save(fileName, ignoreBackup: true);
+
+            var backups = Paths.CheckDefaultBackupDirectory()
+                ? Directory.GetFiles(Paths.DefaultBackupDirectory, $"{baseName}_*").ToList()
+                : new System.Collections.Generic.List<string>();
+            try
+            {
+                Assert.IsEmpty(backups);
+                Assert.Contains("Updated", File.ReadAllText(fileName));
+            }
+            finally
+            {
+                backups.ForEach(File.Delete);
+            }
+        }
+
         #endregion
 
         #region Load
@@ -409,12 +436,12 @@ namespace OSKHelpers.Tests.Json
         }
 
         /// <summary>
-        /// Verifies that a file name with invalid characters throws FormatException.
+        /// Verifies that a file name with invalid characters throws FormatException (the null character is invalid on every platform).
         /// </summary>
         [TestMethod]
         public void Load_InvalidCharacters_ThrowsFormatException()
         {
-            Assert.Throws<FormatException>(() => VersionedSettings.Load(Path.Combine(_tempDirectory, "Set\u0001tings.json")));
+            Assert.Throws<FormatException>(() => VersionedSettings.Load(Path.Combine(_tempDirectory, "Set\0tings.json")));
         }
 
         /// <summary>
@@ -468,7 +495,7 @@ namespace OSKHelpers.Tests.Json
             var settings = new VersionedSettings();
 
             Assert.AreEqual("filename", Assert.Throws<ArgumentNullException>(() => settings.Save((string)null)).ParamName);
-            Assert.Throws<FormatException>(() => settings.Save(Path.Combine(_tempDirectory, "Set\u0001tings.json")));
+            Assert.Throws<FormatException>(() => settings.Save(Path.Combine(_tempDirectory, "Set\0tings.json")));
             Assert.Throws<DirectoryNotFoundException>(() => settings.Save(Path.Combine(_tempDirectory, "Missing", "Settings.json")));
         }
 

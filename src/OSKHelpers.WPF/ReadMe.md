@@ -1,4 +1,16 @@
-**OSKHelpers** is a collection of general-purpose, independent utility classes targeting **.NET Standard 2.0** and **.NET 8**.  
-Each namespace addresses a specific concern and has no mandatory coupling with the others, so you can use only what you need.
+# OSKHelpers.WPF
 
-This package contains WPF specific namespaces and utilities.
+> **Placeholder**: this package does not contain usable classes yet.
+
+**OSKHelpers.WPF** will collect the helpers of the OSKHelpers family that are specific to WPF applications. The general-purpose
+utilities (logging, settings files, paths, security and more) are in the [OSKHelpers](https://www.nuget.org/packages/OSKHelpers)
+package.
+
+Source code, issue tracking and the other packages:
+[github.com/ObySamKenoby/OSKHelpers](https://github.com/ObySamKenoby/OSKHelpers).
+
+---
+
+## License
+
+BSD 3-Clause — see the [License](https://github.com/ObySamKenoby/OSKHelpers/blob/main/LICENSE.txt) file.

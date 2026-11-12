@@ -22,7 +22,9 @@
         /// </summary>
         string ImapUsername { get; set; }
         /// <summary>
-        /// IMAP password.
+        /// IMAP password, in plain text or encrypted with <see cref="OSKHelpers.Security.CredentialProtector"/>.<br/>
+        /// <see cref="MailWorker.Setup{T}(T, string, OSKHelpers.Security.CredentialProtector, bool, bool)"/> replaces a
+        /// plain-text password with the encrypted one.
         /// </summary>
         string ImapPassword { get; set; }
 

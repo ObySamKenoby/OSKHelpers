@@ -23,5 +23,8 @@
     <Project Path="tests/OSKHelpers.Tests/OSKHelpers.Tests.csproj">
       <Build Solution="Release|Any CPU" Project="false" />
     </Project>
+    <Project Path="tests/OSKHelpers.Tests.NetStandard/OSKHelpers.Tests.NetStandard.csproj">
+      <Build Solution="Release|Any CPU" Project="false" />
+    </Project>
   </Folder>
 </Solution>

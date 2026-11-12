@@ -9,7 +9,7 @@ namespace OSKHelpers.Tests.Logging
     /// Tests for the <see cref="SimpleLogger"/> class.
     /// </summary>
     [TestClass]
-    public class SimpleLoggerTests
+    public partial class SimpleLoggerTests
     {
         #region Members
 
