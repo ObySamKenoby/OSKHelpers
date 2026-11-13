@@ -325,6 +325,11 @@ The package adds to the project that installs it, in the `.OSKHelpers.content` f
 
 ---
 
+## Changes in 2.1.1
+- `IniFileHelper.Save` keeps the layout of the existing file (comments, pragmas, key names, alignment), using
+  `SettingsTemplate.ini` only when the file does not exist yet, and no longer requires the template; removed keys and arrays
+  (new `Remove` method) are dropped, new ones are appended at the end. Errors are logged and `Save` returns `false`.
+
 ## Changes in 2.1.0
 
 - New `Security.CredentialProtector`: encrypts credentials stored in configuration files, with DPAPI on Windows and AES with a

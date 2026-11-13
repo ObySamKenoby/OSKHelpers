@@ -1082,6 +1082,133 @@ namespace OSKHelpers.Tests.INIFile
 
         #endregion
 
+        #region Save
+
+        /// <summary>
+        /// Writes <paramref name="layoutLines"/> to a new file in a temporary directory, runs <paramref name="test"/> passing
+        /// the full path of the file and deletes the directory.
+        /// </summary>
+        private static void RunWithIniFile(IEnumerable<string> layoutLines, Action<string> test)
+        {
+            var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            try
+            {
+                Directory.CreateDirectory(directory);
+                var iniFilePath = Path.Combine(directory, IniFileHelper.DEFAULTINIFILE);
+                File.WriteAllLines(iniFilePath, layoutLines);
+
+                test(iniFilePath);
+            }
+            finally
+            {
+                if (Directory.Exists(directory))
+                {
+                    Directory.Delete(directory, true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verifies that Save keeps pragmas, comments, empty lines and the alignment of the existing file, writing the elements
+        /// of an array at its position.
+        /// </summary>
+        [TestMethod]
+        public void Save_ExistingFile_KeepsLayout()
+        {
+            var layoutLines = new string[]
+            {
+                SHOWKEYVALUE,
+                "# Comment",
+                "",
+                "Key1   = Value1",
+                "  Key2 = Value2",
+                "*Arr1 = Arr1Elem1",
+                "*Arr1 = Arr1Elem2",
+                "# End"
+            };
+            var expectedLines = new string[]
+            {
+                SHOWKEYVALUE,
+                "# Comment",
+                "",
+                "Key1   = NewValue",
+                "  Key2 = Value2",
+                "*Arr1 = Arr1Elem1",
+                "*Arr1 = Arr1Elem2",
+                "*Arr1 = Arr1Elem3",
+                "# End"
+            };
+
+            RunWithIniFile(layoutLines, iniFilePath =>
+            {
+                var helper = new IniFileHelper(iniFilePath, false);
+                helper.Set(KEY1, "NewValue");
+                helper.AddArrayElement(ARR1, ARR1ELEM3);
+
+                Assert.IsTrue(helper.Save(iniFilePath, false));
+                CollectionAssert.AreEqual(expectedLines, File.ReadAllLines(iniFilePath));
+                Assert.IsTrue(new IniFileHelper(iniFilePath, false).IniFileRead);
+            });
+        }
+
+        /// <summary>
+        /// Verifies that Save drops the lines of removed keys and arrays and appends new keys and arrays at the end.
+        /// </summary>
+        [TestMethod]
+        public void Save_RemovedAndNewEntries_DropsRemovedAndAppendsNew()
+        {
+            var layoutLines     = new string[] { KEYVALUE1, KEYVALUE2, "*Arr1 = Arr1Elem1" };
+            var expectedLines   = new string[] { KEYVALUE1, $"KEY3 = {VALUE3}", $"*ARR2 = {ARR2ELEM1}" };
+
+            RunWithIniFile(layoutLines, iniFilePath =>
+            {
+                var helper = new IniFileHelper(iniFilePath, false);
+                helper.Remove(KEY2);
+                helper.RemoveArray(ARR1);
+                helper.AddKey(KEY3, VALUE3);
+                helper.AddArrayElement(ARR2, ARR2ELEM1);
+
+                Assert.IsTrue(helper.Save(iniFilePath, false));
+                CollectionAssert.AreEqual(expectedLines, File.ReadAllLines(iniFilePath));
+            });
+        }
+
+        /// <summary>
+        /// Verifies that Save replaces an array placeholder without value, writes the value of a key without value and drops
+        /// lines that are not valid and duplicated keys.
+        /// </summary>
+        [TestMethod]
+        public void Save_TemplateLikeLayout_WritesValidLines()
+        {
+            var layoutLines     = new string[] { "# Arrays", "*Arr1", "Key1 =", "Not valid", "Key1 = Duplicated" };
+            var expectedLines   = new string[] { "# Arrays", $"*ARR1 = {ARR1ELEM1}", KEYVALUE1 };
+
+            RunWithIniFile(layoutLines, iniFilePath =>
+            {
+                var helper = new IniFileHelper();
+                Assert.IsTrue(helper.Parse(new List<string>() { KEYVALUE1, $"*{ARR1} = {ARR1ELEM1}" }));
+
+                Assert.IsTrue(helper.Save(iniFilePath, false));
+                CollectionAssert.AreEqual(expectedLines, File.ReadAllLines(iniFilePath));
+            });
+        }
+
+        /// <summary>
+        /// Verifies that Save returns false, without exceptions, for a missing file name or a missing directory.
+        /// </summary>
+        [TestMethod]
+        public void Save_InvalidPath_ReturnsFalse()
+        {
+            var helper = new IniFileHelper();
+            PopulateHelper3(helper);
+            var missingDirectoryFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), IniFileHelper.DEFAULTINIFILE);
+
+            Assert.IsFalse(helper.Save(string.Empty, false));
+            Assert.IsFalse(helper.Save(missingDirectoryFile, false));
+        }
+
+        #endregion
+
         #endregion
 
     }

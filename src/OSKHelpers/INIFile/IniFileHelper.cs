@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace OSKHelpers.INIFile
 {
@@ -596,6 +595,35 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
+        /// <para>
+        /// Removes a key.
+        /// </para>
+        /// <b>A removed key is not written back to the INI file by <see cref="Save(string, bool)"/>: its line is dropped</b>.
+        /// </summary>
+        /// <param name="key">Name of the key to be removed.</param>
+        /// <returns>True if the key has been correctly removed.</returns>
+        public bool Remove(string key)
+        {
+            var removed = true;
+
+            try
+            {
+                var k = TrimUpper(key ?? string.Empty);
+                if (!string.IsNullOrWhiteSpace(k) && _keys.ContainsKey(k))
+                {
+                    _keys.Remove(k);
+                }
+            }
+            catch (Exception ex)
+            {
+                SimpleLog.LogError(ex);
+                removed = false;
+            }
+
+            return removed;
+        }
+
+        /// <summary>
         /// Returns True if the array with the given name exists among those loaded.
         /// </summary>
         /// <param name="arrayName">Name of the array.</param>
@@ -710,94 +738,165 @@ namespace OSKHelpers.INIFile
             }
         }
 
+        #region Save
+
         /// <summary>
-        /// Saves the INI file by rebuilding it from the template.
+        /// Saves the keys and arrays to the INI file, keeping the layout of the existing file.
         /// </summary>
+        /// <remarks>
+        /// The layout is taken from the INI file itself if it exists, otherwise from <see cref="INIFILETEMPLATEPATH"/>; if neither
+        /// exists, only the keys and arrays are written.<br/>
+        /// Lines of the layout file:<br/>
+        /// - comments, empty lines and pragmas are copied unchanged;<br/>
+        /// - a key line keeps the text up to the value (key name, indentation, alignment) and gets the current value;
+        ///   if the key is no longer present (e.g. after <see cref="Remove(string)"/>) the line is dropped;<br/>
+        /// - the first line of an array (<c>*NAME = value</c>, or the placeholder <c>*NAME</c>) is replaced by all its
+        ///   elements, the following lines of the same array are dropped; an array no longer present, or empty, is dropped;<br/>
+        /// - any other line, not valid in an INI file, is dropped;<br/>
+        /// - a key or array appearing more than once is written only at its first position.<br/>
+        /// Keys and arrays not present in the layout file are appended at the end, in the format <c>KEY = value</c>.
+        /// </remarks>
         /// <param name="iniFile">Name of the INI file.</param>
-        /// <param name="defaultPath">Indicates whether the file is in the default location.</param>
-        /// <returns>True if the operation succeeded.</returns>
+        /// <param name="defaultPath">If true, <paramref name="iniFile"/> is located in the assembly directory; otherwise it
+        /// must contain the full path of the file.</param>
+        /// <returns>True if the file has been written; errors are logged.</returns>
         public bool Save(string iniFile = DEFAULTINIFILE, bool defaultPath = true)
         {
             bool saved = false;
 
-            if (!string.IsNullOrWhiteSpace(iniFile))
+            try
             {
-                var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                var templateFile = Path.Combine(assemblyPath, INIFILETEMPLATE);
-                if (File.Exists(templateFile) && !string.IsNullOrWhiteSpace(iniFile))
+                if (!string.IsNullOrWhiteSpace(iniFile))
                 {
-                    if (defaultPath)
-                    {
-                        iniFile = Path.Combine(assemblyPath, iniFile);
-                        SimpleLog.DebugWrite($"ini file full path: {iniFile}");
-                    }
-                    SimpleLog.DebugWrite($"Saving file {iniFile}");
+                    var iniFilePath = defaultPath ? Path.Combine(Paths.AssemblyPath, iniFile) : iniFile;
+                    SimpleLog.DebugWrite($"Saving file {iniFilePath}");
 
-                    var lines = File.ReadAllLines(templateFile).Select(l => l.Trim()).ToList();
-                    var usedKeys = new List<string>();
-                    var usedArrays = new List<string>();
-
-                    var outLines = new List<string>();
-
-                    // Update lines containing keys
-                    for (var j = 0; j < lines.Count; j++)
-                    {
-                        if (lines[j].Length == 0 || lines[j][0] == '#')
-                        {
-                            // If the line is empty or a comment, copy it as-is
-                            outLines.Add(lines[j]);
-                        }
-                        else if (lines[j][0] == '*')
-                        {
-                            // If the line contains an array reference, insert it
-                            var arrayName = TrimUpper(lines[j].Substring(1));
-                            if (_arrays.ContainsKey(arrayName))
-                            {
-                                outLines.AddRange(_arrays[arrayName].Select(a => $"*{arrayName} = {a}"));
-                                usedArrays.Add(arrayName);
-                            }
-                        }
-                        else
-                        {
-                            int i = lines[j].IndexOf("=");
-                            // If the character does not exist or is at the first position the index is invalid
-                            if (i >= 1)
-                            {
-                                var key = TrimUpper(lines[j].Substring(0, i));
-                                if (_keys.ContainsKey(key))
-                                {
-                                    outLines.Add($"{key} = {_keys[key]}");
-                                    usedKeys.Add(key);
-                                }
-                            }
-                        }
-                    }
-                    // Append any additional keys at the end of the file
-                    foreach (var keyValue in _keys.Where(k => !usedKeys.Contains(k.Key)))
-                    {
-                        outLines.Add($"{keyValue.Key} = {keyValue.Value}");
-                    }
-
-                    foreach (var array in _arrays.Where(a => !usedArrays.Contains(a.Key)))
-                    {
-                        outLines.AddRange(_arrays[array.Key].Select(a => $"*{array.Key} = {a}"));
-                    }
-
-                    File.WriteAllLines(iniFile, outLines);
+                    var outLines = BuildSaveLines(ReadLayoutLines(iniFilePath));
+                    File.WriteAllLines(iniFilePath, outLines);
                     saved = true;
                 }
                 else
                 {
-                    SimpleLog.Write("Unable to update the INI file: the file SettingsTemplate.ini must be present in the application folder.");
+                    SimpleLog.Write("Unable to update the INI file: the file name was not specified.");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                SimpleLog.Write("Unable to update the INI file: the file name was not specified.");
+                SimpleLog.LogError(ex);
             }
 
             return saved;
         }
+
+        /// <summary>
+        /// Returns the lines whose layout <see cref="Save(string, bool)"/> must keep.
+        /// </summary>
+        /// <param name="iniFilePath">Full path of the INI file to save.</param>
+        /// <returns>The lines of <paramref name="iniFilePath"/> if it exists, otherwise those of the template
+        /// (<see cref="INIFILETEMPLATEPATH"/>), otherwise an empty list.</returns>
+        private static List<string> ReadLayoutLines(string iniFilePath)
+        {
+            List<string> lines;
+
+            if (File.Exists(iniFilePath))
+            {
+                lines = File.ReadAllLines(iniFilePath).ToList();
+            }
+            else if (File.Exists(INIFILETEMPLATEPATH))
+            {
+                SimpleLog.DebugWrite($"{iniFilePath} not found: layout taken from {INIFILETEMPLATEPATH}");
+                lines = File.ReadAllLines(INIFILETEMPLATEPATH).ToList();
+            }
+            else
+            {
+                SimpleLog.Write($"Neither {iniFilePath} nor {INIFILETEMPLATEPATH} found: the INI file is written without comments.");
+                lines = new List<string>();
+            }
+
+            return lines;
+        }
+
+        /// <summary>
+        /// Builds the lines of the INI file, applying the current keys and arrays to the layout lines
+        /// (rules described in <see cref="Save(string, bool)"/>).
+        /// </summary>
+        /// <param name="layoutLines">Lines of the existing INI file or of the template.</param>
+        /// <returns>The lines to write.</returns>
+        private List<string> BuildSaveLines(List<string> layoutLines)
+        {
+            var outLines    = new List<string>();
+            var usedKeys    = new HashSet<string>();
+            var usedArrays  = new HashSet<string>();
+
+            foreach (var line in layoutLines.Select(l => l ?? string.Empty))
+            {
+                var trimmedLine     = line.Trim();
+                var separatorIndex  = line.IndexOf('=');
+                var name            = TrimUpper(separatorIndex >= 0 ? line.Substring(0, separatorIndex) : line);
+
+                if (trimmedLine.Length == 0 || trimmedLine[0] == '#' || IsPragma(trimmedLine))
+                {
+                    outLines.Add(line);
+                }
+                else if (trimmedLine[0] == '*')
+                {
+                    // Array line: the elements are written at the position of the first line of the array
+                    var arrayName = name.Substring(1).Trim();
+                    if (_arrays.ContainsKey(arrayName) && !usedArrays.Contains(arrayName))
+                    {
+                        // A placeholder without '=' gets the standard format
+                        var prefix = separatorIndex >= 0 ? GetValuePrefix(line, separatorIndex) : $"*{arrayName} = ";
+                        outLines.AddRange(_arrays[arrayName].Select(element => $"{prefix}{element}"));
+                        usedArrays.Add(arrayName);
+                    }
+                }
+                else if (separatorIndex > 0 && _keys.ContainsKey(name) && !usedKeys.Contains(name))
+                {
+                    outLines.Add($"{GetValuePrefix(line, separatorIndex)}{_keys[name]}");
+                    usedKeys.Add(name);
+                }
+            }
+
+            // Keys and arrays not present in the layout are appended at the end of the file
+            outLines.AddRange(_keys.Where(k => !usedKeys.Contains(k.Key)).Select(k => $"{k.Key} = {k.Value}"));
+            outLines.AddRange(_arrays.Where(a => !usedArrays.Contains(a.Key))
+                .SelectMany(a => a.Value.Select(element => $"*{a.Key} = {element}")));
+
+            return outLines;
+        }
+
+        /// <summary>
+        /// Returns the part of a key or array line that precedes the value: the text up to the '=' character included,
+        /// followed by the spaces that separate it from the value.
+        /// </summary>
+        /// <param name="line">Line of the layout file.</param>
+        /// <param name="separatorIndex">Index of the '=' character in <paramref name="line"/>.</param>
+        /// <returns>The prefix to which the value is appended.</returns>
+        private static string GetValuePrefix(string line, int separatorIndex)
+        {
+            var valuePart   = line.Substring(separatorIndex + 1);
+            var spacing     = valuePart.Substring(0, valuePart.Length - valuePart.TrimStart().Length);
+
+            // Line without value (e.g. "KEY =" in a template): the spacing before '=' is mirrored after it
+            if (valuePart.Trim().Length == 0)
+            {
+                spacing = separatorIndex > 0 && char.IsWhiteSpace(line[separatorIndex - 1]) ? " " : string.Empty;
+            }
+
+            return $"{line.Substring(0, separatorIndex + 1)}{spacing}";
+        }
+
+        /// <summary>
+        /// Returns true if <paramref name="trimmedLine"/> is one of the supported pragmas.
+        /// </summary>
+        private static bool IsPragma(string trimmedLine)
+        {
+            var upperLine = trimmedLine.ToUpper();
+
+            return upperLine == SHOWKEYVALUE || upperLine == FORCEDEBUG || upperLine == FORCEPROTOCOL;
+        }
+
+        #endregion
 
         private string TrimUpper(string s) => s?.Trim().ToUpper() ?? string.Empty;
 

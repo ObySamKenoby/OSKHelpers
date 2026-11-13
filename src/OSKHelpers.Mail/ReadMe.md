@@ -123,7 +123,7 @@ Configuration is loaded from an INI file via `SetupImap(IniFileHelper, protector
 var iniFile = new IniFileHelper(true);
 if (MailWorker.CheckIniPasswordsProtection(iniFile).SmtpRequiresProtection)
 {
-    // Encrypted on the first start with the default protector; Save rebuilds Settings.ini from SettingsTemplate.ini
+    // Encrypted on the first start with the default protector; Save keeps the comments and layout of Settings.ini
     // (see OSKHelpers' IniFileHelper)
     var (success, encrypted) = MailWorker.ProtectPassword(iniFile.GetString("SmtpPassword"));
     if (success)
