@@ -12,7 +12,7 @@ dotnet add package OSKHelpers.Mail
 Source code, issue tracking and the other packages:
 [github.com/ObySamKenoby/OSKHelpers](https://github.com/ObySamKenoby/OSKHelpers).
 
-> **Compatibility**: OSKHelpers.Mail 2.0.0 requires OSKHelpers **2.1.0**: when upgrading from 1.x read the
+> **Compatibility**: OSKHelpers.Mail 2.0.1 requires OSKHelpers **2.1.2**: when upgrading from 1.x read the
 > [breaking changes of OSKHelpers 2.0.0](https://github.com/ObySamKenoby/OSKHelpers/blob/main/src/OSKHelpers/ReadMe.md#breaking-changes-in-200).
 > The package contains two builds, one for each MailKit major version (see [MailKit versions](#mailkit-versions)).
 
@@ -151,7 +151,7 @@ encrypted:
 
 **Default protector**: when no protector is passed (to `Setup<T>`, `SetupSmtp` or `SetupImap`), the entropy is read from
 `MailWorker.DEFAULTENTROPYFILENAME` (`__mail.entropy`) in `Paths.DefaultConfigsDirectory`, created on first use with 32 random
-bytes (readable only by its owner on systems other than Windows). The entropy is kept obfuscated in memory and the default
+bytes by `CredentialProtector.CreateOrReadEntropyFile` (readable only by its owner on systems other than Windows). The entropy is kept obfuscated in memory and the default
 protector is created only for each encryption or decryption. Deleting or replacing the file makes the passwords encrypted
 with it no longer decryptable: write them again in plain text and they will be encrypted with the new entropy.
 
@@ -210,7 +210,7 @@ The package adds to the project that installs it, in the `.OSKHelpers.content` f
 | Package | Purpose |
 |---|---|
 | [MailKit](https://www.nuget.org/packages/MailKit) | SMTP/IMAP transport layer (version by target, see below). |
-| [OSKHelpers](https://www.nuget.org/packages/OSKHelpers) 2.1.0 | Logging (`SimpleLog`), INI configuration (`IniFileHelper`), password protection (`CredentialProtector`, `PasswordObfuscator`). |
+| [OSKHelpers](https://www.nuget.org/packages/OSKHelpers) 2.1.2 | Logging (`SimpleLog`), INI configuration (`IniFileHelper`), password protection (`CredentialProtector`, `PasswordObfuscator`). |
 | [System.Security.Cryptography.Pkcs](https://www.nuget.org/packages/System.Security.Cryptography.Pkcs) | Cryptography support required by MimeKit 4 (S/MIME); `netstandard2.0` build only. |
 
 ### MailKit versions
@@ -226,6 +226,12 @@ runtime with MailKit 5 (`MissingMethodException`) and vice versa. The package th
 An application on .NET 8 or later that needs to stay on MailKit 4 must keep using OSKHelpers.Mail 1.x.
 
 ---
+
+## Changes in 2.0.1
+
+- Requires OSKHelpers 2.1.2 (previously 2.1.0).
+- The entropy of the default protector is read and created with `CredentialProtector.CreateOrReadEntropyFile`, instead of an
+  equivalent copy of the same logic: `__mail.entropy`, its format and the passwords already encrypted are unchanged.
 
 ## Changes in 2.0.0
 

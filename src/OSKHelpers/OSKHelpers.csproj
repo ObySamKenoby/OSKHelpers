@@ -6,8 +6,8 @@
 		<Platforms>AnyCPU;x86</Platforms>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>OSK Helpers</Title>
-		<VersionPrefix>2.1.1</VersionPrefix>
-		<Description>General purpose utilities, including Logging and settings (.ini / json) files.</Description>
+		<VersionPrefix>2.1.2</VersionPrefix>
+		<Description>General purpose utilities, including Logging, settings (.ini / json) files and encryption of stored credentials (DPAPI / AES).</Description>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(Configuration)'!='Debug'">
@@ -36,8 +36,10 @@
 	<!-- Common package properties and files (icon, license, ReadMe) are defined in src/Directory.Build.props -->
 	<PropertyGroup>
 		<PackageId>OSKHelpers</PackageId>
-		<PackageReleaseNotes>2.1.1 - IniFileHelper.Save maintains existing INI file structure and new Remove method.
-			
+		<PackageReleaseNotes>2.1.2 - CredentialProtector: the constructor accepts a null entropy, read from __credentials.entropy in Paths.DefaultConfigsDirectory and created on first use with 32 random bytes (mode 600 on systems other than Windows); new public CreateOrReadEntropyFile(path) and constants DEFAULTENTROPYFILENAME, DEFAULTENTROPYSIZE. Deleting or replacing the entropy file makes the values encrypted with it no longer decryptable.
+
+2.1.1 -IniFileHelper.Save keeps the layout of the existing INI file (comments, pragmas, key names, alignment), using SettingsTemplate.ini only when the file does not exist yet; keys and arrays removed with the new Remove method are dropped, new ones are appended at the end.
+
 2.1.0 - New Security.CredentialProtector: encryption of stored credentials with DPAPI (Windows) or AES and a key file (other systems; AES-GCM on .NET 8, AES-CBC + HMAC-SHA256 on .NET Standard 2.0), also for credentials embedded in a string between configurable tags (default [PWD] / [/PWD]). New dependency System.Security.Cryptography.ProtectedData 8.0.0.
 - Logging: SimpleLogger and SimpleLog can archive the log files of the months before the current one and the previous ArchiveRetentionMonths months (default 1, minimum 1) into a monthly PREFIXLog_YYYY_MM.zip in the log folder; no log or zip file is ever deleted. The check runs on a background thread whenever the log file name changes (first write, change of date, folder or prefix). New EnableArchiving (default false), ArchiveRetentionMonths and ArchiveLogs().
 - JsonSettings.Save: new optional parameter ignoreBackup (default false) to overwrite the file without saving a backup copy. Assemblies compiled against 2.0.x that call Save must be recompiled.

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using OSKHelpers.Common;
 using OSKHelpers.Security;
 
 namespace OSKHelpers.Tests.Security;
@@ -75,7 +76,6 @@ public class CredentialProtectorTests
     }
 
     [TestMethod]
-    [DataRow(null, "[PWD]", "[/PWD]")]
     [DataRow("", "[PWD]", "[/PWD]")]
     [DataRow(ENTROPY, null, "[/PWD]")]
     [DataRow(ENTROPY, "[PWD]", "")]
@@ -91,6 +91,32 @@ public class CredentialProtectorTests
     public void Constructor_EmptyKeyFilePath_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>(() => new CredentialProtector(ENTROPY, " "));
+    }
+
+    [TestMethod]
+    [DoNotParallelize]
+    public void Constructor_NullEntropy_UsesDefaultEntropyFile()
+    {
+#if DEBUG
+        var originalAppdata = Paths.AppdataDirectory;
+        try
+        {
+            Paths.OverrideAppdataDirectory(_tempDirectory);
+            var entropyFile = Path.Combine(Paths.DefaultConfigsDirectory, CredentialProtector.DEFAULTENTROPYFILENAME);
+
+            var protector = new CredentialProtector(null, _keyFilePath);
+            var other     = new CredentialProtector(null, _keyFilePath);
+
+            Assert.IsTrue(File.Exists(entropyFile));
+            Assert.AreEqual(CredentialProtector.CreateOrReadEntropyFile(entropyFile), protector.Entropy);
+            Assert.AreEqual(protector.Entropy, other.Entropy);
+            Assert.AreEqual(PLAINPASSWORD, other.Reveal(protector.Protect(PLAINPASSWORD)));
+        }
+        finally
+        {
+            Paths.OverrideAppdataDirectory(originalAppdata);
+        }
+#endif
     }
 
     #endregion
@@ -394,7 +420,37 @@ public class CredentialProtectorTests
 
     #endregion
 
-    #region Key file
+    #region Key and entropy files
+
+    [TestMethod]
+    public void CreateOrReadEntropyFile_MissingFile_CreatesEntropyAndReusesIt()
+    {
+        var path = Path.Combine(_tempDirectory, "sub", CredentialProtector.DEFAULTENTROPYFILENAME);
+
+        var created = CredentialProtector.CreateOrReadEntropyFile(path);
+        var reused  = CredentialProtector.CreateOrReadEntropyFile(path);
+
+        Assert.HasCount(CredentialProtector.DEFAULTENTROPYSIZE, Convert.FromBase64String(created));
+        Assert.AreEqual(created, reused);
+        Assert.AreEqual(Convert.ToBase64String(File.ReadAllBytes(path)), created);
+    }
+
+    [TestMethod]
+    public void CreateOrReadEntropyFile_InvalidFile_ThrowsWithoutOverwriting()
+    {
+        var path = Path.Combine(_tempDirectory, CredentialProtector.DEFAULTENTROPYFILENAME);
+        Directory.CreateDirectory(_tempDirectory);
+        File.WriteAllText(path, "short");
+
+        Assert.ThrowsExactly<CryptographicException>(() => CredentialProtector.CreateOrReadEntropyFile(path));
+        Assert.AreEqual("short", File.ReadAllText(path));
+    }
+
+    [TestMethod]
+    public void CreateOrReadEntropyFile_EmptyPath_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => CredentialProtector.CreateOrReadEntropyFile(" "));
+    }
 
     [TestMethod]
     public void GetOrCreateKey_MissingFile_CreatesKeyAndReusesIt()

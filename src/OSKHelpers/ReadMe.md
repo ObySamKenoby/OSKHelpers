@@ -131,6 +131,10 @@ using OSKHelpers.Security;
 // One instance per application; the entropy must never change once values are encrypted.
 var protector = new CredentialProtector("MyApplication.Credentials");
 
+// Without an entropy, a random one is read from __credentials.entropy in Paths.DefaultConfigsDirectory (created on first use;
+// deleting it makes the encrypted values no longer decryptable). CreateOrReadEntropyFile(path) reads or creates any other file.
+var defaultProtector = new CredentialProtector();
+
 // A whole value: "secret" -> "DPAPI:AQAAANCM..." (Windows) or "AES:..." (Linux, key file in Paths.DefaultDatabaseDirectory)
 if (CredentialProtector.RequiresProtection(settings.Password))
 {
@@ -294,7 +298,7 @@ Password hashing, credential encryption and obfuscation.
 
 | Class | Description |
 |---|---|
-| `CredentialProtector` | Encrypts credentials stored in configuration files: DPAPI (`LocalMachine` scope, `DPAPI:` prefix) on Windows, AES with a random 256-bit key file readable only by its owner on other systems (AES-GCM `AES:` with .NET 8, AES-CBC + HMAC-SHA256 `AESCBC:` with .NET Standard 2.0). A value without prefix is plain text (`RequiresProtection`, `Protect`, `TryReveal`, `Reveal`). Credentials embedded in a string, e.g. a connection string, are handled between configurable tags, default `[PWD]` / `[/PWD]` (`ProtectTagged`, `TryRevealTagged`, `RevealTagged`). The entropy passed to the constructor must not change once values are encrypted. |
+| `CredentialProtector` | Encrypts credentials stored in configuration files: DPAPI (`LocalMachine` scope, `DPAPI:` prefix) on Windows, AES with a random 256-bit key file readable only by its owner on other systems (AES-GCM `AES:` with .NET 8, AES-CBC + HMAC-SHA256 `AESCBC:` with .NET Standard 2.0). A value without prefix is plain text (`RequiresProtection`, `Protect`, `TryReveal`, `Reveal`). Credentials embedded in a string, e.g. a connection string, are handled between configurable tags, default `[PWD]` / `[/PWD]` (`ProtectTagged`, `TryRevealTagged`, `RevealTagged`). The entropy passed to the constructor must not change once values are encrypted; without an entropy, a random one is read from `__credentials.entropy` in `Paths.DefaultConfigsDirectory`, created on first use (`CreateOrReadEntropyFile`). |
 | `Hash` | Static helper to compute SHA-256 or SHA-512 hashes of a string, not safe for use with passwords (`ComputeSha256Hash`, `ComputeSha512Hash`). |
 | `PasswordHelper`| Static helper to create and check hashes safe to store passwords, and to detect legacy hashes to regenerate (`RequiresRehash`). |
 | `PasswordHash` | PBKDF2/RFC-2898 password hasher (HMAC-SHA256, 600 000 iterations, random 16-byte salt; 49-byte versioned output), suitable for storing credentials in a database. Legacy 36-byte hashes (HMAC-SHA1, 10 000 iterations) are still verified and flagged by `RequiresRehash`. |
@@ -324,6 +328,11 @@ The package adds to the project that installs it, in the `.OSKHelpers.content` f
 | `Json/Settings.cs` | `Settings` class based on `JsonSettings<T>` (namespace `OSKHelpers.Templates.Json`). |
 
 ---
+
+## Changes in 2.1.2
+- `CredentialProtector`: the constructor accepts a null entropy, read from `__credentials.entropy` in
+  `Paths.DefaultConfigsDirectory` and created on first use with 32 random bytes (mode `600` on systems other than Windows); new
+  public `CreateOrReadEntropyFile(path)` and constants `DEFAULTENTROPYFILENAME`, `DEFAULTENTROPYSIZE`.
 
 ## Changes in 2.1.1
 - `IniFileHelper.Save` keeps the layout of the existing file (comments, pragmas, key names, alignment), using

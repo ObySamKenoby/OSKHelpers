@@ -183,13 +183,14 @@ namespace OSKHelpers.Mail
         /// Returns the default entropy: the Base64 of the <see cref="DEFAULTENTROPYSIZE"/> bytes of
         /// <see cref="DEFAULTENTROPYFILENAME"/> in <see cref="Paths.DefaultConfigsDirectory"/>.<br/>
         /// The file (and its directory) is created on first use with
-        /// <see cref="CredentialProtector.GetOrCreateKey(string)"/>: random bytes, exclusive creation and, on systems other than
-        /// Windows, permissions restricted to the owner. The value is kept in memory obfuscated, and read again from the file
+        /// <see cref="CredentialProtector.CreateOrReadEntropyFile(string)"/>: random bytes, exclusive creation and, on systems
+        /// other than Windows, permissions restricted to the owner. The value is kept in memory obfuscated, and read again from the file
         /// when the directory changes or the obfuscated value is no longer readable (<see cref="PasswordObfuscator.ReSeed"/>).
         /// </summary>
         /// <returns>The default entropy.</returns>
         /// <exception cref="System.Security.Cryptography.CryptographicException">Existing but invalid entropy file.</exception>
         /// <exception cref="IOException">Entropy file not readable or not creatable.</exception>
+        /// <exception cref="UnauthorizedAccessException">Insufficient permissions on the entropy file.</exception>
         private static string GetDefaultEntropy()
         {
             string result = null;
@@ -204,7 +205,7 @@ namespace OSKHelpers.Mail
                 }
                 if (result == null || !string.Equals(Hash.ComputeSha256Hash(result), _defaultEntropyHash, StringComparison.Ordinal))
                 {
-                    result              = Convert.ToBase64String(CredentialProtector.GetOrCreateKey(path));
+                    result              = CredentialProtector.CreateOrReadEntropyFile(path);
                     _defaultEntropy     = PasswordObfuscator.EncodePassword(result);
                     _defaultEntropyHash = Hash.ComputeSha256Hash(result);
                     _defaultEntropyPath = path;

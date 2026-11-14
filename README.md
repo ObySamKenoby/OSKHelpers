@@ -16,8 +16,8 @@ Each package has its own ReadMe, also shown on its NuGet page, with quick start,
 
 | Package | Version | Target | Content | Documentation |
 | --- | --- | --- | --- | --- |
-| [OSKHelpers](https://www.nuget.org/packages/OSKHelpers) | **2.1.0** | .NET Standard 2.0, .NET 8 | Logging, INI/JSON settings, paths, security, collections, network and generic helpers | [ReadMe](src/OSKHelpers/ReadMe.md) |
-| [OSKHelpers.Mail](https://www.nuget.org/packages/OSKHelpers.Mail) | 1.2.5 | .NET Standard 2.0 | E-mail sending (MailKit) with template support | [ReadMe](src/OSKHelpers.Mail/ReadMe.md) |
+| [OSKHelpers](https://www.nuget.org/packages/OSKHelpers) | **2.1.2** | .NET Standard 2.0, .NET 8 | Logging, INI/JSON settings, paths, security, collections, network and generic helpers | [ReadMe](src/OSKHelpers/ReadMe.md) |
+| [OSKHelpers.Mail](https://www.nuget.org/packages/OSKHelpers.Mail) | **2.0.1** | .NET Standard 2.0, .NET 8 | E-mail sending (MailKit) with template support | [ReadMe](src/OSKHelpers.Mail/ReadMe.md) |
 | OSKHelpers.WPF | 0.5.0 | .NET Standard 2.0 | Placeholder for WPF helpers: not usable yet | [ReadMe](src/OSKHelpers.WPF/ReadMe.md) |
 
 ```
@@ -25,9 +25,8 @@ dotnet add package OSKHelpers
 dotnet add package OSKHelpers.Mail
 ```
 
-> **Note**: OSKHelpers.Mail 1.2.5 is still built against OSKHelpers **1.7.5**. When both packages are used, read the
-> [breaking changes of OSKHelpers 2.0.0](src/OSKHelpers/ReadMe.md#breaking-changes-in-200) before referencing OSKHelpers 2.x
-> explicitly.
+> **Note**: OSKHelpers.Mail 2.0.1 requires OSKHelpers **2.1.2**. When upgrading from 1.x, read the
+> [breaking changes of OSKHelpers 2.0.0](src/OSKHelpers/ReadMe.md#breaking-changes-in-200).
 
 ### What is inside OSKHelpers
 

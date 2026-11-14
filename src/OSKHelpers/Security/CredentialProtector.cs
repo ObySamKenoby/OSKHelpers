@@ -41,12 +41,18 @@ namespace OSKHelpers.Security
     /// <see cref="DPAPIPREFIX"/> value only on the Windows computer that encrypted it.
     /// <para>
     /// The entropy passed to the constructor must stay the same for the whole life of the encrypted values: changing it makes
-    /// them no longer decryptable. The instance is immutable and thread-safe.
+    /// them no longer decryptable. Without an entropy, the constructor uses the default entropy file
+    /// <see cref="DEFAULTENTROPYFILENAME"/> in <see cref="Paths.DefaultConfigsDirectory"/>, created on first use with random
+    /// bytes (<see cref="CreateOrReadEntropyFile"/>): deleting or replacing it has the same effect, so it must be kept together
+    /// with the configuration. The instance is immutable and thread-safe.
     /// </para>
     /// </remarks>
     /// <example>
     /// <code>
     /// var protector = new CredentialProtector("MyApplication.Credentials");
+    ///
+    /// // Entropy read from Configs/__credentials.entropy, created on first use
+    /// var defaultProtector = new CredentialProtector();
     ///
     /// // "Server=db;User=SA;Password=[PWD]secret[/PWD];" becomes "Server=db;User=SA;Password=[PWD]DPAPI:AQAAANCM...[/PWD];"
     /// var stored = protector.ProtectTagged(connectionString);
@@ -80,6 +86,17 @@ namespace OSKHelpers.Security
         /// Default name of the AES key file, in <see cref="Paths.DefaultDatabaseDirectory"/>.
         /// </summary>
         public const string DEFAULTKEYFILENAME = "__credentials.key";
+
+        /// <summary>
+        /// Default name of the entropy file, in <see cref="Paths.DefaultConfigsDirectory"/>, used when no entropy is passed to
+        /// the constructor (see <see cref="CreateOrReadEntropyFile"/>).
+        /// </summary>
+        public const string DEFAULTENTROPYFILENAME = "__credentials.entropy";
+
+        /// <summary>
+        /// Length in bytes of the entropy created by <see cref="CreateOrReadEntropyFile"/> (256 bit).
+        /// </summary>
+        public const int DEFAULTENTROPYSIZE = AESKEYSIZE;
 
         /// <summary>
         /// Default tag opening a credential embedded in a string.
@@ -154,7 +171,8 @@ namespace OSKHelpers.Security
 
         /// <summary>
         /// Additional entropy of the encryption (associated data for AES): it is not a secret, it distinguishes the data
-        /// encrypted by an application from the data encrypted by other applications.
+        /// encrypted by an application from the data encrypted by other applications. When it is read from the default entropy
+        /// file (<see cref="CreateOrReadEntropyFile"/>) it is the Base64 of <see cref="DEFAULTENTROPYSIZE"/> random bytes.
         /// </summary>
         public string Entropy { get; }
 
@@ -208,16 +226,26 @@ namespace OSKHelpers.Security
         /// Creates a protector with the given entropy, key file and tags.
         /// </summary>
         /// <param name="entropy">Additional entropy of the encryption (see <see cref="Entropy"/>), e.g.
-        /// <c>"MyApplication.Credentials"</c>; it must not change after values have been encrypted.</param>
+        /// <c>"MyApplication.Credentials"</c>; it must not change after values have been encrypted. Null to read it from
+        /// <see cref="DEFAULTENTROPYFILENAME"/> in <see cref="Paths.DefaultConfigsDirectory"/>, created if missing
+        /// (<see cref="CreateOrReadEntropyFile"/>).</param>
         /// <param name="keyFilePath">Path of the AES key file; null for <see cref="DEFAULTKEYFILENAME"/> in
         /// <see cref="Paths.DefaultDatabaseDirectory"/>.</param>
         /// <param name="openTag">Tag opening an embedded credential.</param>
         /// <param name="closeTag">Tag closing an embedded credential.</param>
         /// <exception cref="ArgumentException">Empty entropy or key file path; empty or equal tags; tag made only of characters
         /// that can appear in an encrypted value (Base64 alphabet and <c>:</c>).</exception>
-        public CredentialProtector(string entropy, string keyFilePath = null, string openTag = DEFAULTOPENTAG,
+        /// <exception cref="CryptographicException">Null entropy and existing but invalid entropy file, or permissions of a new
+        /// entropy file not restrictable.</exception>
+        /// <exception cref="IOException">Null entropy and entropy file not readable or not creatable.</exception>
+        /// <exception cref="UnauthorizedAccessException">Null entropy and insufficient permissions on the entropy file.</exception>
+        public CredentialProtector(string entropy = null, string keyFilePath = null, string openTag = DEFAULTOPENTAG,
             string closeTag = DEFAULTCLOSETAG)
         {
+            if (entropy == null)
+            {
+                entropy = CreateOrReadEntropyFile();
+            }
             if (string.IsNullOrEmpty(entropy))
             {
                 throw new ArgumentException("The entropy must not be empty.", nameof(entropy));
@@ -821,7 +849,36 @@ namespace OSKHelpers.Security
 
         #endregion
 
-        #region Key file
+        #region Key and entropy files
+
+        /// <summary>
+        /// Returns the entropy stored in the given file, creating the file if it does not exist: the entropy is the Base64 of
+        /// <see cref="DEFAULTENTROPYSIZE"/> random bytes, and the file is created like the key file
+        /// (<see cref="GetOrCreateKey"/>: directory created if missing, exclusive creation, permissions restricted to the owner
+        /// on systems other than Windows). Used by the constructor when no entropy is passed.
+        /// </summary>
+        /// <param name="path">Path of the entropy file; null for <see cref="DEFAULTENTROPYFILENAME"/> in
+        /// <see cref="Paths.DefaultConfigsDirectory"/>.</param>
+        /// <returns>The entropy, to pass to the constructor.</returns>
+        /// <remarks>Deleting or replacing the file makes the credentials encrypted with its entropy no longer decryptable: they
+        /// must be written again in plain text in the configuration. The file has the same format as the key file, so an
+        /// existing file is never overwritten.</remarks>
+        /// <exception cref="ArgumentException">Empty path.</exception>
+        /// <exception cref="CryptographicException">Existing but invalid file (not <see cref="DEFAULTENTROPYSIZE"/> bytes
+        /// long); permissions of a new file not restrictable.</exception>
+        /// <exception cref="IOException">File not readable or not creatable.</exception>
+        /// <exception cref="UnauthorizedAccessException">Insufficient permissions on the file.</exception>
+        public static string CreateOrReadEntropyFile(string path = null)
+        {
+            if (path != null && path.Trim().Length == 0)
+            {
+                throw new ArgumentException("The entropy file path must not be empty.", nameof(path));
+            }
+
+            var entropyPath = path ?? Path.Combine(Paths.DefaultConfigsDirectory, DEFAULTENTROPYFILENAME);
+
+            return Convert.ToBase64String(GetOrCreateKey(entropyPath));
+        }
 
         /// <summary>
         /// Reads the AES key from the given file.
