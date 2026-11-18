@@ -9,7 +9,7 @@ using System.Linq;
 namespace OSKHelpers.Tests.INIFile
 {
     [TestClass]
-    public class IniFileHelperTests
+    public partial class IniFileHelperTests
     {
         #region Constants
 
@@ -1205,6 +1205,71 @@ namespace OSKHelpers.Tests.INIFile
 
             Assert.IsFalse(helper.Save(string.Empty, false));
             Assert.IsFalse(helper.Save(missingDirectoryFile, false));
+        }
+
+        #endregion
+
+        #region TryGetBool / TryGetInt
+
+        /// <summary>
+        /// Verifies that TryGetBool accepts TRUE, FALSE, 1, 0 regardless of case.
+        /// </summary>
+        [TestMethod]
+        [DataRow("TRUE", true)]
+        [DataRow("true", true)]
+        [DataRow("1", true)]
+        [DataRow("False", false)]
+        [DataRow("0", false)]
+        public void TryGetBool_ValidValue_ReturnsTrueAndValue(string text, bool expected)
+        {
+            var helper = new IniFileHelper();
+            Assert.IsTrue(helper.Parse(new List<string>() { $"Flag = {text}" }));
+
+            Assert.IsTrue(helper.TryGetBool("flag", out bool value));
+            Assert.AreEqual(expected, value);
+        }
+
+        /// <summary>
+        /// Verifies that TryGetBool returns false for an invalid value or a missing key.
+        /// </summary>
+        [TestMethod]
+        [DataRow("Flag")]
+        [DataRow("Missing")]
+        public void TryGetBool_InvalidValueOrMissingKey_ReturnsFalse(string key)
+        {
+            var helper = new IniFileHelper();
+            Assert.IsTrue(helper.Parse(new List<string>() { "Flag = yes" }));
+
+            Assert.IsFalse(helper.TryGetBool(key, out bool value));
+            Assert.IsFalse(value);
+        }
+
+        /// <summary>
+        /// Verifies that TryGetInt returns the value of a valid integer.
+        /// </summary>
+        [TestMethod]
+        public void TryGetInt_ValidValue_ReturnsTrueAndValue()
+        {
+            var helper = new IniFileHelper();
+            Assert.IsTrue(helper.Parse(new List<string>() { "Number = -12" }));
+
+            Assert.IsTrue(helper.TryGetInt("NUMBER", out int value));
+            Assert.AreEqual(-12, value);
+        }
+
+        /// <summary>
+        /// Verifies that TryGetInt returns false for an invalid value or a missing key.
+        /// </summary>
+        [TestMethod]
+        [DataRow("Number")]
+        [DataRow("Missing")]
+        public void TryGetInt_InvalidValueOrMissingKey_ReturnsFalse(string key)
+        {
+            var helper = new IniFileHelper();
+            Assert.IsTrue(helper.Parse(new List<string>() { "Number = 1.5" }));
+
+            Assert.IsFalse(helper.TryGetInt(key, out int value));
+            Assert.AreEqual(0, value);
         }
 
         #endregion

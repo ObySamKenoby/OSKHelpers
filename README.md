@@ -16,16 +16,18 @@ Each package has its own ReadMe, also shown on its NuGet page, with quick start,
 
 | Package | Version | Target | Content | Documentation |
 | --- | --- | --- | --- | --- |
-| [OSKHelpers](https://www.nuget.org/packages/OSKHelpers) | **2.1.2** | .NET Standard 2.0, .NET 8 | Logging, INI/JSON settings, paths, security, collections, network and generic helpers | [ReadMe](src/OSKHelpers/ReadMe.md) |
+| [OSKHelpers](https://www.nuget.org/packages/OSKHelpers) | **2.1.3** | .NET Standard 2.0, .NET 8 | Logging, INI/JSON settings, paths, security, collections, network and generic helpers | [ReadMe](src/OSKHelpers/ReadMe.md) |
 | [OSKHelpers.Mail](https://www.nuget.org/packages/OSKHelpers.Mail) | **2.0.1** | .NET Standard 2.0, .NET 8 | E-mail sending (MailKit) with template support | [ReadMe](src/OSKHelpers.Mail/ReadMe.md) |
+| [OSKHelpers.Cron](https://www.nuget.org/packages/OSKHelpers.Cron) | **0.9.0** | .NET Standard 2.0 | Scheduling of actions from a crontab file (Cronos), with automatic reload and validation | [ReadMe](src/OSKHelpers.Cron/ReadMe.md) |
 | OSKHelpers.WPF | 0.5.0 | .NET Standard 2.0 | Placeholder for WPF helpers: not usable yet | [ReadMe](src/OSKHelpers.WPF/ReadMe.md) |
 
 ```
 dotnet add package OSKHelpers
 dotnet add package OSKHelpers.Mail
+dotnet add package OSKHelpers.Cron
 ```
 
-> **Note**: OSKHelpers.Mail 2.0.1 requires OSKHelpers **2.1.2**. When upgrading from 1.x, read the
+> **Note**: OSKHelpers.Mail 2.0.1 requires OSKHelpers **2.1.2**, OSKHelpers.Cron 0.9.0 requires OSKHelpers **2.0.0**. When upgrading from 1.x, read the
 > [breaking changes of OSKHelpers 2.0.0](src/OSKHelpers/ReadMe.md#breaking-changes-in-200).
 
 ### What is inside OSKHelpers
@@ -34,7 +36,7 @@ dotnet add package OSKHelpers.Mail
 | --- | --- | --- |
 | `Logging` | `SimpleLog`, `SimpleLogger`, `CSVLogger<T>`, `CSVLogItem` | Daily text logs with levels and optional monthly archiving, CSV logs of objects |
 | `INIFile` | `IniFileHelper`, `DaysOfWeekParameter` | `KEY = value` settings files, arrays, typed getters |
-| `Json` | `JsonSettings<T>`, `JsonUtils` | Versioned JSON settings files with automatic backup |
+| `Json` | `JsonSettings<T>`, `JsonUtils` | Versioned JSON settings files with automatic backup, automatic update while running and migration from `Settings.ini` |
 | `Common` | `Paths`, `StringUtils`, `DateUtils`, `MailUtils`, `WebUtils`, `NetUtils`, `ObjectUtils`, `OSKRandom`, ... | Default directories, strings, dates, validation, DNS, diagnostics |
 | `Security` | `PasswordHelper`, `PasswordHash`, `CredentialProtector`, `PasswordObfuscator`, `Hash` | Password hashing (PBKDF2), encryption of stored credentials (DPAPI/AES), in-memory obfuscation, SHA hashes |
 | `Net` | `OSKHttpClient`, `WebDownloader` | Shared `HttpClient`, file download |
@@ -69,12 +71,12 @@ More examples in the [OSKHelpers ReadMe](src/OSKHelpers/ReadMe.md#quick-start) a
 | Folder | Content |
 | --- | --- |
 | `src` | Library projects, one folder per package with its `ReadMe.md`; `src/Directory.Build.props` holds the package properties shared by all the packages |
-| `tests` | MSTest projects (`OSKHelpers.Tests`, `OSKHelpers.Tests.NetStandard`, `OSKHelpers.Mail.Tests`) and an interactive console for manual checks |
-| `docs` | Analysis documentation (in Italian): architecture, data model, processes, issue log |
+| `tests` | MSTest projects (`OSKHelpers.Tests`, `OSKHelpers.Tests.NetStandard`, `OSKHelpers.Mail.Tests`, `OSKHelpers.Cron.Tests`) and an interactive console for manual checks |
+| `docs` | Logo of the packages and `Docs.csproj`, which shows the files of the repository root in Visual Studio |
 
 The tests use members available only in Debug builds: run them with `dotnet test -c Debug`. Integration tests use only local
 resources and can be excluded with `--filter TestCategory!=Integration`. `OSKHelpers.Tests.NetStandard` runs the same tests on
-the .NET Standard 2.0 build of OSKHelpers; `TestLinux.bat` runs the suite under Linux in a Docker container.
+the .NET Standard 2.0 build of OSKHelpers.
 
 ---
 

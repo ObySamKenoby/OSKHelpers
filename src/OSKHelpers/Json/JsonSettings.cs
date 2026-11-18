@@ -16,9 +16,15 @@ namespace OSKHelpers.Json
     /// If a property is renamed following a version change, the previous value will be lost and cannot be<br/>
     /// automatically carried over to the new property.<br/>
     /// It is important to provide adequate documentation about the file structure, possibly including a sample<br/>
-    /// with placeholder collection entries to simplify future extension.
+    /// with placeholder collection entries to simplify future extension.<br/>
+    /// The settings in use can be exposed to the whole application through a static property declared by the derived class
+    /// (see <see cref="CurrentSettingsAttribute"/>) and updated while the application is running, when the file is modified,
+    /// through <see cref="AutoUpdate"/> or <see cref="StartAutoUpdate"/> and the properties marked with
+    /// <see cref="AutoUpdateAttribute"/> (partial class <c>JsonSettings.AutoUpdate.cs</c>).<br/>
+    /// The configuration of an application that still uses an INI file can be converted with <see cref="MigrateFromIniFile"/>
+    /// (partial class <c>JsonSettings.IniMigration.cs</c>).
     /// </summary>
-    public abstract class JsonSettings<T> where T: JsonSettings<T>, new()
+    public abstract partial class JsonSettings<T> where T: JsonSettings<T>, new()
     {
         #region Constants
 
@@ -90,7 +96,9 @@ namespace OSKHelpers.Json
 
         static JsonSettings()
         {
-            DefaultSerializerOptions = GetDefaultSerializerOptions();
+            DefaultSerializerOptions    = GetDefaultSerializerOptions();
+            _autoUpdateProperties       = FindAutoUpdateProperties();
+            _currentSettingsProperty    = FindCurrentSettingsProperty();
         }
 
         /// <summary>
@@ -175,7 +183,8 @@ namespace OSKHelpers.Json
             try
             {
                 var fileName = Path.Combine(Paths.DefaultConfigsDirectory, "SettingsTemplate.json");
-                var template = Load(fileName, true, GetDefaultSerializerOptions());
+                // The template must not become the current settings of the application.
+                LoadCore(fileName, true, GetDefaultSerializerOptions(), false);
             }
             catch (Exception ex)
             {
@@ -218,13 +227,40 @@ namespace OSKHelpers.Json
         /// <remarks>
         /// <b>This method will read the default file.</b>
         /// </remarks>
-        public static (T Object, bool IsNew) Load(bool createIfNotExists = true, JsonSerializerOptions options = null) => Load(DEFAULTFILENAME, createIfNotExists, options);
+        public static (T Object, bool IsNew) Load(bool createIfNotExists = true, JsonSerializerOptions options = null)
+            => Load(DEFAULTFILENAME, createIfNotExists, options);
+
+        /// <inheritdoc cref="Load(string, bool, JsonSerializerOptions)"/>
+        /// <param name="createIfNotExists">See <see cref="Load(string, bool, JsonSerializerOptions)"/>.</param>
+        /// <param name="options">See <see cref="Load(string, bool, JsonSerializerOptions)"/>.</param>
+        /// <param name="doNotAssignCurrent">
+        /// True to read the file without assigning or updating the property of the current settings, e.g. to read the file
+        /// again while the current settings remain in use; false behaves as <see cref="Load(bool, JsonSerializerOptions)"/>.
+        /// </param>
+        /// <remarks>
+        /// <b>This method will read the default file.</b><br/>
+        /// Separate overload, so that the signature of <see cref="Load(bool, JsonSerializerOptions)"/> used by the existing
+        /// applications does not change. <see cref="Init"/> is called on the instance read in any case, with its side effects
+        /// (e.g. the log level).
+        /// </remarks>
+        public static (T Object, bool IsNew) Load(bool createIfNotExists, JsonSerializerOptions options, bool doNotAssignCurrent)
+            => LoadCore(DEFAULTFILENAME, createIfNotExists, options, !doNotAssignCurrent);
 
         /// <summary>
         /// Reads the file passed as parameter and returns an instance of the object.<br/>
         /// If the file does not exist and <paramref name="createIfNotExists"/> is true, file creation will be attempted; the directory will never be created automatically.<br/>
         /// If needed, it will update the file version; in that case the original file will be overwritten by the new version and<br/>
         /// <see cref="Updated"/> of the object will be set to True.<br/>
+        /// If the derived class declares a static property for the current settings (see <see cref="CurrentSettingsAttribute"/>):
+        /// <list type="bullet">
+        /// <item>if the property is null, the instance read is assigned to it before <see cref="Init"/>;</item>
+        /// <item>otherwise the settings in use are never replaced: only their properties marked with
+        /// <see cref="AutoUpdateAttribute"/> are updated from the file, with the same rules as <see cref="AutoUpdate"/>
+        /// (validity, <see cref="AutoUpdateCustomLogic"/>, restore of the previous values if rejected, see
+        /// <see cref="UpdateFromLoadedSettings"/>), and the instance in use is returned.</item>
+        /// </list>
+        /// See <see cref="Load(bool, JsonSerializerOptions, bool)"/> to read the default file without assigning or updating
+        /// the current settings.<br/>
         /// <br/>
         /// <b>Note</b>: the method may throw exceptions related to file read/write attempts; this is intentional and they are not<br/>
         /// caught so as to provide maximum feedback in case of problems.
@@ -245,7 +281,8 @@ namespace OSKHelpers.Json
         /// </param>
         /// <returns>
         /// A tuple composed as follows:<br/>
-        /// <b>Object</b>: the object retrieved from the file or, if the file did not exist, the instance for the newly created file.<br/>
+        /// <b>Object</b>: the object retrieved from the file or, if the file did not exist, the instance for the newly created file;
+        /// if the current settings were already assigned, the instance in use, updated.<br/>
         /// <b>IsNew</b>: True if the returned instance was newly created.
         /// </returns>
         /// <exception cref="ArgumentNullException"/>
@@ -253,29 +290,24 @@ namespace OSKHelpers.Json
         /// <exception cref="DirectoryNotFoundException"/>
         /// <exception cref="FileNotFoundException"/>
         public static (T Object, bool IsNew) Load(string filename, bool createIfNotExists = true, JsonSerializerOptions options = null)
-        {
-            if (string.IsNullOrWhiteSpace(filename))
-            {
-                throw new ArgumentNullException(nameof(filename));
-            }
+            => LoadCore(filename, createIfNotExists, options, true);
 
-            // Verify that the file name does not contain invalid characters.
-            var invalidPathChars = Path.GetInvalidPathChars();
-            if (filename.Any(c => invalidPathChars.Contains(c)))
-            {
-                throw new FormatException($"the parameter {nameof(filename)} ('{filename}') contains invalid characters.");
-            }
-            // Check whether the file path is absolute; if not, make it relative
-            // to the default configuration directory.
-            if (!Path.IsPathRooted(filename))
-            {
-                filename = Path.Combine(Paths.DefaultConfigsDirectory, filename.Trim());
-            }
-            // Verify that the directory exists
-            if (!Directory.Exists(Path.GetDirectoryName(filename)))
-            {
-                throw new DirectoryNotFoundException(Path.GetDirectoryName(filename));
-            }
+        /// <summary>
+        /// Implementation of <see cref="Load(string, bool, JsonSerializerOptions)"/>; the internal reads of the file (template,
+        /// <see cref="AutoUpdate"/>) neither assign nor update the property of the current settings.
+        /// </summary>
+        /// <param name="filename">See <see cref="Load(string, bool, JsonSerializerOptions)"/>.</param>
+        /// <param name="createIfNotExists">See <see cref="Load(string, bool, JsonSerializerOptions)"/>.</param>
+        /// <param name="options">See <see cref="Load(string, bool, JsonSerializerOptions)"/>.</param>
+        /// <param name="assignCurrent">
+        /// True to assign the instance read to the property of the current settings, if null, or to update the instance in use
+        /// otherwise.
+        /// </param>
+        /// <returns>See <see cref="Load(string, bool, JsonSerializerOptions)"/>.</returns>
+        private static (T Object, bool IsNew) LoadCore(string filename, bool createIfNotExists, JsonSerializerOptions options,
+            bool assignCurrent)
+        {
+            filename = ResolveFilePath(filename);
 
             if (options == null)
             {
@@ -311,11 +343,29 @@ namespace OSKHelpers.Json
                 }
             }
 
-            // Final initialisation and validity check.
-            obj.Init();
-            obj.CheckIsValid();
+            // Final initialisation and validity check; the source file and the current settings are recorded first, so that
+            // Init can use them.
+            obj.SetSourceFile(filename, options);
+            var current = assignCurrent ? GetCurrentSettings() as T : null;
+            T result;
+            if (current == null)
+            {
+                if (assignCurrent)
+                {
+                    SetCurrentSettings(obj);
+                }
+                obj.Init();
+                obj.CheckIsValid();
+                result = obj;
+            }
+            else
+            {
+                // The settings in use are never replaced: only the properties marked with AutoUpdate are applied to them.
+                current.UpdateFromLoadedSettings(obj);
+                result = current;
+            }
 
-            return (obj, isNew);
+            return (result, isNew);
         }
 
         /// <inheritdoc cref="Save(string, JsonSerializerOptions, bool)"/>
@@ -351,28 +401,7 @@ namespace OSKHelpers.Json
         /// <exception cref="DirectoryNotFoundException"/>
         public void Save(string filename, JsonSerializerOptions options = null, bool ignoreBackup = false)
         {
-            if (string.IsNullOrWhiteSpace(filename))
-            {
-                throw new ArgumentNullException(nameof(filename));
-            }
-
-            // Verify that the file name does not contain invalid characters.
-            var invalidPathChars = Path.GetInvalidPathChars();
-            if (filename.Any(c => invalidPathChars.Contains(c)))
-            {
-                throw new FormatException($"the parameter {nameof(filename)} ('{filename}') contains invalid characters.");
-            }
-            // Check whether the file path is absolute; if not, make it relative
-            // to the default configuration directory.
-            if (!Path.IsPathRooted(filename))
-            {
-                filename = Path.Combine(Paths.DefaultConfigsDirectory, filename.Trim());
-            }
-            // Verify that the directory exists
-            if (!Directory.Exists(Path.GetDirectoryName(filename)))
-            {
-                throw new DirectoryNotFoundException(Path.GetDirectoryName(filename));
-            }
+            filename = ResolveFilePath(filename);
 
             if (options == null)
             {
@@ -396,6 +425,45 @@ namespace OSKHelpers.Json
                 File.Copy(filename, bkpFileName, false);
             }
             File.WriteAllText(filename, JsonUtils.Serialize(this, options));
+            UpdateSourceFileWriteTime(filename);
+        }
+
+        /// <summary>
+        /// Checks a file name passed to <see cref="Load(string, bool, JsonSerializerOptions)"/>,
+        /// <see cref="Save(string, JsonSerializerOptions, bool)"/> or <see cref="MigrateFromIniFile"/> and returns its full
+        /// path: a relative path is resolved on <see cref="Paths.DefaultConfigsDirectory"/>.
+        /// </summary>
+        /// <param name="filename">Absolute or relative path of the file.</param>
+        /// <returns>The full path of the file.</returns>
+        /// <exception cref="ArgumentNullException">The file name is empty (parameter name <c>filename</c>).</exception>
+        /// <exception cref="FormatException">The file name contains invalid characters.</exception>
+        /// <exception cref="DirectoryNotFoundException">The directory of the file does not exist.</exception>
+        private static string ResolveFilePath(string filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename))
+            {
+                throw new ArgumentNullException(nameof(filename));
+            }
+
+            // Verify that the file name does not contain invalid characters.
+            var invalidPathChars = Path.GetInvalidPathChars();
+            if (filename.Any(c => invalidPathChars.Contains(c)))
+            {
+                throw new FormatException($"the parameter {nameof(filename)} ('{filename}') contains invalid characters.");
+            }
+            // Check whether the file path is absolute; if not, make it relative
+            // to the default configuration directory.
+            if (!Path.IsPathRooted(filename))
+            {
+                filename = Path.Combine(Paths.DefaultConfigsDirectory, filename.Trim());
+            }
+            // Verify that the directory exists
+            if (!Directory.Exists(Path.GetDirectoryName(filename)))
+            {
+                throw new DirectoryNotFoundException(Path.GetDirectoryName(filename));
+            }
+
+            return filename;
         }
 
         #endregion

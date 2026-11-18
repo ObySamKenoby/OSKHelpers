@@ -7,6 +7,11 @@ namespace OSKHelpers.Templates.INIFile
     /// <summary>
     /// Class containing the application settings.
     /// </summary>
+    /// <remarks>
+    /// To keep the data of the application in <i>AssemblyPath\Appdata</i>, call <see cref="OSKHelpers.Common.Paths.MigrateToAppdata"/>
+    /// at the start of the application, before the first use of this class: Settings.ini is moved there as well and is still
+    /// found by <see cref="IniFileHelper"/>.
+    /// </remarks>
     public class Settings
     {
         #region Constants

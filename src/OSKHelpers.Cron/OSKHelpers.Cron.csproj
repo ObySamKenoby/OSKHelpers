@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<Title>OSK Helpers - Cron scheduling</Title>
+		<VersionPrefix>0.9.0</VersionPrefix>
+		<Description>Scheduling of actions from a crontab file (standard cron syntax, Cronos), with automatic reload of the file, validation report and events raised at every scheduled time.</Description>
+	</PropertyGroup>
+
+	<!-- Common package properties and files (icon, license, ReadMe) are defined in src/Directory.Build.props -->
+	<PropertyGroup>
+		<PackageId>OSKHelpers.Cron</PackageId>
+		<PackageReleaseNotes>0.9.0 - First release. Requires OSKHelpers 2.0.0 (2.1.3 for the automatic update of the settings with [AutoUpdate]). Crontab reads the crontab file (five standard fields or a macro, followed by the action), reloads it when it is modified and validates it with CheckCrontab (overridable with ValidateAction, AddCoverageLines and CheckCrontabCustomLogic). CrontabScheduler raises ScheduledActionTriggered and awaits ActionHandler at every scheduled time, skips an action still running (ScheduledActionSkipped), raises CrontabReloaded, can be configured with ISettingsCron and is not stopped again by Dispose after Stop. The actions are compared with Crontab.ActionComparer, a custom comparer passed to the constructor of Crontab (default: case-insensitive), to minimize the overlapping executions of actions written in different ways.</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<Version>$(VersionPrefix)-pre01</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="OSKHelpers" Version="2.0.0" />
+		<PackageReference Include="Cronos" Version="0.13.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- The tests drive a single wake-up of the scheduler (CrontabScheduler.RunCycle) without real waits -->
+		<InternalsVisibleTo Include="OSKHelpers.Cron.Tests" />
+	</ItemGroup>
+
+</Project>

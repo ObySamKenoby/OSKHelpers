@@ -108,11 +108,13 @@ namespace OSKHelpers.INIFile
         }
         /// <summary>
         /// Constructor used to read the file <paramref name="iniFile"/>. If <paramref name="defaultPath"/> is true, the file is<br/>
-        /// looked up inside the directory containing the assembly; otherwise<br/> 
+        /// looked up inside the directory containing the assembly or, if missing there, inside <see cref="Paths.AppdataDirectory"/>;
+        /// otherwise<br/>
         /// <paramref name="iniFile"/> must contain the full path of the file.
         /// </summary>
         /// <param name="iniFile">Name of the file to read.</param>
-        /// <param name="defaultPath">If true, <paramref name="iniFile"/> is searched inside the assembly directory.</param>
+        /// <param name="defaultPath">If true, <paramref name="iniFile"/> is searched inside the assembly directory and then
+        /// inside <see cref="Paths.AppdataDirectory"/>.</param>
         public IniFileHelper(string iniFile, bool defaultPath = true) : this()
         {
             IniFileRead = Load(iniFile, defaultPath);
@@ -127,7 +129,9 @@ namespace OSKHelpers.INIFile
         /// </summary>
         /// <param name="iniFile">Name of the INI file; if not specified, defaults to Settings.ini.</param>
         /// <param name="templateFile">Name of the template file; if not specified, defaults to SettingsTemplate.ini.</param>
-        /// <param name="useDefaultPath">If true, looks for the files inside the service folder.</param>
+        /// <param name="useDefaultPath">If true, looks for the INI file inside the service folder or, if missing there, inside
+        /// <see cref="Paths.AppdataDirectory"/> (e.g. after <see cref="Paths.MigrateToAppdata"/>), and for the template inside the
+        /// service folder; if neither INI file exists, the template is copied to the service folder.</param>
         /// <returns>A tuple containing:<br/>
         /// Exists: indicates whether the file exists.<br/>
         /// Message: optional error message.</returns>
@@ -140,7 +144,7 @@ namespace OSKHelpers.INIFile
             {
                 if (!string.IsNullOrWhiteSpace(iniFile) && !string.IsNullOrWhiteSpace(templateFile))
                 {
-                    var file        = Path.Combine(useDefaultPath ? Paths.AssemblyPath : string.Empty, iniFile);
+                    var file        = useDefaultPath ? ResolveDefaultPath(iniFile) : iniFile;
                     var template    = Path.Combine(useDefaultPath ? Paths.AssemblyPath : string.Empty, templateFile);
                     SimpleLog.Write($"IniFile: {file}");
                     SimpleLog.Write($"Template: {template}");
@@ -175,11 +179,36 @@ namespace OSKHelpers.INIFile
 
 
         /// <summary>
+        /// Returns the full path of an INI file looked up in the default directories: the assembly directory
+        /// (<see cref="Paths.AssemblyPath"/>) and, if the file is missing there, the data directory
+        /// (<see cref="Paths.AppdataDirectory"/>), where <see cref="Paths.MigrateToAppdata"/> moves Settings.ini.
+        /// </summary>
+        /// <param name="iniFile">Name of the INI file.</param>
+        /// <returns>The path in the data directory if the file exists only there; otherwise the path in the assembly
+        /// directory, also when the file exists in neither directory.</returns>
+        private static string ResolveDefaultPath(string iniFile)
+        {
+            var result = Path.Combine(Paths.AssemblyPath, iniFile);
+
+            if (!File.Exists(result))
+            {
+                var appdataFile = Paths.GetDataDirectoryPath(iniFile);
+                if (File.Exists(appdataFile))
+                {
+                    result = appdataFile;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Reads and processes the file passed as parameter; returns true if the operation succeeded and valid keys were found.
         /// The value of IniFileRead is set accordingly.
         /// </summary>
         /// <param name="iniFile">File to read and parse.</param>
-        /// <param name="defaultPath">Indicates whether the file is located in the default path (the folder containing the program executable).
+        /// <param name="defaultPath">Indicates whether the file is located in the default path (the folder containing the program executable
+        /// or, if missing there, <see cref="Paths.AppdataDirectory"/>, e.g. after <see cref="Paths.MigrateToAppdata"/>).
         /// If the file is in the default directory, only the name needs to be provided; otherwise the full path must be supplied.
         /// The file name must include the extension.</param>
         /// <returns>True if reading and parsing succeeded.</returns>
@@ -192,10 +221,10 @@ namespace OSKHelpers.INIFile
 
             try
             {
-                // If the default path flag is set, prepend the execution path to the INI file name
+                // If the default path flag is set, look for the INI file in the application or data directory
                 if (defaultPath)
                 {
-                    iniFile = Path.Combine(Paths.AssemblyPath, iniFile);
+                    iniFile = ResolveDefaultPath(iniFile);
                     SimpleLog.DebugWrite($"ini file full path: {iniFile}");
                 }
                 if (!string.IsNullOrWhiteSpace(iniFile) && File.Exists(iniFile))
@@ -492,15 +521,7 @@ namespace OSKHelpers.INIFile
         /// </summary>
         public int GetInt(string key, int defaultValue = 0)
         {
-            int value = defaultValue;
-            if (HasKey(key))
-            {
-                var k = TrimUpper(key);
-                if (int.TryParse(_keys[k], out int v))
-                {
-                    value = v;
-                }
-            }
+            var value = TryGetInt(key, out int v) ? v : defaultValue;
             if (_showKeyValue)
             {
                 SimpleLog.DebugWrite($"IniFile GetInt({key}) -> {value}");
@@ -509,20 +530,58 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
+        /// Reads the value of key as an integer, telling whether the key exists and contains a valid integer.
+        /// </summary>
+        /// <param name="key">Name of the key.</param>
+        /// <param name="value">The value read; zero if the result is false.</param>
+        /// <returns>True if the key exists and its value is a valid integer.</returns>
+        public bool TryGetInt(string key, out int value)
+        {
+            value = 0;
+
+            return HasKey(key) && int.TryParse(_keys[TrimUpper(key)], out value);
+        }
+
+        /// <summary>
         /// Returns the value of key as a boolean; if the key does not exist or the value is not valid (true, false, 1, 0), returns the default value (false).
         /// </summary>
         public bool GetBool(string key, bool defaultValue = false)
         {
-            var value = defaultValue;
-
-            var s = GetString(key).ToUpper();
-
-            if (_validBoolValues.Contains(s))
+            var value = TryGetBool(key, out bool v) ? v : defaultValue;
+            if (_showKeyValue)
             {
-                value = s == "TRUE" || s == "1";
+                SimpleLog.DebugWrite($"IniFile GetBool({key}) -> {value}");
             }
-
             return value;
+        }
+
+        /// <summary>
+        /// Reads the value of key as a boolean, telling whether the key exists and contains a valid value (TRUE, FALSE, 1, 0, not
+        /// case sensitive).
+        /// </summary>
+        /// <param name="key">Name of the key.</param>
+        /// <param name="value">The value read; false if the result is false.</param>
+        /// <returns>True if the key exists and its value is a valid boolean.</returns>
+        public bool TryGetBool(string key, out bool value)
+        {
+            value = false;
+
+            return HasKey(key) && TryParseBool(_keys[TrimUpper(key)], out value);
+        }
+
+        /// <summary>
+        /// Converts a text into a boolean with the rules of the INI files: TRUE, FALSE, 1, 0, not case sensitive.
+        /// </summary>
+        /// <param name="text">Text to convert.</param>
+        /// <param name="value">The value converted; false if the result is false.</param>
+        /// <returns>True if <paramref name="text"/> is a valid boolean.</returns>
+        internal static bool TryParseBool(string text, out bool value)
+        {
+            var upperText   = text?.Trim().ToUpperInvariant() ?? string.Empty;
+            var valid       = _validBoolValues.Contains(upperText);
+            value           = valid && (upperText == "TRUE" || upperText == "1");
+
+            return valid;
         }
 
         /// <summary>
@@ -757,7 +816,8 @@ namespace OSKHelpers.INIFile
         /// Keys and arrays not present in the layout file are appended at the end, in the format <c>KEY = value</c>.
         /// </remarks>
         /// <param name="iniFile">Name of the INI file.</param>
-        /// <param name="defaultPath">If true, <paramref name="iniFile"/> is located in the assembly directory; otherwise it
+        /// <param name="defaultPath">If true, <paramref name="iniFile"/> is located in the assembly directory or, if it exists
+        /// only there, in <see cref="Paths.AppdataDirectory"/> (a new file is created in the assembly directory); otherwise it
         /// must contain the full path of the file.</param>
         /// <returns>True if the file has been written; errors are logged.</returns>
         public bool Save(string iniFile = DEFAULTINIFILE, bool defaultPath = true)
@@ -768,7 +828,7 @@ namespace OSKHelpers.INIFile
             {
                 if (!string.IsNullOrWhiteSpace(iniFile))
                 {
-                    var iniFilePath = defaultPath ? Path.Combine(Paths.AssemblyPath, iniFile) : iniFile;
+                    var iniFilePath = defaultPath ? ResolveDefaultPath(iniFile) : iniFile;
                     SimpleLog.DebugWrite($"Saving file {iniFilePath}");
 
                     var outLines = BuildSaveLines(ReadLayoutLines(iniFilePath));
@@ -887,9 +947,10 @@ namespace OSKHelpers.INIFile
         }
 
         /// <summary>
-        /// Returns true if <paramref name="trimmedLine"/> is one of the supported pragmas.
+        /// Returns true if <paramref name="trimmedLine"/> is one of the supported pragmas.<br/>
+        /// Used also by <see cref="Json.JsonSettings{T}.MigrateFromIniFile"/> to skip the pragmas of the file.
         /// </summary>
-        private static bool IsPragma(string trimmedLine)
+        internal static bool IsPragma(string trimmedLine)
         {
             var upperLine = trimmedLine.ToUpper();
 

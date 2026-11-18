@@ -7,7 +7,7 @@ using OSKHelpers.Logging;
 namespace OSKHelpers.Tests.Common
 {
     [TestClass]
-    public class PathsTests
+    public partial class PathsTests
     {
         #region Constants
 

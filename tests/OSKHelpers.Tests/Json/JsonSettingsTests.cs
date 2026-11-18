@@ -12,7 +12,7 @@ namespace OSKHelpers.Tests.Json
     /// </summary>
     [TestClass]
     [DoNotParallelize]
-    public class JsonSettingsTests
+    public partial class JsonSettingsTests
     {
         #region Support classes
 
@@ -112,21 +112,24 @@ namespace OSKHelpers.Tests.Json
         #region Setup / Cleanup
 
         /// <summary>
-        /// Creates a temporary directory for the settings files.
+        /// Creates a temporary directory for the settings files and resets the current settings, which Load only updates
+        /// when they are already assigned.
         /// </summary>
         [TestInitialize]
         public void Setup()
         {
             _tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(_tempDirectory);
+            ResetCurrentSettings();
         }
 
         /// <summary>
-        /// Removes the temporary directory.
+        /// Removes the temporary directory and resets the current settings.
         /// </summary>
         [TestCleanup]
         public void Cleanup()
         {
+            ResetCurrentSettings();
             try
             {
                 if (Directory.Exists(_tempDirectory))
@@ -138,6 +141,16 @@ namespace OSKHelpers.Tests.Json
             {
                 // Ignore cleanup errors during tests.
             }
+        }
+
+        /// <summary>
+        /// Resets the static current settings of the support classes, so that every test starts with no settings in use.
+        /// </summary>
+        private static void ResetCurrentSettings()
+        {
+            AutoUpdateSettings.Current?.StopAutoUpdate();
+            AutoUpdateSettings.ResetStaticState();
+            MarkedCurrentSettings.ResetStaticState();
         }
 
         #endregion

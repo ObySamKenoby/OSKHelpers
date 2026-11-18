@@ -11,7 +11,7 @@ namespace OSKHelpers.Common
     /// <summary>
     /// Provides standard filesystem paths and related utilities for use within applications.
     /// </summary>
-    public class Paths
+    public partial class Paths
     {
         #region Constants
 
@@ -27,6 +27,20 @@ namespace OSKHelpers.Common
         /// Interval, in milliseconds, of the automatic cleanup of the temporary files directory (one minute).
         /// </summary>
         private const double TEMPFILESCLEANINTERVAL = 60_000;
+
+        /// <summary>
+        /// Name of the data directory inside <see cref="AssemblyPath"/> used by <see cref="UseLocalAppdataDirectory"/> and
+        /// <see cref="MigrateToAppdata"/>.
+        /// </summary>
+        private const string LOCALAPPDATADIRECTORYNAME  = "Appdata";
+        private const string BACKUPSDIRECTORYNAME       = "Backups";
+        private const string CONFIGSDIRECTORYNAME       = "Configs";
+        private const string DATABASEDIRECTORYNAME      = "Database";
+        private const string LOGSDIRECTORYNAME          = "Logs";
+        private const string OUTPUTDIRECTORYNAME        = "Output";
+        private const string SCRIPTSDIRECTORYNAME       = "Scripts";
+        private const string TEMPDIRECTORYNAME          = "Temp";
+        private const string SETTINGSFILENAME           = "Settings.ini";
 
         #endregion
 
@@ -207,13 +221,24 @@ namespace OSKHelpers.Common
         /// Calling this method requests use of the <i>AssemblyPath\Appdata</i> directory<br/>
         /// as the base for all default directories.<br/>
         /// Any non-existent default directories will be created.<br/>
-        /// Has no effect when the application is running in a containerised environment.
+        /// Has no effect when the application is running in a containerised environment.<br/>
+        /// Existing data in <see cref="AssemblyPath"/> is not moved: to move it as well use <see cref="MigrateToAppdata"/>.
         /// </summary>
         public static void UseLocalAppdataDirectory()
         {
+            ActivateAppdataDirectory(Path.Combine(AssemblyPath, LOCALAPPDATADIRECTORYNAME));
+        }
+
+        /// <summary>
+        /// Sets <paramref name="appdataDirectory"/> as the base of the default directories and creates them.<br/>
+        /// In a containerised environment the base does not change and only the directories are created.
+        /// </summary>
+        /// <param name="appdataDirectory">New base data directory.</param>
+        private static void ActivateAppdataDirectory(string appdataDirectory)
+        {
             if (!_isDockerized)
             {
-                AppdataDirectory = Path.Combine(AssemblyPath, "Appdata");
+                AppdataDirectory = appdataDirectory;
             }
             InitializeDefaultDirectories(true);
         }
@@ -224,14 +249,14 @@ namespace OSKHelpers.Common
         /// <param name="createDirectories">When true, creates the default directories.</param>
         public static void InitializeDefaultDirectories(bool createDirectories = true)
         {
-            DefaultSettingsFile         = GetDataDirectoryPath("Settings.ini");
-            DefaultBackupDirectory      = GetDataDirectoryPath("Backups");
-            DefaultConfigsDirectory     = GetDataDirectoryPath("Configs");
-            DefaultDatabaseDirectory    = GetDataDirectoryPath("Database");
-            DefaultLogsDirectory        = GetDataDirectoryPath("Logs");
-            DefaultOutputDirectory      = GetDataDirectoryPath("Output");
-            DefaultScriptsDirectory     = GetDataDirectoryPath("Scripts");
-            TempDirectory               = GetDataDirectoryPath("Temp");
+            DefaultSettingsFile         = GetDataDirectoryPath(SETTINGSFILENAME);
+            DefaultBackupDirectory      = GetDataDirectoryPath(BACKUPSDIRECTORYNAME);
+            DefaultConfigsDirectory     = GetDataDirectoryPath(CONFIGSDIRECTORYNAME);
+            DefaultDatabaseDirectory    = GetDataDirectoryPath(DATABASEDIRECTORYNAME);
+            DefaultLogsDirectory        = GetDataDirectoryPath(LOGSDIRECTORYNAME);
+            DefaultOutputDirectory      = GetDataDirectoryPath(OUTPUTDIRECTORYNAME);
+            DefaultScriptsDirectory     = GetDataDirectoryPath(SCRIPTSDIRECTORYNAME);
+            TempDirectory               = GetDataDirectoryPath(TEMPDIRECTORYNAME);
             if (createDirectories)
             {
                 CheckDefaultDirectories();
