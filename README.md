@@ -17,7 +17,7 @@ Each package has its own ReadMe, also shown on its NuGet page, with quick start,
 | Package | Version | Target | Content | Documentation |
 | --- | --- | --- | --- | --- |
 | [OSKHelpers](https://www.nuget.org/packages/OSKHelpers) | **2.1.3** | .NET Standard 2.0, .NET 8 | Logging, INI/JSON settings, paths, security, collections, network and generic helpers | [ReadMe](src/OSKHelpers/ReadMe.md) |
-| [OSKHelpers.Mail](https://www.nuget.org/packages/OSKHelpers.Mail) | **2.0.1** | .NET Standard 2.0, .NET 8 | E-mail sending (MailKit) with template support | [ReadMe](src/OSKHelpers.Mail/ReadMe.md) |
+| [OSKHelpers.Mail](https://www.nuget.org/packages/OSKHelpers.Mail) | **2.1.0** | .NET Standard 2.0, .NET 8 | E-mail sending (MailKit) with template support | [ReadMe](src/OSKHelpers.Mail/ReadMe.md) |
 | [OSKHelpers.Cron](https://www.nuget.org/packages/OSKHelpers.Cron) | **0.9.0** | .NET Standard 2.0 | Scheduling of actions from a crontab file (Cronos), with automatic reload and validation | [ReadMe](src/OSKHelpers.Cron/ReadMe.md) |
 | OSKHelpers.WPF | 0.5.0 | .NET Standard 2.0 | Placeholder for WPF helpers: not usable yet | [ReadMe](src/OSKHelpers.WPF/ReadMe.md) |
 
@@ -27,8 +27,12 @@ dotnet add package OSKHelpers.Mail
 dotnet add package OSKHelpers.Cron
 ```
 
-> **Note**: OSKHelpers.Mail 2.0.1 requires OSKHelpers **2.1.2**, OSKHelpers.Cron 0.9.0 requires OSKHelpers **2.0.0**. When upgrading from 1.x, read the
+> **Note**: OSKHelpers.Mail 2.1.0 requires OSKHelpers **2.1.2**, OSKHelpers.Cron 0.9.0 requires OSKHelpers **2.0.0**. When upgrading from 1.x, read the
 > [breaking changes of OSKHelpers 2.0.0](src/OSKHelpers/ReadMe.md#breaking-changes-in-200).
+
+> **Breaking changes**: OSKHelpers.Mail 2.1.0 adds `SmtpStartTls` to `ISettingsSmtp` and `ImapStartTls` to `ISettingsImap`, and removes the
+> STARTTLS parameter of `SetupSmtp(ISettingsSmtp, ...)` and `Setup<T>`: read the
+> [breaking changes of OSKHelpers.Mail 2.1.0](src/OSKHelpers.Mail/ReadMe.md#breaking-changes-in-210) before upgrading.
 
 ### What is inside OSKHelpers
 

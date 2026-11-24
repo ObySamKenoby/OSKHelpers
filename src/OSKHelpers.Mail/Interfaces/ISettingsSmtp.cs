@@ -18,12 +18,17 @@
         /// </summary>
         bool SmtpSSL { get; set; }
         /// <summary>
+        /// True if the SMTP connection must be upgraded to TLS with STARTTLS (e.g. port 587); used only when
+        /// <see cref="SmtpSSL"/> is false. Sets <see cref="MailWorker.SmtpStartTls"/>.
+        /// </summary>
+        bool SmtpStartTls { get; set; }
+        /// <summary>
         /// SMTP Username,
         /// </summary>
         string SmtpUsername { get; set; }
         /// <summary>
         /// SMTP password, in plain text or encrypted with <see cref="OSKHelpers.Security.CredentialProtector"/>.<br/>
-        /// <see cref="MailWorker.Setup{T}(T, string, OSKHelpers.Security.CredentialProtector, bool, bool)"/> replaces a
+        /// <see cref="MailWorker.Setup{T}(T, string, OSKHelpers.Security.CredentialProtector, bool)"/> replaces a
         /// plain-text password with the encrypted one.
         /// </summary>
         string SmtpPassword { get; set; }

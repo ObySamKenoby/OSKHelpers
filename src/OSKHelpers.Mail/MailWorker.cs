@@ -60,7 +60,8 @@ namespace OSKHelpers.Mail
         public static bool SmtpSSL { get; set; }
         /// <summary>
         /// The SMTP connection must be upgraded to TLS with STARTTLS (e.g. port 587).<br/>
-        /// Used only when <see cref="SmtpSSL"/> is false; default: false (unencrypted connection).
+        /// Used only when <see cref="SmtpSSL"/> is false; default: false (unencrypted connection).<br/>
+        /// Set from the <c>SmtpStartTls</c> key of an INI file or from <see cref="ISettingsSmtp.SmtpStartTls"/>.
         /// </summary>
         public static bool SmtpStartTls { get; set; }
         /// <summary>
@@ -220,13 +221,12 @@ namespace OSKHelpers.Mail
         /// <summary>
         /// Sets the default parameters for the SMTP connection.
         /// </summary>
-        /// <param name="settings">SMTP settings.</param>
-        /// <param name="startTls">Value for <see cref="SmtpStartTls"/>, not included in <see cref="ISettingsSmtp"/>.</param>
+        /// <param name="settings">SMTP settings; <see cref="ISettingsSmtp.SmtpStartTls"/> sets <see cref="SmtpStartTls"/>.</param>
         /// <param name="protector">Protector used to decrypt <see cref="ISettingsSmtp.SmtpPassword"/> when it is encrypted (see
         /// <see cref="SetupSmtp(IniFileHelper, CredentialProtector)"/>).</param>
         /// <returns>The result of <see cref="CheckSmtpParameters(bool)"/>: false also when the password is encrypted but cannot be
         /// decrypted.</returns>
-        public static bool SetupSmtp(ISettingsSmtp settings, bool startTls = false, CredentialProtector protector = null)
+        public static bool SetupSmtp(ISettingsSmtp settings, CredentialProtector protector = null)
         {
             if (settings == null)
             {
@@ -236,7 +236,7 @@ namespace OSKHelpers.Mail
             SmtpServer      = settings.SmtpServer;
             SmtpPort        = settings.SmtpPort;
             SmtpSSL         = settings.SmtpSSL;
-            SmtpStartTls    = startTls;
+            SmtpStartTls    = settings.SmtpStartTls;
             SmtpUsername    = settings.SmtpUsername;
             SetStoredSmtpPassword(settings.SmtpPassword, protector);
             SmtpFrom        = settings.SmtpFrom;
@@ -295,7 +295,6 @@ namespace OSKHelpers.Mail
         /// <param name="protector">Protector used to encrypt and decrypt the passwords; if null, the default protector is used,
         /// whose entropy is read from <see cref="DEFAULTENTROPYFILENAME"/> (created if missing). It must use the same entropy
         /// used to encrypt the passwords already encrypted.</param>
-        /// <param name="smtpStartTls">Value for <see cref="SmtpStartTls"/>, not included in <see cref="ISettingsSmtp"/>.</param>
         /// <param name="saveProtectedPasswords">If false, the file is never saved: the passwords found in plain text are
         /// encrypted only in <paramref name="settings"/> and are written to the file at its next save.</param>
         /// <returns>
@@ -309,8 +308,7 @@ namespace OSKHelpers.Mail
         /// </returns>
         /// <exception cref="ArgumentNullException"><paramref name="settings"/> is null.</exception>
         public static (bool SmtpIsValid, bool ImapIsValid, bool PlainTextPasswords) Setup<T>(T settings,
-            string filename = JsonSettings<T>.DEFAULTFILENAME, CredentialProtector protector = null, bool smtpStartTls = false,
-            bool saveProtectedPasswords = true)
+            string filename = JsonSettings<T>.DEFAULTFILENAME, CredentialProtector protector = null, bool saveProtectedPasswords = true)
             where T : JsonSettings<T>, new()
         {
             if (settings == null)
@@ -363,7 +361,7 @@ namespace OSKHelpers.Mail
 
             // The protector received is passed as it is: when null, MailWorker does not keep the default protector, which
             // contains the entropy in plain text, and recreates it from the obfuscated entropy at each decryption
-            var smtpIsValid = smtpSettings != null && SetupSmtp(smtpSettings, smtpStartTls, protector);
+            var smtpIsValid = smtpSettings != null && SetupSmtp(smtpSettings, protector);
             var imapIsValid = imapSettings != null && SetupImap(imapSettings, protector);
 
             return (smtpIsValid, imapIsValid, plainTextPasswords);

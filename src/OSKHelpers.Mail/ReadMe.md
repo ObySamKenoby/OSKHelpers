@@ -12,8 +12,10 @@ dotnet add package OSKHelpers.Mail
 Source code, issue tracking and the other packages:
 [github.com/ObySamKenoby/OSKHelpers](https://github.com/ObySamKenoby/OSKHelpers).
 
-> **Compatibility**: OSKHelpers.Mail 2.0.1 requires OSKHelpers **2.1.2**: when upgrading from 1.x read the
+> **Compatibility**: OSKHelpers.Mail 2.1.0 requires OSKHelpers **2.1.2**: when upgrading from 1.x read the
 > [breaking changes of OSKHelpers 2.0.0](https://github.com/ObySamKenoby/OSKHelpers/blob/main/src/OSKHelpers/ReadMe.md#breaking-changes-in-200).
+> **OSKHelpers.Mail 2.1.0 contains breaking changes** to `ISettingsSmtp`, `ISettingsImap`, `SetupSmtp(ISettingsSmtp, ...)`
+> and `Setup<T>`: see [Breaking changes in 2.1.0](#breaking-changes-in-210).
 > The package contains two builds, one for each MailKit major version (see [MailKit versions](#mailkit-versions)).
 
 ---
@@ -65,8 +67,8 @@ if (parsed)
 | Class / Interface | Description |
 |---|---|
 | `MailWorker` | Central static class for all mail operations. Manages SMTP and IMAP connection parameters, parses template files, and sends HTML messages (synchronously or asynchronously) via MailKit. |
-| `ISettingsSmtp` | SMTP settings (`SmtpServer`, `SmtpPort`, `SmtpSSL`, `SmtpUsername`, `SmtpPassword`, `SmtpFrom`) of a settings class, accepted by `SetupSmtp(ISettingsSmtp, startTls)` and by `Setup<T>`. |
-| `ISettingsImap` | IMAP settings (`ImapServer`, `ImapPort`, `ImapSSL`, `ImapUsername`, `ImapPassword`) of a settings class, accepted by `SetupImap(ISettingsImap)` and by `Setup<T>`. |
+| `ISettingsSmtp` | SMTP settings (`SmtpServer`, `SmtpPort`, `SmtpSSL`, `SmtpStartTls`, `SmtpUsername`, `SmtpPassword`, `SmtpFrom`) of a settings class, accepted by `SetupSmtp(ISettingsSmtp, protector)` and by `Setup<T>`; `SmtpStartTls` sets `MailWorker.SmtpStartTls`. |
+| `ISettingsImap` | IMAP settings (`ImapServer`, `ImapPort`, `ImapSSL`, `ImapStartTls`, `ImapUsername`, `ImapPassword`) of a settings class, accepted by `SetupImap(ISettingsImap)` and by `Setup<T>`; `ImapStartTls` is not used yet. |
 
 #### SMTP configuration
 
@@ -84,7 +86,7 @@ if (parsed)
 | `SmtpAuthConfigError` | `true` when only one of the two credentials is set (configuration error). |
 
 Configuration can be loaded from an INI file via `SetupSmtp(IniFileHelper, protector)`, from a settings class via
-`SetupSmtp(ISettingsSmtp, startTls, protector)`, from JSON settings via `Setup<T>` (see [JSON settings](#json-settings)), or set programmatically via `SetupSmtp(server, port, ssl, username, password,
+`SetupSmtp(ISettingsSmtp, protector)` (`SmtpStartTls` sets `MailWorker.SmtpStartTls`), from JSON settings via `Setup<T>` (see [JSON settings](#json-settings)), or set programmatically via `SetupSmtp(server, port, ssl, username, password,
 from, startTls)`. The optional `protector` decrypts an encrypted password (see [Passwords](#passwords)). The INI key `SmtpStartTls` is optional (default `false`); INI keys are case-insensitive.
 `GetSecureSocketOptions(ssl, startTls)` returns the MailKit `SecureSocketOptions` used for the connection.
 
@@ -138,7 +140,7 @@ var ready = MailWorker.SetupSmtp(iniFile);      // no protector: the default one
 
 #### JSON settings
 
-`Setup<T>(settings, filename, protector, smtpStartTls, saveProtectedPasswords)` configures SMTP and IMAP from a
+`Setup<T>(settings, filename, protector, saveProtectedPasswords)` configures SMTP and IMAP from a
 `JsonSettings<T>` class implementing `ISettingsSmtp`, `ISettingsImap` or both, and makes sure the passwords are stored
 encrypted:
 
@@ -226,6 +228,26 @@ runtime with MailKit 5 (`MissingMethodException`) and vice versa. The package th
 An application on .NET 8 or later that needs to stay on MailKit 4 must keep using OSKHelpers.Mail 1.x.
 
 ---
+
+## Breaking changes in 2.1.0
+
+The STARTTLS upgrade of the SMTP connection is now part of the settings interfaces, so the parameters that passed it separately
+have been removed. Applications must be updated and recompiled:
+
+- `ISettingsSmtp` has the new member `SmtpStartTls` (same name and meaning as the INI key): it sets `MailWorker.SmtpStartTls` in
+  `SetupSmtp(ISettingsSmtp, ...)` and `Setup<T>`. Classes implementing the interface must add it.
+- `ISettingsImap` has the new member `ImapStartTls`, not used yet (receiving via IMAP is not implemented). Classes implementing
+  the interface must add it.
+- `SetupSmtp(ISettingsSmtp settings, bool startTls, CredentialProtector protector)` becomes
+  `SetupSmtp(ISettingsSmtp settings, CredentialProtector protector)`: set `SmtpStartTls` in the settings instead of passing
+  `startTls`.
+- `Setup<T>(settings, filename, protector, smtpStartTls, saveProtectedPasswords)` becomes
+  `Setup<T>(settings, filename, protector, saveProtectedPasswords)`: set `SmtpStartTls` in the settings instead of passing
+  `smtpStartTls`. JSON files without the `SmtpStartTls` property read it as `false`.
+- A call that passed `startTls` or `smtpStartTls` no longer compiles, so no call silently changes behaviour.
+
+`SetupSmtp(IniFileHelper, ...)`, the INI keys and `SetupSmtp(server, port, ssl, username, password, from, startTls)` are
+unchanged.
 
 ## Changes in 2.0.1
 

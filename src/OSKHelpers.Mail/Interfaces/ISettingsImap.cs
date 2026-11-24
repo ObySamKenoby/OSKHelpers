@@ -18,12 +18,17 @@
         /// </summary>
         bool ImapSSL { get; set; }
         /// <summary>
+        /// True if TLS must be used with IMAP.
+        /// </summary>
+        /// <remarks>Not used yet: the IMAP connection is not supported.</remarks>
+        bool ImapStartTls { get; set; }
+        /// <summary>
         /// IMAP username.
         /// </summary>
         string ImapUsername { get; set; }
         /// <summary>
         /// IMAP password, in plain text or encrypted with <see cref="OSKHelpers.Security.CredentialProtector"/>.<br/>
-        /// <see cref="MailWorker.Setup{T}(T, string, OSKHelpers.Security.CredentialProtector, bool, bool)"/> replaces a
+        /// <see cref="MailWorker.Setup{T}(T, string, OSKHelpers.Security.CredentialProtector, bool)"/> replaces a
         /// plain-text password with the encrypted one.
         /// </summary>
         string ImapPassword { get; set; }

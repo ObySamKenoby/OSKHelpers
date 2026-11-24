@@ -33,19 +33,21 @@ namespace OSKHelpers.Mail.Tests
 
         /// <summary>
         /// JSON settings with both SMTP and IMAP parameters, used by the tests of
-        /// <see cref="MailWorker.Setup{T}(T, string, CredentialProtector, bool, bool)"/>.
+        /// <see cref="MailWorker.Setup{T}(T, string, CredentialProtector, bool)"/>.
         /// </summary>
         public class MailSettings : JsonSettings<MailSettings>, ISettingsSmtp, ISettingsImap
         {
             public string SmtpServer { get; set; }
             public int SmtpPort { get; set; }
             public bool SmtpSSL { get; set; }
+            public bool SmtpStartTls { get; set; }
             public string SmtpUsername { get; set; }
             public string SmtpPassword { get; set; }
             public string SmtpFrom { get; set; }
             public string ImapServer { get; set; }
             public int ImapPort { get; set; }
             public bool ImapSSL { get; set; }
+            public bool ImapStartTls { get; set; }
             public string ImapUsername { get; set; }
             public string ImapPassword { get; set; }
 
@@ -62,6 +64,7 @@ namespace OSKHelpers.Mail.Tests
             public string SmtpServer { get; set; }
             public int SmtpPort { get; set; }
             public bool SmtpSSL { get; set; }
+            public bool SmtpStartTls { get; set; }
             public string SmtpUsername { get; set; }
             public string SmtpPassword { get; set; }
             public string SmtpFrom { get; set; }
@@ -496,7 +499,7 @@ namespace OSKHelpers.Mail.Tests
         #region SetupSmtp / SetupImap (ISettings)
 
         /// <summary>
-        /// Verifies that SetupSmtp copies the values of ISettingsSmtp and the startTls parameter.
+        /// Verifies that SetupSmtp copies the values of ISettingsSmtp, SmtpStartTls included.
         /// </summary>
         [TestMethod]
         public void SetupSmtp_Settings_CopiesValues()
@@ -505,11 +508,12 @@ namespace OSKHelpers.Mail.Tests
             settings.SetupGet(s => s.SmtpServer).Returns("smtp.example.com");
             settings.SetupGet(s => s.SmtpPort).Returns(587);
             settings.SetupGet(s => s.SmtpSSL).Returns(false);
+            settings.SetupGet(s => s.SmtpStartTls).Returns(true);
             settings.SetupGet(s => s.SmtpUsername).Returns("user");
             settings.SetupGet(s => s.SmtpPassword).Returns("pass");
             settings.SetupGet(s => s.SmtpFrom).Returns("from@example.com");
 
-            var result = MailWorker.SetupSmtp(settings.Object, true);
+            var result = MailWorker.SetupSmtp(settings.Object);
 
             Assert.IsTrue(result);
             Assert.AreEqual("smtp.example.com", MailWorker.SmtpServer);
@@ -881,13 +885,14 @@ namespace OSKHelpers.Mail.Tests
             {
                 SmtpServer      = "smtp.example.com",
                 SmtpPort        = 587,
+                SmtpStartTls    = true,
                 SmtpUsername    = "user",
                 SmtpPassword    = "smtpSecret",
                 SmtpFrom        = "from@example.com"
             };
 
             var result = MailWorker.Setup(settings, Path.Combine(_testDirectory, "SmtpSettings.json"),
-                CreateProtector(PROTECTORENTROPY), smtpStartTls: true);
+                CreateProtector(PROTECTORENTROPY));
 
             Assert.IsTrue(result.SmtpIsValid);
             Assert.IsFalse(result.ImapIsValid);
